@@ -67,7 +67,7 @@
         <h3>Recent Meetings</h3>
         <a routerLink="/meetings" class="view-all-link">View all</a>
       </div>
-      
+
       <div class="table-container">
         <table class="meetings-table">
           <thead>
@@ -79,20 +79,20 @@
           </thead>
           <tbody>
             @for (meeting of recentMeetings; track meeting.title) {
-              <tr>
-                <td class="meeting-title-cell">
-                  <div class="meeting-icon-box">
-                    <span class="material-icons-round text-primary">calendar_today</span>
-                  </div>
-                  <span class="meeting-title-text">{{ meeting.title }}</span>
-                </td>
-                <td class="date-text">{{ meeting.date }}</td>
-                <td class="text-right">
-                  <button class="actions-menu-btn">
-                    <span class="material-icons-round">more_vert</span>
-                  </button>
-                </td>
-              </tr>
+            <tr>
+              <td class="meeting-title-cell">
+                <div class="meeting-icon-box">
+                  <span class="material-icons-round text-primary">calendar_today</span>
+                </div>
+                <span class="meeting-title-text">{{ meeting.title }}</span>
+              </td>
+              <td class="date-text">{{ meeting.date }}</td>
+              <td class="text-right">
+                <button class="actions-menu-btn">
+                  <span class="material-icons-round">more_vert</span>
+                </button>
+              </td>
+            </tr>
             }
           </tbody>
         </table>
@@ -121,10 +121,10 @@
             <span class="material-icons-round arrow-icon">chevron_right</span>
           </a>
 
-          <a routerLink="/mining" class="btn btn-secondary quick-action-btn summary-action-btn">
+          <a routerLink="/meetings" class="btn btn-secondary quick-action-btn summary-action-btn">
             <div class="btn-left-content">
-              <span class="material-icons-round btn-icon">auto_awesome</span>
-              <span>Generate Summary</span>
+              <span class="material-icons-round btn-icon">calendar_today</span>
+              <span>Manage Meetings</span>
             </div>
             <span class="material-icons-round arrow-icon">chevron_right</span>
           </a>
@@ -136,16 +136,16 @@
         <h3>Recent Activity</h3>
         <div class="timeline">
           @for (act of recentActivities; track act.title) {
-            <div class="timeline-item">
-              <div class="timeline-marker">
-                <span class="timeline-dot"></span>
-              </div>
-              <div class="timeline-content">
-                <div class="timeline-title">{{ act.title }}</div>
-                <div class="timeline-desc">{{ act.desc }}</div>
-                <div class="timeline-time">{{ act.time }}</div>
-              </div>
+          <div class="timeline-item">
+            <div class="timeline-marker">
+              <span class="timeline-dot"></span>
             </div>
+            <div class="timeline-content">
+              <div class="timeline-title">{{ act.title }}</div>
+              <div class="timeline-desc">{{ act.desc }}</div>
+              <div class="timeline-time">{{ act.time }}</div>
+            </div>
+          </div>
           }
         </div>
       </div>

@@ -36,10 +36,6 @@ export const routes: Routes = [
         path: 'users',
         loadChildren: () => import('./features/users/users.routes'),
         canActivate: [adminGuard]
-      },
-      {
-        path: 'mining',
-        loadChildren: () => import('./features/mining/mining.routes')
       }
     ]
   },

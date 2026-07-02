@@ -1,1 +1,122 @@
-<p>meeting-create works!</p>
+<div class="create-container animate-fade-in">
+  <!-- Back Button & Page Header -->
+  <div class="page-header">
+    <a routerLink="/meetings" class="back-link">
+      <span class="material-icons-round">arrow_back</span>
+      <span>Back to Meetings</span>
+    </a>
+    <h2>Create New Meeting</h2>
+    <p class="subtitle">Fill in the details to schedule and configure your new meeting workspace.</p>
+  </div>
+
+  <!-- Form Body Card -->
+  <div class="form-card glass-panel">
+    <form [formGroup]="meetingForm" (ngSubmit)="onSubmit()" class="meeting-form">
+      <div class="form-grid">
+        
+        <!-- Meeting Title -->
+        <div class="form-group full-width">
+          <label for="title">Meeting Title <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="title" 
+            formControlName="title" 
+            placeholder="e.g. Q3 Product Strategy Sync"
+            [class.input-error]="isInvalid('title')"
+          >
+          @if (isInvalid('title')) {
+            <span class="error-msg">Title is required and must be at least 3 characters.</span>
+          }
+        </div>
+
+        <!-- Date & Time -->
+        <div class="form-group">
+          <label for="meeting_date">Date & Time <span class="required">*</span></label>
+          <input 
+            type="datetime-local" 
+            id="meeting_date" 
+            formControlName="meeting_date"
+            [class.input-error]="isInvalid('meeting_date')"
+          >
+          @if (isInvalid('meeting_date')) {
+            <span class="error-msg">Meeting date and time is required.</span>
+          }
+        </div>
+
+        <!-- Duration -->
+        <div class="form-group">
+          <label for="duration">Duration (minutes) <span class="required">*</span></label>
+          <input 
+            type="number" 
+            id="duration" 
+            formControlName="duration" 
+            placeholder="60"
+            [class.input-error]="isInvalid('duration')"
+          >
+          @if (isInvalid('duration')) {
+            <span class="error-msg">Duration is required (minimum 5 minutes).</span>
+          }
+        </div>
+
+        <!-- Location -->
+        <div class="form-group full-width">
+          <label for="location">Location <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="location" 
+            formControlName="location" 
+            placeholder="e.g. Room A, Zoom, Microsoft Teams link"
+            [class.input-error]="isInvalid('location')"
+          >
+          @if (isInvalid('location')) {
+            <span class="error-msg">Location or virtual meeting link is required.</span>
+          }
+        </div>
+
+        <!-- Participants -->
+        <div class="form-group full-width">
+          <label for="participants">Participants (names, separated by comma) <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="participants" 
+            formControlName="participants" 
+            placeholder="e.g. Alex Rivera, Sarah Connor, John Doe"
+            [class.input-error]="isInvalid('participants')"
+          >
+          @if (isInvalid('participants')) {
+            <span class="error-msg">At least one participant name is required.</span>
+          }
+        </div>
+
+        <!-- Description -->
+        <div class="form-group full-width">
+          <label for="description">Description & Agenda</label>
+          <textarea 
+            id="description" 
+            formControlName="description" 
+            rows="4" 
+            placeholder="Describe the meeting objectives, key discussion points, or agenda..."
+          ></textarea>
+        </div>
+
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="form-actions">
+        <a routerLink="/meetings" class="btn btn-secondary cancel-btn">Cancel</a>
+        <button 
+          type="submit" 
+          class="btn btn-primary submit-btn" 
+          [disabled]="meetingForm.invalid || isSubmitting"
+        >
+          @if (isSubmitting) {
+            <span>Creating...</span>
+          } @else {
+            <span>Create Meeting</span>
+          }
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

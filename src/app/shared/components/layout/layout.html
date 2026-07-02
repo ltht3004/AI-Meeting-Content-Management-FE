@@ -6,10 +6,16 @@
   <div class="main-container">
     <!-- Top Header -->
     <header class="main-header">
-      <!-- Search bar -->
+      <!-- Global Search Box -->
       <div class="search-box">
         <span class="material-icons-round search-icon">search</span>
-        <input type="text" placeholder="Search meetings or transcripts... (Cmd + K)" class="search-input">
+        <input 
+          type="text" 
+          placeholder="Search meetings or transcripts..." 
+          [ngModel]="searchService.searchQuery()"
+          (ngModelChange)="searchService.setQuery($event)"
+          class="search-input"
+        >
       </div>
 
       <!-- Right Header Actions -->
