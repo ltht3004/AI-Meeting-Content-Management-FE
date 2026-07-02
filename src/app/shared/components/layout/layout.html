@@ -1,6 +1,35 @@
-<div class="layout-container">
+<div class="layout-wrapper">
+  <!-- Sidebar -->
   <app-sidebar></app-sidebar>
-  <div class="main-content">
-    <router-outlet></router-outlet>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <!-- Top Header -->
+    <header class="main-header">
+      <!-- Search bar -->
+      <div class="search-box">
+        <span class="material-icons-round search-icon">search</span>
+        <input type="text" placeholder="Search meetings or transcripts... (Cmd + K)" class="search-input">
+      </div>
+
+      <!-- Right Header Actions -->
+      <div class="header-right">
+        <!-- User info -->
+        <div class="user-profile">
+          <div class="user-details">
+            <span class="user-name">Alex Rivera</span>
+            <span class="user-role">Enterprise Admin</span>
+          </div>
+          <div class="avatar-box">
+            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="User Avatar" class="avatar-img">
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dynamic Routed Content -->
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
   </div>
 </div>
