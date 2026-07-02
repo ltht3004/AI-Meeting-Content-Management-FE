@@ -1,1 +1,402 @@
-<p>meeting-detail works!</p>
+<div class="detail-container animate-fade-in">
+  <!-- Back Button & Page Header -->
+  <div class="page-header">
+    <a routerLink="/meetings" class="back-link">
+      <span class="material-icons-round">arrow_back</span>
+      <span>Back to Meetings</span>
+    </a>
+    <div class="header-main">
+      <div class="header-left-info">
+        <h2>{{ meeting.title }}</h2>
+        <p class="subtitle">{{ meeting.description }}</p>
+      </div>
+      <div class="header-right-actions">
+        <!-- Export Dropdown Wrapper -->
+        <div class="export-dropdown-container">
+          <button 
+            (click)="toggleExportDropdown()" 
+            class="btn btn-secondary export-dropdown-trigger"
+            [disabled]="isExporting"
+          >
+            @if (isExporting) {
+              <span class="material-icons-round spin-icon">sync</span>
+              <span>Exporting...</span>
+            } @else {
+              <span class="material-icons-round">download</span>
+              <span>Export Report</span>
+              <span class="material-icons-round dropdown-arrow">expand_more</span>
+            }
+          </button>
+          
+          @if (showExportDropdown) {
+            <div class="export-dropdown-menu glass-panel animate-fade-in">
+              <button (click)="triggerExport('pdf')" class="dropdown-item">
+                <span class="material-icons-round text-danger">picture_as_pdf</span>
+                <span>PDF Document (.pdf)</span>
+              </button>
+              <button (click)="triggerExport('word')" class="dropdown-item">
+                <span class="material-icons-round text-primary">description</span>
+                <span>Word Document (.docx)</span>
+              </button>
+            </div>
+          }
+        </div>
+
+        <a routerLink="/meetings/edit/{{ meeting.id }}" class="btn btn-secondary edit-meeting-btn">
+          <span class="material-icons-round">edit</span>
+          <span>Edit Meeting</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Metadata Details Header -->
+    <div class="meta-strip">
+      <div class="meta-item">
+        <span class="material-icons-round text-primary">calendar_today</span>
+        <span>{{ meeting.meeting_date | date:'MMMM d, y • h:mm a' }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="material-icons-round text-success">schedule</span>
+        <span>{{ meeting.duration }} minutes</span>
+      </div>
+      <div class="meta-item">
+        <span class="material-icons-round text-info">place</span>
+        <span>{{ meeting.location }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="material-icons-round text-warning">people</span>
+        <span>{{ meeting.participants }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATE 1: No Recording Uploaded yet -->
+  @if (meeting.recordings.length === 0 && !isUploading && !isProcessing) {
+    <div 
+      class="upload-dropzone glass-panel"
+      [class.drag-over]="isDragOver"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event)"
+    >
+      <div class="dropzone-content">
+        <span class="material-icons-round upload-icon">cloud_upload</span>
+        <h3>Upload Meeting Recording</h3>
+        <p class="upload-desc">Drag and drop your meeting audio file (.mp3, .wav, .m4a) here to start transcribing</p>
+        <div class="upload-divider">
+          <span>or</span>
+        </div>
+        <label for="audio-upload" class="btn btn-primary browse-btn">
+          <span class="material-icons-round">folder_open</span>
+          <span>Browse File</span>
+        </label>
+        <input 
+          type="file" 
+          id="audio-upload" 
+          accept="audio/*" 
+          (change)="onFileSelected($event)" 
+          style="display: none;"
+        >
+      </div>
+    </div>
+  }
+
+  <!-- STATE 2A: Uploading File -->
+  @if (isUploading) {
+    <div class="loader-card glass-panel">
+      <div class="loader-content">
+        <div class="progress-ring-box">
+          <span class="material-icons-round upload-spin-icon">cloud_upload</span>
+        </div>
+        <h3>Uploading audio file...</h3>
+        <p>Transferring audio data to AI processing server. Please wait.</p>
+        <div class="progress-bar-wrapper">
+          <div class="progress-bar-fill" [style.width.%]="uploadProgress"></div>
+        </div>
+        <span class="progress-text">{{ uploadProgress }}% Uploaded</span>
+      </div>
+    </div>
+  }
+
+  <!-- STATE 2B: AI Processing -->
+  @if (isProcessing) {
+    <div class="loader-card glass-panel">
+      <div class="loader-content">
+        <div class="ai-spin-box">
+          <span class="material-icons-round ai-spin-icon">psychology</span>
+        </div>
+        <h3>AI Processing Active</h3>
+        <p>Generating transcription and analyzing meeting content...</p>
+        
+        <!-- Steps List -->
+        <div class="processing-steps">
+          @for (stepText of processingStepsText; track stepText; let idx = $index) {
+            <div class="step-item" [class.active]="processingStep === idx" [class.completed]="processingStep > idx">
+              <span class="material-icons-round step-status-icon">
+                {{ processingStep > idx ? 'check_circle' : (processingStep === idx ? 'sync' : 'radio_button_unchecked') }}
+              </span>
+              <span>{{ stepText }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- STATE 3: Processed Successfully - Display Audio Player & Tabs -->
+  @if (meeting.recordings.length > 0 && !isUploading && !isProcessing) {
+    <div class="details-layout">
+      
+      <!-- Left Column: Audio & Metadata Info -->
+      <div class="sidebar-column">
+        
+        <!-- Audio Recordings Card (Supports Multiple) -->
+        <div class="audio-card glass-panel">
+          <div class="card-header-small-between">
+            <div class="header-left-side">
+              <span class="material-icons-round audio-head-icon text-primary">audiotrack</span>
+              <div>
+                <h4>Recordings</h4>
+                <span class="file-size">{{ meeting.recordings.length }} file(s)</span>
+              </div>
+            </div>
+            <label for="audio-upload-more" class="upload-more-btn" title="Upload more recordings">
+              <span class="material-icons-round">add_circle</span>
+            </label>
+            <input 
+              type="file" 
+              id="audio-upload-more" 
+              accept="audio/*" 
+              (change)="onFileSelected($event)" 
+              style="display: none;"
+            >
+          </div>
+          
+          <!-- Recordings List -->
+          <div class="recordings-list">
+            @for (rec of meeting.recordings; track rec.id) {
+              <div 
+                class="recording-list-item" 
+                [class.active]="selectedRecordingId === rec.id"
+                (click)="selectRecording(rec.id)"
+              >
+                <div class="rec-item-info">
+                  <span class="material-icons-round rec-icon">
+                    {{ selectedRecordingId === rec.id ? 'play_circle_filled' : 'music_note' }}
+                  </span>
+                  <div class="rec-text">
+                    <span class="rec-name" [title]="rec.file_name">{{ rec.file_name }}</span>
+                    <span class="rec-meta">{{ rec.size }} • {{ rec.created_at | date:'shortTime' }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Active Audio Player (If a recording is selected) -->
+          @if (getSelectedRecording(); as activeRec) {
+            <div class="active-player-section">
+              <audio controls class="html5-audio" [src]="activeRec.file_name || ''">
+                Your browser does not support the audio element.
+              </audio>
+            </div>
+          }
+        </div>
+
+        <!-- Participants Card -->
+        <div class="info-side-card glass-panel">
+          <h3>Participants</h3>
+          <div class="participants-list">
+            @for (name of meeting.participants.split(','); track name) {
+              <div class="participant-item">
+                <div class="avatar-sm">
+                  {{ name.trim().charAt(0) }}
+                </div>
+                <span class="participant-name">{{ name.trim() }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- System Timestamps Card -->
+        <div class="info-side-card glass-panel system-timestamps">
+          <h3>History Timestamps</h3>
+          <div class="timestamp-list">
+            <div class="timestamp-item-row">
+              <span class="ts-label">Created:</span>
+              <span class="ts-value">{{ meeting.created_at | date:'MMM d, y • h:mm a' }}</span>
+            </div>
+            <div class="timestamp-item-row">
+              <span class="ts-label">Updated:</span>
+              <span class="ts-value">{{ meeting.updated_at | date:'MMM d, y • h:mm a' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Tabs (AI Summary / Transcript) -->
+      <div class="main-column">
+        <div class="content-tabs-card glass-panel">
+          <!-- Tab Headers -->
+          <div class="tab-header-strip">
+            <button 
+              class="tab-btn" 
+              [class.active]="activeTab === 'summary'"
+              (click)="activeTab = 'summary'"
+            >
+              <span class="material-icons-round">summarize</span>
+              <span>AI Summary</span>
+            </button>
+            <button 
+              class="tab-btn" 
+              [class.active]="activeTab === 'transcript'"
+              (click)="activeTab = 'transcript'"
+            >
+              <span class="material-icons-round">description</span>
+              <span>Transcript</span>
+            </button>
+          </div>
+
+          <!-- Tab Body -->
+          <div class="tab-body-content">
+            
+            <!-- AI SUMMARY TAB -->
+            @if (activeTab === 'summary') {
+              <div class="summary-tab-pane animate-fade-in">
+                <!-- Summary Text -->
+                <div class="summary-section">
+                  <h3>Overview Summary</h3>
+                  <p class="summary-text">{{ meeting.summary?.content }}</p>
+                </div>
+              </div>
+            }
+
+            <!-- TRANSCRIPT TAB -->
+            @if (activeTab === 'transcript') {
+              <div class="transcript-tab-pane animate-fade-in">
+                <!-- Inner Transcript Header -->
+                <div class="transcript-active-header">
+                  <h4>Transcript: {{ getSelectedRecording()?.file_name || 'No recording selected' }}</h4>
+                </div>
+
+                <!-- Inner Transcript Search -->
+                <div class="transcript-search-bar">
+                  <span class="material-icons-round t-search-icon">search</span>
+                  <input 
+                    type="text" 
+                    placeholder="Search words inside transcript..." 
+                    [(ngModel)]="transcriptSearch"
+                    class="t-search-input"
+                  >
+                </div>
+
+                <!-- Transcript Segments List -->
+                <div class="transcript-scroller">
+                  @if (getFilteredTranscript().length > 0) {
+                    @for (seg of getFilteredTranscript(); track seg.time) {
+                      <div class="transcript-segment">
+                        <div class="segment-meta">
+                          <span class="speaker-name">{{ seg.speaker }}</span>
+                          <span class="segment-time">{{ seg.time }}</span>
+                        </div>
+                        <p class="segment-text">{{ seg.text }}</p>
+                      </div>
+                    }
+                  } @else {
+                    <div class="no-matches">
+                      <span class="material-icons-round">search_off</span>
+                      <p>No matching words found in this transcript.</p>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+</div>
+
+<!-- PDF/WORD PREVIEW MODAL -->
+@if (showPreviewModal) {
+  <div class="modal-overlay animate-fade-in">
+    <div class="modal-card pdf-preview-card">
+      <div class="modal-header">
+        <div class="modal-title-area">
+          <span class="material-icons-round" [class.text-danger]="exportType === 'pdf'" [class.text-primary]="exportType === 'word'">
+            {{ exportType === 'pdf' ? 'picture_as_pdf' : 'description' }}
+          </span>
+          <h3>{{ exportType === 'pdf' ? 'PDF Report' : 'Word Document' }} Preview</h3>
+        </div>
+        <div class="modal-actions">
+          <button (click)="downloadReport()" class="btn btn-primary download-btn">
+            <span class="material-icons-round">download</span>
+            <span>Download {{ exportType === 'pdf' ? 'PDF' : 'Word' }}</span>
+          </button>
+          <button (click)="closePreview()" class="btn btn-secondary close-btn">
+            <span class="material-icons-round">close</span>
+            <span>Close</span>
+          </button>
+        </div>
+      </div>
+      
+      <div class="modal-body preview-scroll">
+        <!-- A4 Sheet Representation -->
+        <div class="a4-page" [class.word-border]="exportType === 'word'">
+          <div class="pdf-header">
+            <div class="pdf-doc-title">MEETING REPORT SUMMARY</div>
+            <div class="pdf-divider" [class.bg-word]="exportType === 'word'"></div>
+            
+            <div class="pdf-meta-grid">
+              <div class="pdf-meta-item">
+                <strong>Title:</strong> <span>{{ meeting.title }}</span>
+              </div>
+              <div class="pdf-meta-item">
+                <strong>Date:</strong> <span>{{ meeting.meeting_date | date:'MMMM d, y • h:mm a' }}</span>
+              </div>
+              <div class="pdf-meta-item">
+                <strong>Location:</strong> <span>{{ meeting.location }}</span>
+              </div>
+              <div class="pdf-meta-item">
+                <strong>Duration:</strong> <span>{{ meeting.duration }} minutes</span>
+              </div>
+              <div class="pdf-meta-item full-width">
+                <strong>Participants:</strong> <span>{{ meeting.participants }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="pdf-section">
+            <h4 class="pdf-sec-title" [class.border-word]="exportType === 'word'">1. AI Summary Overview</h4>
+            <p class="pdf-summary-text">{{ meeting.summary?.content || 'No summary generated yet.' }}</p>
+          </div>
+          
+          <div class="pdf-section">
+            <h4 class="pdf-sec-title" [class.border-word]="exportType === 'word'">2. Meeting Transcripts</h4>
+            @for (rec of meeting.recordings; track rec.id) {
+              <div class="pdf-recording-block">
+                <h5 class="pdf-rec-title" [class.text-word]="exportType === 'word'">File: {{ rec.file_name }}</h5>
+                <div class="pdf-transcript-list">
+                  @for (seg of meeting.transcripts[rec.id]; track seg.time) {
+                    <div class="pdf-transcript-row">
+                      <span class="pdf-speaker">[{{ seg.time }}] {{ seg.speaker }}:</span>
+                      <span class="pdf-text">{{ seg.text }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+          
+          <div class="pdf-footer">
+            <span>AI Meeting Content Management System • Generated on {{ today | date:'medium' }}</span>
+            <span>Page 1 of 1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
