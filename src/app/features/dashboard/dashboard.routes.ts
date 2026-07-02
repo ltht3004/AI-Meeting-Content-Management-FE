@@ -6,3 +6,5 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
   }
 ];
+
+export default routes;

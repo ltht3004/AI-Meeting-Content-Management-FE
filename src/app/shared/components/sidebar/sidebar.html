@@ -1,1 +1,42 @@
-<p>sidebar works!</p>
+<div class="sidebar-container">
+  <!-- Brand Header -->
+  <div class="brand">
+    <div class="logo-box">
+      <span class="material-icons-round logo-icon">psychology</span>
+    </div>
+    <span class="brand-name">MeetingAI</span>
+  </div>
+
+  <!-- Navigation Menu -->
+  <nav class="nav-menu">
+    <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+      <span class="material-icons-round nav-icon">space_dashboard</span>
+      <span class="nav-label">Dashboard</span>
+    </a>
+
+    <a routerLink="/meetings" routerLinkActive="active" class="nav-item">
+      <span class="material-icons-round nav-icon">calendar_today</span>
+      <span class="nav-label">Meetings</span>
+    </a>
+
+    <a routerLink="/profile" routerLinkActive="active" class="nav-item">
+      <span class="material-icons-round nav-icon">person</span>
+      <span class="nav-label">Profile</span>
+    </a>
+
+    @if (isAdmin) {
+      <a routerLink="/users" routerLinkActive="active" class="nav-item">
+        <span class="material-icons-round nav-icon">group</span>
+        <span class="nav-label">Users</span>
+      </a>
+    }
+  </nav>
+
+  <!-- Footer Action -->
+  <div class="sidebar-footer">
+    <button (click)="logout()" class="logout-btn">
+      <span class="material-icons-round logout-icon">logout</span>
+      <span class="logout-label">Logout</span>
+    </button>
+  </div>
+</div>
