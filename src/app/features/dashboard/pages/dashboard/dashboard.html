@@ -74,7 +74,6 @@
             <tr>
               <th>Title</th>
               <th>Date</th>
-              <th>Status</th>
               <th class="text-right">Actions</th>
             </tr>
           </thead>
@@ -83,22 +82,11 @@
               <tr>
                 <td class="meeting-title-cell">
                   <div class="meeting-icon-box">
-                    @if (meeting.status === 'Processed') {
-                      <span class="material-icons-round text-success">event_available</span>
-                    } @else if (meeting.status === 'Transcribing') {
-                      <span class="material-icons-round text-primary">autorenew</span>
-                    } @else {
-                      <span class="material-icons-round text-danger">error_outline</span>
-                    }
+                    <span class="material-icons-round text-primary">calendar_today</span>
                   </div>
                   <span class="meeting-title-text">{{ meeting.title }}</span>
                 </td>
                 <td class="date-text">{{ meeting.date }}</td>
-                <td>
-                  <span class="badge" [class.badge-success]="meeting.status === 'Processed'" [class.badge-info]="meeting.status === 'Transcribing'" [class.badge-danger]="meeting.status === 'Error'">
-                    {{ meeting.status }}
-                  </span>
-                </td>
                 <td class="text-right">
                   <button class="actions-menu-btn">
                     <span class="material-icons-round">more_vert</span>
