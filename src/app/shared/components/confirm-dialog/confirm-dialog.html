@@ -1,9 +1,13 @@
 @if (isOpen) {
-  <div class="confirm-overlay animate-fade-in" (click)="onCancel()">
+  <div class="confirm-overlay" (click)="onCancel()">
     <div class="confirm-card" (click)="$event.stopPropagation()">
       <div class="confirm-body">
-        <div class="confirm-icon-wrapper" [class.danger]="type === 'danger'" [class.warning]="type === 'warning'">
-          <span class="material-icons-round">warning</span>
+        <div class="confirm-icon-wrapper" [class]="type">
+          @if (type === 'danger' || type === 'warning') {
+            <span class="material-icons-round">warning_amber</span>
+          } @else {
+            <span class="material-icons-round">info</span>
+          }
         </div>
         <div class="confirm-content">
           <h3>{{ title }}</h3>
@@ -11,7 +15,7 @@
         </div>
       </div>
       <div class="confirm-actions">
-        <button (click)="onConfirm()" class="btn btn-confirm" [class.danger]="type === 'danger'" [class.warning]="type === 'warning'">
+        <button (click)="onConfirm()" class="btn btn-confirm" [class]="type">
           {{ confirmText }}
         </button>
         <button (click)="onCancel()" class="btn btn-cancel">
