@@ -26,6 +26,8 @@ interface MeetingDetailData {
   participants: string;
   created_at: string;
   updated_at: string;
+  creator_id: string;
+  status: 'scheduled' | 'processing' | 'completed';
   recordings: RecordingData[];
   transcripts: Record<string, TranscriptSegment[]>; // recording_id -> TranscriptSegment[]
   summary?: {
@@ -54,6 +56,8 @@ export class MeetingDetail implements OnInit {
   showExportDropdown = false;
   exportType: 'pdf' | 'word' = 'pdf';
   today = new Date();
+  currentUserId = '1'; // Mock logged-in user ID
+  isAdmin = false;      // Mock admin privilege toggler
 
   // Upload & processing simulator states
   isDragOver = false;
@@ -81,6 +85,8 @@ export class MeetingDetail implements OnInit {
       participants: 'Alex Rivera, Sarah Connor, David Miller',
       created_at: '2023-10-24T08:00:00Z',
       updated_at: '2023-10-24T10:30:00Z',
+      creator_id: '1',
+      status: 'completed',
       recordings: [
         { id: 'rec_1', file_name: 'strategy_sync_q3_part1.mp3', size: '12.8 MB', created_at: '2023-10-24T14:05:00Z' },
         { id: 'rec_2', file_name: 'strategy_sync_q3_part2.mp3', size: '10.0 MB', created_at: '2023-10-24T14:35:00Z' }
@@ -110,6 +116,8 @@ export class MeetingDetail implements OnInit {
       participants: 'Sarah Connor, Emma Watson, John Doe',
       created_at: '2023-10-23T09:00:00Z',
       updated_at: '2023-10-23T11:45:00Z',
+      creator_id: '2',
+      status: 'completed',
       recordings: [
         { id: 'rec_3', file_name: 'customer_feedback_loop_23.mp3', size: '34.1 MB', created_at: '2023-10-23T11:30:00Z' }
       ],
@@ -135,6 +143,8 @@ export class MeetingDetail implements OnInit {
       participants: 'Alex Rivera, John Doe, Peter Parker',
       created_at: '2023-10-22T08:30:00Z',
       updated_at: '2023-10-22T08:30:00Z',
+      creator_id: '1',
+      status: 'scheduled',
       recordings: [],
       transcripts: {}
     },
@@ -148,6 +158,8 @@ export class MeetingDetail implements OnInit {
       participants: 'Alex Rivera, David Miller, Emma Watson',
       created_at: '2023-10-21T17:00:00Z',
       updated_at: '2023-10-21T17:00:00Z',
+      creator_id: '3',
+      status: 'scheduled',
       recordings: [],
       transcripts: {}
     }
@@ -156,7 +168,7 @@ export class MeetingDetail implements OnInit {
   ngOnInit() {
     this.meetingId = this.route.snapshot.paramMap.get('id') || '1';
     this.meeting = this.meetingsDb[this.meetingId] || this.meetingsDb['1'];
-    
+
     // Select first recording by default if exists
     if (this.meeting.recordings && this.meeting.recordings.length > 0) {
       this.selectedRecordingId = this.meeting.recordings[0].id;
@@ -201,6 +213,7 @@ export class MeetingDetail implements OnInit {
   private startUploadSimulation(file: File) {
     this.isUploading = true;
     this.uploadProgress = 0;
+    this.meeting.status = 'processing';
 
     const interval = setInterval(() => {
       this.uploadProgress += 10;
@@ -224,8 +237,9 @@ export class MeetingDetail implements OnInit {
         } else {
           // Finished! Populate new mock recording in the list
           this.isProcessing = false;
+          this.meeting.status = 'completed';
           const newRecId = 'rec_' + (Object.keys(this.meeting.transcripts).length + 1);
-          
+
           const newRecording: RecordingData = {
             id: newRecId,
             file_name: fileName,
@@ -234,7 +248,7 @@ export class MeetingDetail implements OnInit {
           };
 
           this.meeting.recordings.push(newRecording);
-          
+
           this.meeting.transcripts[newRecId] = [
             { time: '00:00', speaker: 'Presenter', text: 'Welcome to this additional recording session. Today we are finishing our follow-up discussions.' },
             { time: '00:45', speaker: 'Sarah Connor', text: 'We verified the API and spacing changes. The indexes were also pushed successfully.' },
@@ -284,7 +298,7 @@ export class MeetingDetail implements OnInit {
   downloadReport() {
     this.showPreviewModal = false;
     this.isExporting = true;
-    
+
     // Simulate API delay for generation
     setTimeout(() => {
       this.isExporting = false;

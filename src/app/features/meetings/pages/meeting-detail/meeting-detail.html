@@ -7,7 +7,13 @@
     </a>
     <div class="header-main">
       <div class="header-left-info">
-        <h2>{{ meeting.title }}</h2>
+        <div class="title-with-status">
+          <h2>{{ meeting.title }}</h2>
+          <span class="status-badge" [class]="meeting.status">
+            <span class="status-dot"></span>
+            {{ meeting.status | titlecase }}
+          </span>
+        </div>
         <p class="subtitle">{{ meeting.description }}</p>
       </div>
       <div class="header-right-actions">
@@ -42,10 +48,12 @@
           }
         </div>
 
-        <a routerLink="/meetings/edit/{{ meeting.id }}" class="btn btn-secondary edit-meeting-btn">
-          <span class="material-icons-round">edit</span>
-          <span>Edit Meeting</span>
-        </a>
+        @if (isAdmin || currentUserId === meeting.creator_id) {
+          <a routerLink="/meetings/edit/{{ meeting.id }}" class="btn btn-secondary edit-meeting-btn">
+            <span class="material-icons-round">edit</span>
+            <span>Edit Meeting</span>
+          </a>
+        }
       </div>
     </div>
 

@@ -4,123 +4,180 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(6px);
+  background-color: rgba(15, 23, 42, 0.35); /* Slate 900 background with soft opacity */
+  backdrop-filter: blur(8px);
   z-index: 3000;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
+  animation: overlayFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .confirm-card {
   width: 100%;
-  max-width: 440px;
+  max-width: 400px;
   background-color: #ffffff;
   border-radius: 16px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  padding: 24px;
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.08), 
+    0 10px 10px -5px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+  padding: 32px 24px;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
   gap: 24px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  animation: cardScaleIn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes cardScaleIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 .confirm-body {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
   gap: 16px;
+  width: 100%;
 }
 
 .confirm-icon-wrapper {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.confirm-icon-wrapper:hover {
+  transform: rotate(-8deg) scale(1.05);
 }
 
 .confirm-icon-wrapper.danger {
   background-color: #fee2e2;
-  color: #dc2626;
+  color: #ef4444;
 }
 
 .confirm-icon-wrapper.warning {
   background-color: #fef3c7;
-  color: #d97706;
+  color: #f59e0b;
+}
+
+.confirm-icon-wrapper.info {
+  background-color: #e0f2fe;
+  color: #0ea5e9;
 }
 
 .confirm-icon-wrapper span.material-icons-round {
-  font-size: 24px;
+  font-size: 28px;
 }
 
 .confirm-content {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 8px;
+  width: 100%;
 }
 
 .confirm-content h3 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 600;
   color: #0f172a;
+  text-align: center;
 }
 
 .confirm-content p {
   margin: 0;
   font-size: 14px;
-  color: #475569;
-  line-height: 1.5;
+  color: #64748b;
+  line-height: 1.57;
+  text-align: center;
 }
 
 .confirm-actions {
   display: flex;
   flex-direction: row;
   gap: 12px;
+  width: 100%;
 }
 
 .confirm-actions .btn {
-  padding: 10px 20px;
+  flex: 1;
+  padding: 10px 16px;
   font-size: 14px;
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   border: none;
-  transition: all 0.2s ease;
-  height: 40px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  outline: none;
+  white-space: nowrap;
+}
+
+.confirm-actions .btn:active {
+  transform: scale(0.96);
 }
 
 .btn-confirm.danger {
-  background-color: #b91c1c;
+  background-color: #ef4444;
   color: #ffffff;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
 .btn-confirm.danger:hover {
-  background-color: #991b1b;
+  background-color: #dc2626;
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
 }
 
 .btn-confirm.warning {
-  background-color: #d97706;
+  background-color: #f59e0b;
   color: #ffffff;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
 }
 
 .btn-confirm.warning:hover {
-  background-color: #b45309;
+  background-color: #d97706;
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.3);
+}
+
+.btn-confirm.info {
+  background-color: #0ea5e9;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+}
+
+.btn-confirm.info:hover {
+  background-color: #0284c7;
+  box-shadow: 0 6px 16px rgba(14, 165, 233, 0.3);
 }
 
 .btn-cancel {
-  background-color: #ffffff;
-  border: 1px solid #cbd5e1 !important;
+  background-color: #f8fafc; /* light grey instead of pure white */
+  border: 1px solid #e2e8f0 !important;
   color: #475569;
 }
 
 .btn-cancel:hover {
-  background-color: #f8fafc;
-  color: #1e293b;
+  background-color: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1 !important;
 }

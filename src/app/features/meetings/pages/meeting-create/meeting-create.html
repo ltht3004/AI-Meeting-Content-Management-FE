@@ -25,7 +25,15 @@
             [class.input-error]="isInvalid('title')"
           >
           @if (isInvalid('title')) {
-            <span class="error-msg">Title is required and must be at least 3 characters.</span>
+            <span class="error-msg">
+              @if (meetingForm.get('title')?.hasError('required')) {
+                Meeting title is required.
+              } @else if (meetingForm.get('title')?.hasError('minlength')) {
+                Meeting title must be at least 3 characters.
+              } @else if (meetingForm.get('title')?.hasError('duplicateTitle')) {
+                This meeting title already exists. Please choose a unique title.
+              }
+            </span>
           }
         </div>
 
@@ -35,11 +43,24 @@
           <input 
             type="datetime-local" 
             id="meeting_date" 
-            formControlName="meeting_date"
+            formControlName="meeting_date" 
+            [min]="getMinDateTime()"
             [class.input-error]="isInvalid('meeting_date')"
           >
           @if (isInvalid('meeting_date')) {
-            <span class="error-msg">Meeting date and time is required.</span>
+            <span class="error-msg">
+              @if (meetingForm.get('meeting_date')?.hasError('required')) {
+                Meeting date and time is required.
+              } @else if (meetingForm.get('meeting_date')?.hasError('pastDate')) {
+                Meeting date cannot be in the past.
+              } @else if (meetingForm.get('meeting_date')?.hasError('workingHours')) {
+                Meeting must be scheduled during working hours (08:00 - 17:30).
+              } @else if (meetingForm.get('meeting_date')?.hasError('weekend')) {
+                Meeting must be scheduled on weekdays (Monday - Friday).
+              } @else if (meetingForm.get('meeting_date')?.hasError('lunchBreak')) {
+                Meeting cannot be scheduled during lunch break (12:00 - 13:30).
+              }
+            </span>
           }
         </div>
 
@@ -54,49 +75,104 @@
             [class.input-error]="isInvalid('duration')"
           >
           @if (isInvalid('duration')) {
-            <span class="error-msg">Duration is required (minimum 5 minutes).</span>
+            <span class="error-msg">
+              @if (meetingForm.get('duration')?.hasError('required')) {
+                Duration is required.
+              } @else if (meetingForm.get('duration')?.hasError('min')) {
+                Duration must be at least 15 minutes.
+              } @else if (meetingForm.get('duration')?.hasError('max')) {
+                Duration cannot exceed 240 minutes (4 hours).
+              }
+            </span>
           }
         </div>
 
         <!-- Location -->
         <div class="form-group full-width">
           <label for="location">Location <span class="required">*</span></label>
-          <input 
-            type="text" 
-            id="location" 
-            formControlName="location" 
-            placeholder="e.g. Room A, Zoom, Microsoft Teams link"
-            [class.input-error]="isInvalid('location')"
-          >
+          <div class="input-with-button">
+            <input 
+              type="text" 
+              id="location" 
+              formControlName="location" 
+              placeholder="e.g. Room A, Zoom, Microsoft Teams link, or search on map..."
+              [class.input-error]="isInvalid('location')"
+            >
+            <button type="button" class="btn btn-secondary map-picker-btn" (click)="openMapModal($event)">
+              <span class="material-icons-round">map</span>
+              <span>Choose on Map</span>
+            </button>
+          </div>
           @if (isInvalid('location')) {
             <span class="error-msg">Location or virtual meeting link is required.</span>
           }
         </div>
 
         <!-- Participants -->
-        <div class="form-group full-width">
-          <label for="participants">Participants (names, separated by comma) <span class="required">*</span></label>
-          <input 
-            type="text" 
-            id="participants" 
-            formControlName="participants" 
-            placeholder="e.g. Alex Rivera, Sarah Connor, John Doe"
+        <div class="form-group full-width relative-container">
+          <label>Participants <span class="required">*</span></label>
+          <div 
+            class="custom-select-trigger" 
             [class.input-error]="isInvalid('participants')"
+            (click)="toggleUsersDropdown($event)"
           >
+            @if (!meetingForm.get('participants')?.value) {
+              <span class="selected-text-placeholder">Select participants from list...</span>
+            } @else {
+              <span class="selected-text">{{ meetingForm.get('participants')?.value }}</span>
+            }
+            <span class="material-icons-round dropdown-icon">
+              {{ showUsersDropdown ? 'expand_less' : 'expand_more' }}
+            </span>
+          </div>
+
+          @if (showUsersDropdown) {
+            <div class="custom-select-dropdown glass-panel" (click)="$event.stopPropagation()">
+              @for (user of availableUsers; track user.id) {
+                <label class="dropdown-user-option">
+                  <input 
+                    type="checkbox" 
+                    [checked]="isUserSelected(user.name)"
+                    (change)="toggleUserSelection(user.name)"
+                  >
+                  <span class="checkbox-custom"></span>
+                  <span class="user-avatar-circle">{{ getInitials(user.name) }}</span>
+                  <span class="user-name">{{ user.name }}</span>
+                </label>
+              }
+            </div>
+          }
+          
           @if (isInvalid('participants')) {
-            <span class="error-msg">At least one participant name is required.</span>
+            <span class="error-msg">
+              @if (meetingForm.get('participants')?.hasError('required')) {
+                At least one participant must be selected.
+              } @else if (meetingForm.get('participants')?.hasError('minParticipants')) {
+                At least 2 participants must be selected.
+              }
+            </span>
           }
         </div>
 
         <!-- Description -->
         <div class="form-group full-width">
           <label for="description">Description & Agenda</label>
-          <textarea 
-            id="description" 
-            formControlName="description" 
-            rows="4" 
-            placeholder="Describe the meeting objectives, key discussion points, or agenda..."
-          ></textarea>
+          <div class="textarea-container">
+            <textarea 
+              id="description" 
+              formControlName="description" 
+              rows="4" 
+              maxlength="255"
+              placeholder="Describe the meeting objectives, key discussion points, or agenda..."
+              [class.input-error]="isInvalid('description')"
+            ></textarea>
+            <span class="char-count">
+              {{ meetingForm.get('description')?.value?.length || 0 }}/255
+            </span>
+          </div>
+          @if (isInvalid('description')) {
+            <span class="error-msg">Description cannot exceed 255 characters.</span>
+          }
         </div>
 
       </div>
@@ -120,3 +196,63 @@
     </form>
   </div>
 </div>
+
+<!-- Map Picker Modal -->
+@if (showMapModal) {
+  <div class="map-modal-overlay" (click)="closeMapModal()">
+    <div class="map-modal glass-panel" (click)="$event.stopPropagation()">
+      <div class="map-modal-header">
+        <h3>Select Location on Map</h3>
+        <button type="button" class="close-btn" (click)="closeMapModal()">
+          <span class="material-icons-round">close</span>
+        </button>
+      </div>
+      
+      <div class="map-search-group relative-container">
+        <input 
+          type="text" 
+          class="map-search-input" 
+          placeholder="Search for an address..." 
+          [(ngModel)]="mapSearchQuery" 
+          (input)="onSearchInputChange()"
+          (focus)="showSuggestions = mapSuggestions.length > 0"
+          (keyup.enter)="searchAddress()"
+        >
+        <button type="button" class="btn btn-primary" (click)="searchAddress()" [disabled]="isMapSearching">
+          <span class="material-icons-round">search</span>
+        </button>
+
+        <!-- Suggestions Dropdown -->
+        @if (showSuggestions && mapSuggestions.length > 0) {
+          <ul class="map-suggestions-dropdown">
+            @for (item of mapSuggestions; track item.place_id) {
+              <li (click)="selectSuggestion(item)">
+                <span class="material-icons-round">location_on</span>
+                <span class="suggestion-text">{{ item.display_name }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+      
+      <div id="map-picker" class="map-container"></div>
+      
+      <div class="map-address-preview">
+        @if (isMapSearching) {
+          <span class="loading-text">Fetching address...</span>
+        } @else if (selectedAddress) {
+          <span><strong>Address:</strong> {{ selectedAddress }}</span>
+        } @else {
+          <span class="text-muted">Click on the map or drag the marker to select a location.</span>
+        }
+      </div>
+      
+      <div class="map-modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeMapModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="confirmMapLocation()" [disabled]="!selectedAddress || isMapSearching">
+          Confirm Location
+        </button>
+      </div>
+    </div>
+  </div>
+}
