@@ -21,6 +21,12 @@
         <div class="meeting-card glass-panel">
           <!-- Card Body -->
           <div class="card-body">
+            <div class="meeting-card-header-status">
+              <span class="status-badge" [class]="meeting.status">
+                <span class="status-dot"></span>
+                {{ meeting.status | titlecase }}
+              </span>
+            </div>
             <h3 class="meeting-title">{{ meeting.title }}</h3>
             <p class="meeting-description">{{ meeting.description }}</p>
             
@@ -46,10 +52,16 @@
             <!-- Participants list -->
             <div class="participants-section">
               <div class="avatar-group">
-                @for (initials of getParticipantInitials(meeting.participants); track initials) {
-                  <div class="avatar-circle">
-                    {{ initials }}
-                  </div>
+                @for (p of getParticipantsList(meeting.participants).slice(0, 3); track p.name) {
+                  <a 
+                    [routerLink]="['/users', p.id]" 
+                    class="avatar-circle-link" 
+                    [attr.data-tooltip]="p.name"
+                  >
+                    <div class="avatar-circle">
+                      {{ p.initials }}
+                    </div>
+                  </a>
                 }
                 @if (getParticipantCount(meeting.participants) > 3) {
                   <div class="avatar-circle-more">
@@ -65,10 +77,12 @@
                 <span>View Details</span>
                 <span class="material-icons-round">arrow_forward</span>
               </a>
-              <div class="divider"></div>
-              <button (click)="deleteMeeting(meeting.id)" class="btn-action-delete" title="Delete Meeting">
-                <span class="material-icons-round">delete_outline</span>
-              </button>
+              @if (isAdmin || currentUserId === meeting.creator_id) {
+                <div class="divider"></div>
+                <button (click)="deleteMeeting(meeting.id)" class="btn-action-delete" title="Delete Meeting" [disabled]="meeting.status === 'processing'">
+                  <span class="material-icons-round">delete_outline</span>
+                </button>
+              }
             </div>
           </div>
         </div>
@@ -87,7 +101,7 @@
 <app-confirm-dialog
   [isOpen]="showDeleteConfirm"
   [title]="'Delete Meeting?'"
-  [message]="'Are you sure you want to delete \'' + (meetingToDelete?.title || '') + '\'? This action is permanent and cannot be undone.'"
+  [message]="'Are you sure you want to delete \'' + (meetingToDelete?.title || '') + '\'?'"
   [confirmText]="'Delete Permanently'"
   [cancelText]="'Cancel'"
   (confirm)="onConfirmDelete()"

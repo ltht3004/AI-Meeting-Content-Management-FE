@@ -13,6 +13,8 @@ export interface Meeting {
   location: string;
   duration: number;
   participants: string;
+  creator_id: string;
+  status: 'scheduled' | 'processing' | 'completed';
 }
 
 @Component({
@@ -31,7 +33,9 @@ export class MeetingList implements OnInit {
       meeting_date: '2023-10-24T14:00:00Z',
       location: 'Meeting Room A',
       duration: 45,
-      participants: 'Alex Rivera, Sarah Connor, David Miller'
+      participants: 'Alex Rivera, Sarah Connor, David Miller',
+      creator_id: '1',
+      status: 'completed'
     },
     {
       id: '2',
@@ -40,7 +44,9 @@ export class MeetingList implements OnInit {
       meeting_date: '2023-10-23T11:30:00Z',
       location: 'Zoom Online',
       duration: 60,
-      participants: 'Sarah Connor, Emma Watson, John Doe'
+      participants: 'Sarah Connor, Emma Watson, John Doe',
+      creator_id: '2',
+      status: 'completed'
     },
     {
       id: '3',
@@ -49,7 +55,9 @@ export class MeetingList implements OnInit {
       meeting_date: '2023-10-22T09:00:00Z',
       location: 'Room 404',
       duration: 30,
-      participants: 'Alex Rivera, John Doe, Peter Parker'
+      participants: 'Alex Rivera, John Doe, Peter Parker',
+      creator_id: '1',
+      status: 'scheduled'
     },
     {
       id: '4',
@@ -58,13 +66,25 @@ export class MeetingList implements OnInit {
       meeting_date: '2023-10-21T17:45:00Z',
       location: 'MS Teams',
       duration: 90,
-      participants: 'Alex Rivera, David Miller, Emma Watson'
+      participants: 'Alex Rivera, David Miller, Emma Watson',
+      creator_id: '3',
+      status: 'scheduled'
     }
   ];
 
   filteredMeetings: Meeting[] = [];
+  availableUsers = [
+    { id: '1', name: 'Alex Rivera' },
+    { id: '2', name: 'Sarah Connor' },
+    { id: '3', name: 'David Miller' },
+    { id: '4', name: 'Emma Watson' },
+    { id: '5', name: 'John Doe' },
+    { id: '6', name: 'Peter Parker' }
+  ];
   showDeleteConfirm = false;
   meetingToDelete: Meeting | null = null;
+  currentUserId = '1'; // Mock logged-in user ID (Alex Rivera)
+  isAdmin = false;      // Mock admin privilege toggler
   private searchService = inject(SearchService);
 
   constructor() {
@@ -100,8 +120,9 @@ export class MeetingList implements OnInit {
   }
 
   onConfirmDelete() {
-    if (this.meetingToDelete) {
-      this.meetings = this.meetings.filter(m => m.id !== this.meetingToDelete!.id);
+    const toDelete = this.meetingToDelete;
+    if (toDelete) {
+      this.meetings = this.meetings.filter(m => m.id !== toDelete.id);
       this.filterMeetings(this.searchService.searchQuery());
     }
     this.showDeleteConfirm = false;
@@ -122,6 +143,28 @@ export class MeetingList implements OnInit {
       }
       return parts[0][0].toUpperCase();
     }).slice(0, 3); // Display at most 3 avatar circles
+  }
+
+  getParticipantsList(participantsStr: string) {
+    if (!participantsStr) return [];
+    return participantsStr.split(',').map(p => {
+      const name = p.trim();
+      const user = this.availableUsers.find(u => u.name.toLowerCase() === name.toLowerCase());
+      
+      const parts = name.split(' ');
+      let initials = '';
+      if (parts.length >= 2) {
+        initials = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      } else if (parts.length === 1 && parts[0].length > 0) {
+        initials = parts[0][0].toUpperCase();
+      }
+
+      return {
+        id: user ? user.id : '1',
+        name: name,
+        initials: initials
+      };
+    });
   }
 
   getParticipantCount(participantsStr: string): number {
