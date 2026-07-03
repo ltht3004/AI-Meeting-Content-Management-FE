@@ -1,1 +1,151 @@
-<p>user-list works!</p>
+<div class="page-container animate-fade-in">
+  <!-- Top Page Header (If layout doesn't provide it) -->
+  <div class="page-header-local">
+    <h1 class="page-title-local">Users</h1>
+    <div class="local-search">
+      <span class="material-icons-round search-icon">search</span>
+      <input type="text" placeholder="Search user..." [(ngModel)]="searchQuery" class="search-input">
+    </div>
+  </div>
+
+  <div class="table-card glass-panel">
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="filters">
+        <div class="select-wrapper-inline">
+          <select class="btn btn-outline filter-btn" [(ngModel)]="filterRole">
+            <option value="all">All Roles</option>
+            <option value="admin">Admin</option>
+            <option value="user">User</option>
+          </select>
+        </div>
+        <div class="select-wrapper-inline">
+          <select class="btn btn-outline filter-btn" [(ngModel)]="filterStatus">
+            <option value="all">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Pending">Pending</option>
+          </select>
+        </div>
+        <button class="btn btn-text filter-btn text-muted">
+          <span class="material-icons-round icon-left">filter_list</span> More Filters
+        </button>
+      </div>
+      <!-- Add User button removed -->
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>USER</th>
+            <th>EMAIL</th>
+            <th>ROLE</th>
+            <th>CREATED DATE</th>
+            <th>STATUS</th>
+            <th class="text-right">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (isLoading) {
+            <tr>
+              <td colspan="6" class="text-center py-4">
+                <span class="spinner-blue"></span> Loading users...
+              </td>
+            </tr>
+          } @else if (filteredUsers.length === 0) {
+            <tr>
+              <td colspan="6" class="text-center py-4 text-muted">
+                No users found.
+              </td>
+            </tr>
+          } @else {
+            @for (user of filteredUsers; track user.id) {
+              <tr class="table-row">
+                <td>
+                  <div class="user-cell">
+                    <img [src]="user.avatarUrl" alt="Avatar" class="avatar-sm">
+                    <div class="user-meta">
+                      <a [routerLink]="['/users', user.id]" class="user-name-link">{{ user.full_name }}</a>
+                      <span class="user-active-time">{{ user.last_active }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-muted">{{ user.email }}</td>
+                <td>
+                  <span class="role-badge" [class.admin]="user.role === 'admin'">
+                    {{ user.role === 'admin' ? 'Admin' : 'User' }}
+                  </span>
+                </td>
+                <td class="text-muted">{{ user.created_at }}</td>
+                <td>
+                  <div class="status-cell">
+                    <span class="status-dot" [class.active]="user.status === 'Active'"></span>
+                    <span class="status-text" [class.active-text]="user.status === 'Active'">{{ user.status }}</span>
+                  </div>
+                </td>
+                <td class="text-right">
+                  <button class="btn-icon" [routerLink]="['/users', user.id, 'edit']" title="Edit User">
+                    <span class="material-icons-round">more_vert</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-footer">
+      <div class="pagination-info">
+        Showing <strong>1-{{ filteredUsers.length }}</strong> of <strong>24</strong> users
+      </div>
+      <div class="pagination-controls">
+        <button class="page-btn"><span class="material-icons-round">chevron_left</span></button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <span class="page-ellipsis">...</span>
+        <button class="page-btn">6</button>
+        <button class="page-btn"><span class="material-icons-round">chevron_right</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <!-- Total Users -->
+    <div class="summary-card card-primary">
+      <div class="card-content">
+        <span class="card-label">TOTAL USERS</span>
+        <h2 class="card-value">{{ metrics?.totalUsers | number }}</h2>
+        <div class="card-trend positive">
+          <span class="material-icons-round trend-icon">trending_up</span>
+          <span>{{ metrics?.totalUsersGrowth }}% from last month</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Now -->
+    <div class="summary-card glass-panel">
+      <div class="card-content">
+        <span class="card-label text-muted">ACTIVE NOW</span>
+        <h2 class="card-value text-primary">{{ metrics?.activeNow }}</h2>
+        <div class="progress-bar-container mt-2">
+          <div class="progress-bar" [style.width.%]="(metrics?.activeNow / metrics?.totalUsers) * 100 * 5"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Security -->
+    <div class="summary-card glass-panel security-card">
+      <div class="card-content">
+        <span class="card-label text-muted">SYSTEM SECURITY</span>
+        <h2 class="card-value text-main">{{ metrics?.systemSecurity }}%</h2>
+        <p class="card-desc">All user activities are verified and encrypted.</p>
+      </div>
+      <span class="material-icons-round security-bg-icon">verified_user</span>
+    </div>
+  </div>
+</div>

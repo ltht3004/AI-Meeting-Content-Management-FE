@@ -1,0 +1,139 @@
+<div class="page-container animate-fade-in">
+  
+  <!-- Success Toast -->
+  @if (showToast) {
+    <div class="toast-notification slide-down">
+      <div class="toast-icon-box">
+        <span class="material-icons-round">check_circle</span>
+      </div>
+      <div class="toast-content">
+        <h4 class="toast-title">Changes Saved</h4>
+        <p class="toast-desc">User profile has been updated successfully.</p>
+      </div>
+      <button class="toast-close" (click)="showToast = false">
+        <span class="material-icons-round">close</span>
+      </button>
+    </div>
+  }
+
+  @if (isLoading) {
+    <div class="loading-state">
+      <span class="spinner-blue"></span> Loading...
+    </div>
+  } @else if (error || !user) {
+    <div class="error-state">
+      {{ error || 'User not found' }}
+    </div>
+  } @else {
+    <div class="edit-card-wrapper">
+      <div class="edit-card glass-panel">
+        
+        <!-- Header -->
+        <div class="edit-header">
+          <div class="breadcrumbs">
+            <a routerLink="/users" class="breadcrumb-link">Users</a>
+            <span class="material-icons-round breadcrumb-sep">chevron_right</span>
+            <span class="breadcrumb-current">Edit User</span>
+          </div>
+          <h1 class="edit-title">User Profile Settings</h1>
+          <p class="edit-desc">Manage permissions, access levels, and account status for this user.</p>
+        </div>
+
+        <!-- Avatar Section -->
+        <div class="avatar-section">
+          <div class="avatar-wrapper">
+            <img [src]="user.avatarUrl" alt="Avatar" class="avatar-img">
+            <button class="edit-avatar-btn">
+              <span class="material-icons-round">edit</span>
+            </button>
+          </div>
+          <div class="avatar-meta">
+            <h2 class="avatar-name">{{ user.full_name }}</h2>
+            <p class="avatar-subtitle">Product Designer • Joined {{ user.created_at }}</p>
+          </div>
+        </div>
+
+        <!-- Form Fields -->
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" class="form-control" [(ngModel)]="editFullName">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" class="form-control" [(ngModel)]="editEmail">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Role</label>
+            <div class="select-wrapper">
+              <select class="form-control form-select" [(ngModel)]="editRole">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+              <span class="material-icons-round select-icon">expand_more</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Account Status</label>
+            <div class="status-toggle-wrapper">
+              <button 
+                class="toggle-switch" 
+                [class.on]="editStatus === 'Active'"
+                (click)="toggleStatus()"
+              >
+                <span class="toggle-knob"></span>
+              </button>
+              <span class="status-label">{{ editStatus }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security Info -->
+        <div class="security-info">
+          <div class="info-row">
+            <div class="info-label-group">
+              <span class="material-icons-round info-icon">verified_user</span>
+              <span>Two-Factor Authentication</span>
+            </div>
+            @if (user.twoFactorEnabled) {
+              <span class="badge badge-primary">Enabled</span>
+            } @else {
+              <span class="badge badge-muted">Disabled</span>
+            }
+          </div>
+          <div class="info-row">
+            <div class="info-label-group">
+              <span class="material-icons-round info-icon">history</span>
+              <span>Last Login</span>
+            </div>
+            <span class="info-value">{{ user.last_active }} (San Francisco, CA)</span>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button class="btn btn-text" [routerLink]="['/users', user.id]">Cancel</button>
+          <button class="btn btn-primary" (click)="saveChanges()" [disabled]="isSaving">
+            @if (isSaving) {
+              <span class="spinner-white"></span>
+            } @else {
+              Save Changes
+            }
+          </button>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="danger-zone">
+          <div class="danger-info">
+            <h4 class="danger-title">Danger Zone</h4>
+            <p class="danger-desc">Permanently remove this user and all their associated data.</p>
+          </div>
+          <button class="btn btn-danger" (click)="deleteUser()">
+            <span class="material-icons-round icon-left">delete_outline</span> Delete User
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+</div>

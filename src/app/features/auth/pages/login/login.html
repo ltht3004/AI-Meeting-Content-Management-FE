@@ -1,1 +1,121 @@
-<p>login works!</p>
+<div class="auth-wrapper animate-fade-in">
+  <div class="auth-card">
+    <!-- Left Banner Split -->
+    <div class="auth-banner">
+      <div class="banner-overlay"></div>
+      <div class="banner-content">
+        <!-- Floating badge -->
+        <div class="ai-badge">
+          <span class="material-icons-round ai-badge-icon">auto_awesome</span>
+          <span>AI ASSISTANT ACTIVE</span>
+        </div>
+
+        <!-- Main Banner Image Wrapper -->
+        <div class="banner-image-container">
+          <img src="/login-handshake.png" alt="Meeting Handshake" class="banner-img">
+        </div>
+
+        <h2 class="banner-title">The Future of Collaboration</h2>
+        <p class="banner-desc">Experience automated summaries, action item tracking, and sentiment analysis for every conversation.</p>
+      </div>
+    </div>
+
+    <!-- Right Form Split -->
+    <div class="auth-form-container">
+      <div class="brand">
+        <div class="logo-box">
+          <span class="material-icons-round logo-icon">psychology</span>
+        </div>
+        <span class="brand-name">MeetingAI</span>
+      </div>
+
+      <div class="form-header">
+        <h1 class="form-title">Welcome Back</h1>
+        <p class="form-desc">Manage your meetings smarter with AI.</p>
+      </div>
+
+      <!-- Error message toast -->
+      @if (errorMessage) {
+        <div class="alert alert-danger">
+          <span class="material-icons-round alert-icon">error_outline</span>
+          <span class="alert-text">{{ errorMessage }}</span>
+        </div>
+      }
+
+      <form (ngSubmit)="onSubmit()" class="auth-form">
+        <!-- Email Input -->
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <div class="input-icon-wrapper">
+            <span class="material-icons-round input-icon">mail</span>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              class="form-control" 
+              placeholder="name@company.com" 
+              [(ngModel)]="email" 
+              required
+            >
+          </div>
+        </div>
+
+        <!-- Password Input -->
+        <div class="form-group">
+          <div class="label-wrapper">
+            <label class="form-label" for="password">Password</label>
+            <a routerLink="/auth/forgot-password" class="forgot-link">Forgot Password?</a>
+          </div>
+          <div class="input-icon-wrapper">
+            <span class="material-icons-round input-icon">lock</span>
+            <input 
+              [type]="showPassword ? 'text' : 'password'" 
+              id="password" 
+              name="password" 
+              class="form-control password-control" 
+              placeholder="••••••••" 
+              [(ngModel)]="password" 
+              required
+            >
+            <button 
+              type="button" 
+              class="password-toggle-btn" 
+              (click)="togglePasswordVisibility()"
+            >
+              <span class="material-icons-round toggle-icon">
+                {{ showPassword ? 'visibility_off' : 'visibility' }}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary btn-block" [disabled]="isLoading">
+          @if (isLoading) {
+            <span class="spinner"></span>
+            <span>Signing in...</span>
+          } @else {
+            <span>Login</span>
+          }
+        </button>
+      </form>
+
+      <!-- Footer register link -->
+      <div class="auth-footer">
+        <p>Don't have an account? <a routerLink="/auth/register" class="register-link">Register</a></p>
+      </div>
+
+      <!-- Trust Badges -->
+      <div class="trust-footer">
+        <div class="trust-item">
+          <span class="material-icons-round trust-icon">verified_user</span>
+          <span>ENTERPRISE SECURE</span>
+        </div>
+        <div class="trust-item">
+          <span class="material-icons-round trust-icon">cloud_queue</span>
+          <span>99.9% UPTIME</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

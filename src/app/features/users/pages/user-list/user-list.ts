@@ -1,9 +1,64 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { UserService, User } from '../../services/user.service';
 
 @Component({
   selector: 'app-user-list',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './user-list.html',
   styleUrl: './user-list.css'
 })
-export class UserList {}
+export class UserList implements OnInit {
+  userService = inject(UserService);
+
+  users: User[] = [];
+  metrics: any = null;
+  isLoading = true;
+  searchQuery = '';
+  filterRole = 'all';
+  filterStatus = 'all';
+
+  ngOnInit() {
+    this.loadData();
+  }
+
+  loadData() {
+    this.isLoading = true;
+    
+    // Load metrics
+    this.userService.getSystemMetrics().subscribe(data => {
+      this.metrics = data;
+    });
+
+    // Load users
+    this.userService.getUsers().subscribe(data => {
+      this.users = data;
+      this.isLoading = false;
+    });
+  }
+
+  get filteredUsers() {
+    let result = this.users;
+
+    if (this.filterRole !== 'all') {
+      result = result.filter(u => u.role === this.filterRole);
+    }
+
+    if (this.filterStatus !== 'all') {
+      result = result.filter(u => u.status === this.filterStatus);
+    }
+
+    if (this.searchQuery) {
+      const q = this.searchQuery.toLowerCase();
+      result = result.filter(u => 
+        u.full_name.toLowerCase().includes(q) || 
+        u.email.toLowerCase().includes(q)
+      );
+    }
+
+    return result;
+  }
+}

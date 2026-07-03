@@ -101,7 +101,7 @@ export class MeetingList implements OnInit {
 
   onConfirmDelete() {
     if (this.meetingToDelete) {
-      this.meetings = this.meetings.filter(m => m.id !== this.meetingToDelete.id);
+      this.meetings = this.meetings.filter(m => m.id !== this.meetingToDelete!.id);
       this.filterMeetings(this.searchService.searchQuery());
     }
     this.showDeleteConfirm = false;

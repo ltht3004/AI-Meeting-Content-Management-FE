@@ -1,9 +1,43 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-forgot-password',
-  imports: [],
+  standalone: true,
+  imports: [RouterLink, FormsModule],
   templateUrl: './forgot-password.html',
   styleUrl: './forgot-password.css'
 })
-export class ForgotPassword {}
+export class ForgotPassword {
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+  email = '';
+  errorMessage = '';
+  successMessage = '';
+  isLoading = false;
+
+  onSubmit() {
+    if (!this.email) {
+      this.errorMessage = 'Vui lòng nhập địa chỉ email.';
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.authService.forgotPassword(this.email).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.successMessage = 'Link đặt lại mật khẩu đã được gửi đến email của bạn.';
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = err.error?.detail || 'Không thể gửi link. Vui lòng thử lại.';
+      }
+    });
+  }
+}

@@ -1,1 +1,188 @@
-<p>profile-view works!</p>
+<div class="profile-page animate-fade-in">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">My Profile</h1>
+    <p class="page-desc">View and manage your personal account information.</p>
+  </div>
+
+  <!-- Success toast -->
+  @if (successMessage) {
+    <div class="alert alert-success">
+      <span class="material-icons-round alert-icon">check_circle</span>
+      <span>{{ successMessage }}</span>
+    </div>
+  }
+
+  <!-- Main Profile Card -->
+  <div class="profile-content">
+    <!-- Left: Avatar Section -->
+    <div class="profile-avatar-card glass-panel">
+      <div class="avatar-section">
+        <div class="avatar-frame">
+          <img 
+            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
+            alt="Profile Avatar" 
+            class="avatar-img"
+          >
+        </div>
+        <h3 class="avatar-name">{{ user?.full_name || 'User' }}</h3>
+        <span class="avatar-role-badge">{{ user?.role === 'admin' ? 'Enterprise Admin' : 'User' }}</span>
+      </div>
+
+      <div class="avatar-actions">
+        <button class="btn btn-primary btn-sm">
+          <span class="material-icons-round btn-icon">cloud_upload</span>
+          Upload New Avatar
+        </button>
+        <button class="btn btn-secondary btn-sm">Remove Avatar</button>
+      </div>
+    </div>
+
+    <!-- Right: Personal Info Section -->
+    <div class="profile-info-card glass-panel">
+      <div class="info-header">
+        <h2 class="info-title">Personal Information</h2>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-field">
+          <span class="info-label">Full Name</span>
+          @if (isEditing) {
+            <input type="text" class="info-input" [(ngModel)]="editName" placeholder="Full Name">
+          } @else {
+            <div class="info-value-box">{{ user?.full_name || '—' }}</div>
+          }
+        </div>
+
+        <div class="info-field">
+          <span class="info-label">Email Address</span>
+          @if (isEditing) {
+            <input type="email" class="info-input" [(ngModel)]="editEmail" placeholder="Email">
+          } @else {
+            <div class="info-value-box">{{ user?.email || '—' }}</div>
+          }
+        </div>
+
+        <div class="info-field">
+          <span class="info-label">Role</span>
+          <div class="info-value-box">{{ user?.role === 'admin' ? 'Enterprise Admin' : 'User' }}</div>
+        </div>
+
+        <div class="info-field">
+          <span class="info-label">Created at</span>
+          <div class="info-value-box">{{ getCreatedDate() }}</div>
+        </div>
+
+        <div class="info-field full-width">
+          <span class="info-label">Updated at</span>
+          <div class="info-value-box">{{ getUpdatedDate() }}</div>
+        </div>
+      </div>
+
+      <!-- Error in edit mode -->
+      @if (errorMessage) {
+        <div class="alert alert-danger" style="margin-top: 16px;">
+          <span class="material-icons-round alert-icon">error_outline</span>
+          <span>{{ errorMessage }}</span>
+        </div>
+      }
+
+      <!-- Edit / Save Actions -->
+      <div class="info-actions">
+        @if (isEditing) {
+          <button class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
+          <button class="btn btn-primary" (click)="saveProfile()" [disabled]="isLoading">
+            @if (isLoading) {
+              <span class="spinner"></span>
+            } @else {
+              <span class="material-icons-round btn-icon">save</span>
+              Save Changes
+            }
+          </button>
+        } @else {
+          <button class="btn btn-primary" (click)="startEdit()">
+            <span class="material-icons-round btn-icon">edit</span>
+            Edit Profile
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Right: Usage Quota Card -->
+    <div class="productivity-card">
+      <div class="card-top">
+        <span class="card-label">USAGE QUOTA</span>
+        <h2 class="score-value">{{ stats.usedQuota || 0 }} / {{ stats.totalQuota || 0 }} <span style="font-size: 16px; font-weight: 500; opacity: 0.8;">mins</span></h2>
+        <div class="progress-bar-container mt-2" style="background-color: rgba(255,255,255,0.2);">
+          <div class="progress-bar" style="background-color: #fff;" [style.width.%]="((stats.usedQuota || 0) / (stats.totalQuota || 1)) * 100"></div>
+        </div>
+        <p class="score-desc" style="margin-top: 16px;">
+          You have used {{ (((stats.usedQuota || 0) / (stats.totalQuota || 1)) * 100).toFixed(1) }}% of your allocated AI transcript minutes for this billing cycle.
+        </p>
+      </div>
+      <div class="card-bottom">
+        <div class="review-info">
+          <span class="review-label">NEXT RESET</span>
+          <span class="review-date">{{ stats.resetDate || 'N/A' }}</span>
+        </div>
+        <div class="trend-icon-box">
+          <span class="material-icons-round">autorenew</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Meeting Statistics Section -->
+  <div class="stats-section">
+    <h2 class="stats-title">Meeting Statistics</h2>
+    <div class="stats-grid">
+      <!-- Total Meetings -->
+      <div class="stat-card glass-panel">
+        <div class="stat-header">
+          <div class="stat-icon-box meetings">
+            <span class="material-icons-round stat-icon">groups</span>
+          </div>
+          <span class="stat-growth positive">+{{ stats.meetingsGrowth }}%</span>
+        </div>
+        <span class="stat-label">Total Meetings</span>
+        <span class="stat-value">{{ stats.totalMeetings }}</span>
+      </div>
+
+      <!-- Total Recordings -->
+      <div class="stat-card glass-panel">
+        <div class="stat-header">
+          <div class="stat-icon-box recordings">
+            <span class="material-icons-round stat-icon">videocam</span>
+          </div>
+          <span class="stat-growth positive">+{{ stats.recordingsGrowth }}%</span>
+        </div>
+        <span class="stat-label">Total Recordings</span>
+        <span class="stat-value">{{ stats.totalRecordings }}</span>
+      </div>
+
+      <!-- Total Transcripts -->
+      <div class="stat-card glass-panel">
+        <div class="stat-header">
+          <div class="stat-icon-box transcripts">
+            <span class="material-icons-round stat-icon">description</span>
+          </div>
+          <span class="stat-growth positive">+{{ stats.transcriptsGrowth }}%</span>
+        </div>
+        <span class="stat-label">Total Transcripts</span>
+        <span class="stat-value">{{ stats.totalTranscripts | number }}</span>
+      </div>
+
+      <!-- Total AI Summaries -->
+      <div class="stat-card glass-panel">
+        <div class="stat-header">
+          <div class="stat-icon-box summaries">
+            <span class="material-icons-round stat-icon">auto_awesome</span>
+          </div>
+          <span class="stat-growth positive">+{{ stats.summariesGrowth }}%</span>
+        </div>
+        <span class="stat-label">Total AI Summaries</span>
+        <span class="stat-value">{{ stats.totalSummaries }}</span>
+      </div>
+    </div>
+  </div>
+</div>

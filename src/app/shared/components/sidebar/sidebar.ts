@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -8,18 +9,15 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css'
 })
-export class Sidebar implements OnInit {
-  isAdmin = false;
+export class Sidebar {
+  authService = inject(AuthService);
 
-  ngOnInit() {
-    // Check role from localStorage for mock setup
-    const role = localStorage.getItem('role') || 'admin'; // Fallback to admin for easy design display
-    this.isAdmin = role === 'admin';
+  get isAdmin(): boolean {
+    const user = this.authService.currentUser();
+    return user?.role === 'admin';
   }
 
   logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    window.location.href = '/auth/login';
+    this.authService.logout();
   }
 }

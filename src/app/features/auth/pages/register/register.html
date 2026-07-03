@@ -1,1 +1,129 @@
-<p>register works!</p>
+<div class="auth-wrapper animate-fade-in">
+  <div class="auth-card">
+    <!-- Left Banner Split -->
+    <div class="auth-banner">
+      <div class="banner-overlay"></div>
+      <div class="banner-content">
+        <div class="brand">
+          <div class="logo-box">
+            <span class="material-icons-round logo-icon">psychology</span>
+          </div>
+          <span class="brand-name">MeetingAI</span>
+        </div>
+
+        <h2 class="banner-title">The intelligence behind every conversation.</h2>
+        <p class="banner-desc">Automate transcriptions, extract key insights, and sync action items effortlessly across your entire enterprise workflow.</p>
+
+        <!-- Floating AI notification toast -->
+        <div class="ai-toast">
+          <div class="ai-toast-icon-box">
+            <span class="material-icons-round ai-toast-icon">auto_awesome</span>
+          </div>
+          <div class="ai-toast-text">
+            <span class="ai-toast-title">AI Summary Generated</span>
+            <span class="ai-toast-desc">Meeting with Product Team...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Form Split -->
+    <div class="auth-form-container">
+      <div class="form-header">
+        <h1 class="form-title">Create Account</h1>
+        <p class="form-desc">Get started with your enterprise workspace today.</p>
+      </div>
+
+      <!-- Error message toast -->
+      @if (errorMessage) {
+        <div class="alert alert-danger">
+          <span class="material-icons-round alert-icon">error_outline</span>
+          <span class="alert-text">{{ errorMessage }}</span>
+        </div>
+      }
+
+      <form (ngSubmit)="onSubmit()" class="auth-form">
+        <!-- Full Name -->
+        <div class="form-group">
+          <label class="form-label" for="fullName">Full Name</label>
+          <div class="input-icon-wrapper">
+            <span class="material-icons-round input-icon">person</span>
+            <input 
+              type="text" id="fullName" name="fullName" 
+              class="form-control" placeholder="John Doe" 
+              [(ngModel)]="fullName" required
+            >
+          </div>
+        </div>
+
+        <!-- Work Email -->
+        <div class="form-group">
+          <label class="form-label" for="regEmail">Work Email</label>
+          <div class="input-icon-wrapper">
+            <span class="material-icons-round input-icon">mail</span>
+            <input 
+              type="email" id="regEmail" name="email" 
+              class="form-control" placeholder="name@company.com" 
+              [(ngModel)]="email" required
+            >
+          </div>
+        </div>
+
+        <!-- Password Row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="regPassword">Password</label>
+            <div class="input-icon-wrapper">
+              <span class="material-icons-round input-icon">lock</span>
+              <input 
+                [type]="showPassword ? 'text' : 'password'" 
+                id="regPassword" name="password" 
+                class="form-control password-control" placeholder="••••••••" 
+                [(ngModel)]="password" required
+              >
+              <button type="button" class="password-toggle-btn" (click)="togglePasswordVisibility()">
+                <span class="material-icons-round toggle-icon">
+                  {{ showPassword ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="confirmPassword">Confirm Password</label>
+            <div class="input-icon-wrapper">
+              <span class="material-icons-round input-icon">verified_user</span>
+              <input 
+                [type]="showConfirmPassword ? 'text' : 'password'" 
+                id="confirmPassword" name="confirmPassword" 
+                class="form-control password-control" placeholder="••••••••" 
+                [(ngModel)]="confirmPassword" required
+              >
+              <button type="button" class="password-toggle-btn" (click)="toggleConfirmPasswordVisibility()">
+                <span class="material-icons-round toggle-icon">
+                  {{ showConfirmPassword ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn btn-primary btn-block" [disabled]="isLoading">
+          @if (isLoading) {
+            <span class="spinner"></span>
+            <span>Creating account...</span>
+          } @else {
+            <span>Create Account</span>
+            <span class="material-icons-round btn-arrow">arrow_forward</span>
+          }
+        </button>
+      </form>
+
+      <!-- Footer -->
+      <div class="auth-footer">
+        <p>Already have an account? <a routerLink="/auth/login" class="login-link">Login</a></p>
+      </div>
+    </div>
+  </div>
+</div>

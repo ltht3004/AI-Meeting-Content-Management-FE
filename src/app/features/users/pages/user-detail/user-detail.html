@@ -1,1 +1,143 @@
-<p>user-detail works!</p>
+<div class="page-container animate-fade-in">
+  <!-- Top Navigation Bar -->
+  <div class="page-nav">
+    <a routerLink="/users" class="btn btn-text back-btn">
+      <span class="material-icons-round icon-left">arrow_back</span> Back
+    </a>
+    
+    <div class="nav-actions">
+      <button class="btn btn-outline">Reset Password</button>
+      @if (user) {
+        <a [routerLink]="['/users', user.id, 'edit']" class="btn btn-primary">
+          <span class="material-icons-round icon-left">edit</span> Edit User
+        </a>
+      }
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading-state">
+      <span class="spinner-blue"></span> Loading user details...
+    </div>
+  } @else if (error || !user) {
+    <div class="error-state">
+      {{ error || 'User not found' }}
+    </div>
+  } @else {
+    <!-- Main Profile & Productivity Grid -->
+    <div class="profile-grid">
+      
+      <!-- Left: User Profile Info -->
+      <div class="profile-card glass-panel">
+        <div class="profile-header">
+          <div class="avatar-wrapper">
+            <img [src]="user.avatarUrl" alt="Avatar" class="avatar-lg">
+            <span class="status-indicator" [class.active]="user.status === 'Active'"></span>
+          </div>
+          <div class="profile-meta">
+            <div class="name-row">
+              <h1 class="user-name">{{ user.full_name }}</h1>
+              <span class="role-badge" [class.admin]="user.role === 'admin'">
+                {{ user.role === 'admin' ? 'ADMIN' : 'USER' }}
+              </span>
+            </div>
+            <p class="user-email">{{ user.email }}</p>
+          </div>
+        </div>
+
+        <div class="profile-details">
+          <div class="detail-item">
+            <span class="material-icons-round detail-icon">calendar_today</span>
+            <div class="detail-text">
+              <span class="detail-label">JOINED DATE</span>
+              <span class="detail-value">{{ user.created_at }}</span>
+            </div>
+          </div>
+          
+          <div class="detail-item">
+            <span class="material-icons-round detail-icon">verified_user</span>
+            <div class="detail-text">
+              <span class="detail-label">ACCOUNT STATUS</span>
+              <span class="detail-value status-text" [class.active]="user.status === 'Active'">
+                {{ user.status }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Usage Quota Card -->
+      <div class="productivity-card">
+        <div class="card-top">
+          <span class="card-label">USAGE QUOTA</span>
+          <h2 class="score-value">{{ user.usedQuota || 0 }} / {{ user.totalQuota || 0 }} <span style="font-size: 16px; font-weight: 500; opacity: 0.8;">mins</span></h2>
+          <div class="progress-bar-container mt-2" style="background-color: rgba(255,255,255,0.2);">
+            <div class="progress-bar" style="background-color: #fff;" [style.width.%]="((user.usedQuota || 0) / (user.totalQuota || 1)) * 100"></div>
+          </div>
+          <p class="score-desc" style="margin-top: 16px;">
+            {{ user.full_name.split(' ')[0] }} has used {{ (((user.usedQuota || 0) / (user.totalQuota || 1)) * 100).toFixed(1) }}% of their allocated AI transcript minutes for this billing cycle.
+          </p>
+        </div>
+        <div class="card-bottom">
+          <div class="review-info">
+            <span class="review-label">NEXT RESET</span>
+            <span class="review-date">{{ user.resetDate || 'N/A' }}</span>
+          </div>
+          <div class="trend-icon-box">
+            <span class="material-icons-round">autorenew</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid mt-4">
+      <!-- Total Meetings -->
+      <div class="stat-card glass-panel">
+        <div class="stat-header">
+          <div class="stat-icon-box meetings">
+            <span class="material-icons-round">videocam</span>
+          </div>
+          @if (user.stats?.meetingsGrowth) {
+            <span class="stat-growth positive">+{{ user.stats?.meetingsGrowth }}%</span>
+          }
+        </div>
+        <div class="stat-body">
+          <h3 class="stat-value">{{ user.stats?.totalMeetings || 0 }}</h3>
+          <span class="stat-label">Total Meetings</span>
+        </div>
+      </div>
+
+      <!-- Total Recordings -->
+      <div class="stat-card glass-panel">
+        <div class="stat-header">
+          <div class="stat-icon-box recordings">
+            <span class="material-icons-round">mic</span>
+          </div>
+          @if (user.stats?.recordingsGrowth) {
+            <span class="stat-growth positive">+{{ user.stats?.recordingsGrowth }}%</span>
+          }
+        </div>
+        <div class="stat-body">
+          <h3 class="stat-value">{{ user.stats?.totalRecordings || 0 }}</h3>
+          <span class="stat-label">Total Recordings</span>
+        </div>
+      </div>
+
+      <!-- Total Summaries -->
+      <div class="stat-card glass-panel">
+        <div class="stat-header">
+          <div class="stat-icon-box summaries">
+            <span class="material-icons-round">auto_awesome</span>
+          </div>
+          <span class="stat-growth neutral">Stable</span>
+        </div>
+        <div class="stat-body">
+          <h3 class="stat-value">{{ user.stats?.totalSummaries || 0 }}</h3>
+          <span class="stat-label">Total Summaries</span>
+        </div>
+      </div>
+    </div>
+
+  }
+</div>
