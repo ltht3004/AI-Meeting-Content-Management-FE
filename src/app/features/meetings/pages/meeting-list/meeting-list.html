@@ -17,7 +17,7 @@
   <!-- Card Grid -->
   @if (filteredMeetings.length > 0) {
     <div class="meetings-grid">
-      @for (meeting of filteredMeetings; track meeting.id) {
+      @for (meeting of paginatedMeetings; track meeting.id) {
         <div class="meeting-card glass-panel">
           <!-- Card Body -->
           <div class="card-body">
@@ -88,6 +88,29 @@
         </div>
       }
     </div>
+
+    <!-- Pagination controls -->
+    @if (totalPages > 1) {
+      <div class="pagination-container">
+        <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">
+          <span class="material-icons-round">chevron_left</span>
+        </button>
+        
+        @for (page of pages; track page) {
+          <button 
+            class="page-btn" 
+            [class.active]="currentPage === page" 
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+        }
+        
+        <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+          <span class="material-icons-round">chevron_right</span>
+        </button>
+      </div>
+    }
   } @else {
     <!-- Empty state -->
     <div class="empty-state glass-panel">

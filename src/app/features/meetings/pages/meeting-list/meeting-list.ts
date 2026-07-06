@@ -69,10 +69,115 @@ export class MeetingList implements OnInit {
       participants: 'Alex Rivera, David Miller, Emma Watson',
       creator_id: '3',
       status: 'scheduled'
+    },
+    {
+      id: '5',
+      title: 'Marketing Plan Brainstorm',
+      description: 'Brainstorm creative directions, campaigns, and content scheduling for next month.',
+      meeting_date: '2023-10-20T10:00:00Z',
+      location: 'Creative Lab B',
+      duration: 60,
+      participants: 'Emma Watson, John Doe, Peter Parker',
+      creator_id: '2',
+      status: 'completed'
+    },
+    {
+      id: '6',
+      title: 'DevOps & CI/CD Pipeline Audit',
+      description: 'Analyze build speed, Docker layer caching, and deployment stability in staging environment.',
+      meeting_date: '2023-10-19T15:30:00Z',
+      location: 'Slack Call',
+      duration: 45,
+      participants: 'Sarah Connor, David Miller, Peter Parker',
+      creator_id: '1',
+      status: 'completed'
+    },
+    {
+      id: '7',
+      title: 'API Gateway Integration',
+      description: 'Refactor API endpoints, rate limiting policies, and authentication token caching.',
+      meeting_date: '2023-10-18T13:00:00Z',
+      location: 'Meeting Room C',
+      duration: 75,
+      participants: 'Alex Rivera, David Miller, John Doe',
+      creator_id: '3',
+      status: 'completed'
+    },
+    {
+      id: '8',
+      title: 'HR Policy & Benefits Review',
+      description: 'Review updated health insurance plans, annual remote work policy changes, and perks.',
+      meeting_date: '2023-10-17T09:30:00Z',
+      location: 'Main Hall',
+      duration: 60,
+      participants: 'Emma Watson, Sarah Connor, Peter Parker',
+      creator_id: '2',
+      status: 'completed'
+    },
+    {
+      id: '9',
+      title: 'Q4 Budget & Spending Review',
+      description: 'Analyze team spending, cloud computing costs, and estimate budget for next quarter.',
+      meeting_date: '2023-10-16T11:00:00Z',
+      location: 'Executive Boardroom',
+      duration: 60,
+      participants: 'Alex Rivera, Sarah Connor, David Miller',
+      creator_id: '1',
+      status: 'completed'
+    },
+    {
+      id: '10',
+      title: 'Frontend Performance Audit',
+      description: 'Check Core Web Vitals, bundle optimization, and image lazy loading configurations.',
+      meeting_date: '2023-10-15T14:30:00Z',
+      location: 'Room 101',
+      duration: 45,
+      participants: 'Alex Rivera, John Doe, Peter Parker',
+      creator_id: '1',
+      status: 'completed'
     }
   ];
 
   filteredMeetings: Meeting[] = [];
+  currentPage = 1;
+  pageSize = 9;
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredMeetings.length / this.pageSize);
+  }
+
+  get paginatedMeetings(): Meeting[] {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    return this.filteredMeetings.slice(startIndex, startIndex + this.pageSize);
+  }
+
+  get pages(): number[] {
+    const total = this.totalPages;
+    const array: number[] = [];
+    for (let i = 1; i <= total; i++) {
+      array.push(i);
+    }
+    return array;
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
   availableUsers = [
     { id: '1', name: 'Alex Rivera' },
     { id: '2', name: 'Sarah Connor' },
@@ -109,6 +214,7 @@ export class MeetingList implements OnInit {
         m.location.toLowerCase().includes(cleanQuery)
       );
     }
+    this.currentPage = 1;
   }
 
   deleteMeeting(id: string) {

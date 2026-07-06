@@ -168,6 +168,12 @@ a {
   outline: none;
 }
 
+.btn:disabled, .btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .btn-primary {
   background-color: var(--primary);
   color: var(--text-inverse);

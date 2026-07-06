@@ -49,10 +49,17 @@
         </div>
 
         @if (isAdmin || currentUserId === meeting.creator_id) {
-          <a routerLink="/meetings/edit/{{ meeting.id }}" class="btn btn-secondary edit-meeting-btn">
-            <span class="material-icons-round">edit</span>
-            <span>Edit Meeting</span>
-          </a>
+          @if (meeting.status === 'scheduled') {
+            <a routerLink="/meetings/edit/{{ meeting.id }}" class="btn btn-secondary edit-meeting-btn">
+              <span class="material-icons-round">edit</span>
+              <span>Edit Meeting</span>
+            </a>
+          } @else {
+            <button class="btn btn-secondary edit-meeting-btn disabled" [title]="meeting.status === 'processing' ? 'Cannot edit while processing' : 'Cannot edit completed meetings'">
+              <span class="material-icons-round">edit</span>
+              <span>Edit Meeting</span>
+            </button>
+          }
         }
       </div>
     </div>
