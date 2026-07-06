@@ -27,7 +27,7 @@ export class UserEdit implements OnInit {
   editFullName = '';
   editEmail = '';
   editRole: 'admin' | 'user' = 'user';
-  editStatus: 'Active' | 'Pending' = 'Active';
+  editStatus: 'Active' | 'Unactive' = 'Active';
 
   ngOnInit() {
     this.route.paramMap.pipe(
@@ -53,7 +53,7 @@ export class UserEdit implements OnInit {
   }
 
   toggleStatus() {
-    this.editStatus = this.editStatus === 'Active' ? 'Pending' : 'Active';
+    this.editStatus = this.editStatus === 'Active' ? 'Unactive' : 'Active';
   }
 
   saveChanges() {

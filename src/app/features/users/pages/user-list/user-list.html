@@ -23,12 +23,10 @@
           <select class="btn btn-outline filter-btn" [(ngModel)]="filterStatus">
             <option value="all">All Status</option>
             <option value="Active">Active</option>
-            <option value="Pending">Pending</option>
+            <option value="Unactive">Unactive</option>
           </select>
         </div>
-        <button class="btn btn-text filter-btn text-muted">
-          <span class="material-icons-round icon-left">filter_list</span> More Filters
-        </button>
+
       </div>
       <!-- Add User button removed -->
     </div>
@@ -86,7 +84,7 @@
                 </td>
                 <td class="text-right">
                   <button class="btn-icon" [routerLink]="['/users', user.id, 'edit']" title="Edit User">
-                    <span class="material-icons-round">more_vert</span>
+                    <span class="material-icons-round">edit</span>
                   </button>
                 </td>
               </tr>
@@ -138,14 +136,6 @@
       </div>
     </div>
 
-    <!-- System Security -->
-    <div class="summary-card glass-panel security-card">
-      <div class="card-content">
-        <span class="card-label text-muted">SYSTEM SECURITY</span>
-        <h2 class="card-value text-main">{{ metrics?.systemSecurity }}%</h2>
-        <p class="card-desc">All user activities are verified and encrypted.</p>
-      </div>
-      <span class="material-icons-round security-bg-icon">verified_user</span>
-    </div>
+
   </div>
 </div>

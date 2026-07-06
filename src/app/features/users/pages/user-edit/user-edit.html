@@ -88,27 +88,7 @@
           </div>
         </div>
 
-        <!-- Security Info -->
-        <div class="security-info">
-          <div class="info-row">
-            <div class="info-label-group">
-              <span class="material-icons-round info-icon">verified_user</span>
-              <span>Two-Factor Authentication</span>
-            </div>
-            @if (user.twoFactorEnabled) {
-              <span class="badge badge-primary">Enabled</span>
-            } @else {
-              <span class="badge badge-muted">Disabled</span>
-            }
-          </div>
-          <div class="info-row">
-            <div class="info-label-group">
-              <span class="material-icons-round info-icon">history</span>
-              <span>Last Login</span>
-            </div>
-            <span class="info-value">{{ user.last_active }} (San Francisco, CA)</span>
-          </div>
-        </div>
+
 
         <!-- Form Actions -->
         <div class="form-actions">
