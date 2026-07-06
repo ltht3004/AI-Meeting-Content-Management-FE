@@ -25,7 +25,7 @@ export interface User {
   email: string;
   role: 'admin' | 'user';
   created_at: string;
-  status: 'Active' | 'Pending';
+  status: 'Active' | 'Unactive';
   last_active: string;
   avatarUrl?: string;
   twoFactorEnabled?: boolean;
@@ -86,7 +86,7 @@ export class UserService {
       email: 'jordan.s@meetingai.com',
       role: 'user',
       created_at: 'Jan 18, 2024',
-      status: 'Pending',
+      status: 'Unactive',
       last_active: 'Never logged in',
       avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
       twoFactorEnabled: false,
