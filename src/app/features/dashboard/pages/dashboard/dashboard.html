@@ -74,6 +74,7 @@
             <tr>
               <th>Title</th>
               <th>Date</th>
+              <th>Status</th>
               <th class="text-right">Actions</th>
             </tr>
           </thead>
@@ -84,13 +85,42 @@
                 <div class="meeting-icon-box">
                   <span class="material-icons-round text-primary">calendar_today</span>
                 </div>
-                <span class="meeting-title-text">{{ meeting.title }}</span>
+                <a [routerLink]="['/meetings', meeting.id]" class="meeting-title-link">
+                  {{ meeting.title }}
+                </a>
               </td>
               <td class="date-text">{{ meeting.date }}</td>
-              <td class="text-right">
-                <button class="actions-menu-btn">
+              <td>
+                <span class="badge" 
+                      [class.badge-success]="meeting.status === 'completed'" 
+                      [class.badge-info]="meeting.status === 'scheduled'" 
+                      [class.badge-warning]="meeting.status === 'processing'">
+                  {{ meeting.status | titlecase }}
+                </span>
+              </td>
+              <td class="text-right actions-cell-container">
+                <button class="actions-menu-btn" (click)="toggleMenu($index, $event)">
                   <span class="material-icons-round">more_vert</span>
                 </button>
+                @if (activeMenuIndex === $index) {
+                  <div class="actions-dropdown-menu">
+                    <a [routerLink]="['/meetings', meeting.id]" class="dropdown-item">
+                      <span class="material-icons-round">visibility</span>
+                      <span>Details</span>
+                    </a>
+                    @if (meeting.status === 'scheduled') {
+                      <a [routerLink]="['/meetings/edit', meeting.id]" class="dropdown-item">
+                        <span class="material-icons-round">edit</span>
+                        <span>Edit</span>
+                      </a>
+                    } @else {
+                      <div class="dropdown-item disabled" [title]="meeting.status === 'processing' ? 'Cannot edit while processing' : 'Cannot edit completed meetings'">
+                        <span class="material-icons-round">edit</span>
+                        <span>Edit</span>
+                      </div>
+                    }
+                  </div>
+                }
               </td>
             </tr>
             }
@@ -117,14 +147,6 @@
             <div class="btn-left-content">
               <span class="material-icons-round btn-icon">cloud_upload</span>
               <span>Upload Recording</span>
-            </div>
-            <span class="material-icons-round arrow-icon">chevron_right</span>
-          </a>
-
-          <a routerLink="/meetings" class="btn btn-secondary quick-action-btn summary-action-btn">
-            <div class="btn-left-content">
-              <span class="material-icons-round btn-icon">calendar_today</span>
-              <span>Manage Meetings</span>
             </div>
             <span class="material-icons-round arrow-icon">chevron_right</span>
           </a>
