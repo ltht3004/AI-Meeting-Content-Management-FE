@@ -147,9 +147,24 @@ a {
   transition: all var(--transition-speed) ease;
 }
 
-.form-control:focus {
+.form-control:focus, .info-input:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.15);
+}
+
+.input-error {
+  border-color: var(--danger) !important;
+}
+
+.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+}
+
+.error-msg {
+  color: var(--danger);
+  font-size: 12px;
+  margin-top: 6px;
+  display: block;
 }
 
 /* Button Styles */

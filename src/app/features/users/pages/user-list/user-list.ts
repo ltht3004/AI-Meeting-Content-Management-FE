@@ -20,6 +20,7 @@ export class UserList implements OnInit {
   searchQuery = '';
   filterRole = 'all';
   filterStatus = 'all';
+  sortOrder: 'newest' | 'oldest' = 'newest';
 
   ngOnInit() {
     this.loadData();
@@ -58,6 +59,12 @@ export class UserList implements OnInit {
         u.email.toLowerCase().includes(q)
       );
     }
+
+    result = [...result].sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return this.sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
 
     return result;
   }

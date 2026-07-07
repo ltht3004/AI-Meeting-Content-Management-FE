@@ -1,20 +1,4 @@
 <div class="page-container animate-fade-in">
-  
-  <!-- Success Toast -->
-  @if (showToast) {
-    <div class="toast-notification slide-down">
-      <div class="toast-icon-box">
-        <span class="material-icons-round">check_circle</span>
-      </div>
-      <div class="toast-content">
-        <h4 class="toast-title">Changes Saved</h4>
-        <p class="toast-desc">User profile has been updated successfully.</p>
-      </div>
-      <button class="toast-close" (click)="showToast = false">
-        <span class="material-icons-round">close</span>
-      </button>
-    </div>
-  }
 
   @if (isLoading) {
     <div class="loading-state">
@@ -56,12 +40,18 @@
         <!-- Form Fields -->
         <div class="form-grid">
           <div class="form-group">
-            <label class="form-label">Full Name</label>
-            <input type="text" class="form-control" [(ngModel)]="editFullName">
+            <label class="form-label">Full Name <span class="required" style="color: red;">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="editFullName" required #editNameField="ngModel" [class.input-error]="editNameField.invalid && (editNameField.touched || editNameField.dirty)">
+            @if (editNameField.invalid && (editNameField.touched || editNameField.dirty)) {
+              <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">Full Name is required.</span>
+            }
           </div>
           <div class="form-group">
-            <label class="form-label">Email Address</label>
-            <input type="email" class="form-control" [(ngModel)]="editEmail">
+            <label class="form-label">Email Address <span class="required" style="color: red;">*</span></label>
+            <input type="email" class="form-control" [(ngModel)]="editEmail" required #editEmailField="ngModel" [class.input-error]="editEmailField.invalid && (editEmailField.touched || editEmailField.dirty)">
+            @if (editEmailField.invalid && (editEmailField.touched || editEmailField.dirty)) {
+              <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">Email is required.</span>
+            }
           </div>
           <div class="form-group">
             <label class="form-label">Role</label>
@@ -93,7 +83,7 @@
         <!-- Form Actions -->
         <div class="form-actions">
           <button class="btn btn-text" [routerLink]="['/users', user.id]">Cancel</button>
-          <button class="btn btn-primary" (click)="saveChanges()" [disabled]="isSaving">
+          <button class="btn btn-primary" (click)="saveChanges()" [disabled]="isSaving || !editFullName || !editEmail">
             @if (isSaving) {
               <span class="spinner-white"></span>
             } @else {
@@ -117,3 +107,19 @@
     </div>
   }
 </div>
+
+<!-- Success Toast -->
+@if (showToast) {
+  <div class="toast-notification slide-down">
+    <div class="toast-icon-box">
+      <span class="material-icons-round">check_circle</span>
+    </div>
+    <div class="toast-content">
+      <h4 class="toast-title">Changes Saved</h4>
+      <p class="toast-desc">User profile has been updated successfully.</p>
+    </div>
+    <button class="toast-close" (click)="showToast = false">
+      <span class="material-icons-round">close</span>
+    </button>
+  </div>
+}

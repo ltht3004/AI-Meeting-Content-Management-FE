@@ -5,14 +5,6 @@
     <p class="page-desc">View and manage your personal account information.</p>
   </div>
 
-  <!-- Success toast -->
-  @if (successMessage) {
-    <div class="alert alert-success">
-      <span class="material-icons-round alert-icon">check_circle</span>
-      <span>{{ successMessage }}</span>
-    </div>
-  }
-
   <!-- Main Profile Card -->
   <div class="profile-content">
     <!-- Left: Avatar Section -->
@@ -46,18 +38,24 @@
 
       <div class="info-grid">
         <div class="info-field">
-          <span class="info-label">Full Name</span>
+          <span class="info-label">Full Name <span class="required" style="color: red;">*</span></span>
           @if (isEditing) {
-            <input type="text" class="info-input" [(ngModel)]="editName" placeholder="Full Name">
+            <input type="text" class="info-input" [(ngModel)]="editName" placeholder="Full Name" required #editNameField="ngModel" [class.input-error]="editNameField.invalid && (editNameField.touched || editNameField.dirty)">
+            @if (editNameField.invalid && (editNameField.touched || editNameField.dirty)) {
+              <span class="error-msg">Full Name is required.</span>
+            }
           } @else {
             <div class="info-value-box">{{ user?.full_name || '—' }}</div>
           }
         </div>
 
         <div class="info-field">
-          <span class="info-label">Email Address</span>
+          <span class="info-label">Email Address <span class="required" style="color: red;">*</span></span>
           @if (isEditing) {
-            <input type="email" class="info-input" [(ngModel)]="editEmail" placeholder="Email">
+            <input type="email" class="info-input" [(ngModel)]="editEmail" placeholder="Email" required #editEmailField="ngModel" [class.input-error]="editEmailField.invalid && (editEmailField.touched || editEmailField.dirty)">
+            @if (editEmailField.invalid && (editEmailField.touched || editEmailField.dirty)) {
+              <span class="error-msg">Email is required.</span>
+            }
           } @else {
             <div class="info-value-box">{{ user?.email || '—' }}</div>
           }
@@ -91,7 +89,7 @@
       <div class="info-actions">
         @if (isEditing) {
           <button class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
-          <button class="btn btn-primary" (click)="saveProfile()" [disabled]="isLoading">
+          <button class="btn btn-primary" (click)="saveProfile()" [disabled]="isLoading || !editName || !editEmail">
             @if (isLoading) {
               <span class="spinner"></span>
             } @else {
@@ -186,3 +184,19 @@
     </div>
   </div>
 </div>
+
+<!-- Success toast -->
+@if (successMessage) {
+  <div class="toast-notification slide-down">
+    <div class="toast-icon-box">
+      <span class="material-icons-round">check_circle</span>
+    </div>
+    <div class="toast-content">
+      <h4 class="toast-title">Changes Saved</h4>
+      <p class="toast-desc">{{ successMessage }}</p>
+    </div>
+    <button class="toast-close" (click)="successMessage = ''">
+      <span class="material-icons-round">close</span>
+    </button>
+  </div>
+}
