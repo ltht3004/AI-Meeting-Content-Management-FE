@@ -33,17 +33,17 @@ export class Register {
 
   onSubmit() {
     if (!this.fullName || !this.email || !this.password || !this.confirmPassword) {
-      this.errorMessage = 'Vui lòng điền đầy đủ tất cả các trường.';
+      this.errorMessage = 'Please fill in all fields.';
       return;
     }
 
     if (this.password !== this.confirmPassword) {
-      this.errorMessage = 'Mật khẩu xác nhận không khớp.';
+      this.errorMessage = 'Passwords do not match.';
       return;
     }
 
     if (this.password.length < 6) {
-      this.errorMessage = 'Mật khẩu phải có ít nhất 6 ký tự.';
+      this.errorMessage = 'Password must be at least 6 characters.';
       return;
     }
 
@@ -61,7 +61,7 @@ export class Register {
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.detail || 'Đăng ký thất bại. Vui lòng thử lại.';
+        this.errorMessage = err.error?.detail || 'Registration failed. Please try again.';
       }
     });
   }

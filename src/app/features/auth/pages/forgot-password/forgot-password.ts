@@ -21,7 +21,7 @@ export class ForgotPassword {
 
   onSubmit() {
     if (!this.email) {
-      this.errorMessage = 'Vui lòng nhập địa chỉ email.';
+      this.errorMessage = 'Please enter your email address.';
       return;
     }
 
@@ -32,11 +32,11 @@ export class ForgotPassword {
     this.authService.forgotPassword(this.email).subscribe({
       next: () => {
         this.isLoading = false;
-        this.successMessage = 'Link đặt lại mật khẩu đã được gửi đến email của bạn.';
+        this.successMessage = 'Password reset link has been sent to your email.';
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.detail || 'Không thể gửi link. Vui lòng thử lại.';
+        this.errorMessage = err.error?.detail || 'Failed to send link. Please try again.';
       }
     });
   }

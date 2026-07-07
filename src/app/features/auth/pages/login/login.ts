@@ -26,7 +26,7 @@ export class Login {
 
   onSubmit() {
     if (!this.email || !this.password) {
-      this.errorMessage = 'Vui lòng nhập đầy đủ email và mật khẩu.';
+      this.errorMessage = 'Please fill in all required fields.';
       return;
     }
     
@@ -40,7 +40,7 @@ export class Login {
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.detail || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.';
+        this.errorMessage = err.error?.detail || 'Login failed. Please check your credentials.';
       }
     });
   }

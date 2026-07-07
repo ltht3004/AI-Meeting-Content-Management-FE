@@ -60,7 +60,7 @@ export class ProfileView implements OnInit {
 
   saveProfile() {
     if (!this.editName || !this.editEmail) {
-      this.errorMessage = 'Vui lòng điền đầy đủ thông tin.';
+      this.errorMessage = 'Please fill in all required fields.';
       return;
     }
 
@@ -74,12 +74,12 @@ export class ProfileView implements OnInit {
       next: () => {
         this.isLoading = false;
         this.isEditing = false;
-        this.successMessage = 'Cập nhật hồ sơ thành công!';
+        this.successMessage = 'Profile updated successfully!';
         setTimeout(() => this.successMessage = '', 3000);
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.detail || 'Cập nhật thất bại.';
+        this.errorMessage = err.error?.detail || 'Update failed.';
       }
     });
   }

@@ -5,73 +5,7 @@
   position: relative;
 }
 
-/* Toast Notification */
-.toast-notification {
-  position: fixed;
-  top: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  border: 1px solid var(--border-color);
-  padding: 16px 20px;
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  z-index: 1000;
-  width: 400px;
-  max-width: 90vw;
-}
 
-.slide-down {
-  animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-@keyframes slideDown {
-  from { top: -50px; opacity: 0; }
-  to { top: 24px; opacity: 1; }
-}
-
-.toast-icon-box {
-  background-color: var(--success-light);
-  color: var(--success);
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.toast-content {
-  flex-grow: 1;
-}
-
-.toast-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-main);
-  margin-bottom: 4px;
-}
-
-.toast-desc {
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-.toast-close {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 4px;
-}
-
-.toast-close:hover {
-  color: var(--text-main);
-}
 
 /* Loading / Error */
 .loading-state, .error-state {
