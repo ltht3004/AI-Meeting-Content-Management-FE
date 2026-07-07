@@ -1,4 +1,20 @@
 <div class="detail-container animate-fade-in">
+  <!-- Success Toast -->
+  @if (showToast) {
+    <div class="toast-notification slide-down">
+      <div class="toast-icon-box">
+        <span class="material-icons-round">check_circle</span>
+      </div>
+      <div class="toast-content">
+        <h4 class="toast-title">Changes Saved</h4>
+        <p class="toast-desc">Meeting details have been updated successfully.</p>
+      </div>
+      <button class="toast-close" (click)="showToast = false">
+        <span class="material-icons-round">close</span>
+      </button>
+    </div>
+  }
+
   <!-- Back Button & Page Header -->
   <div class="page-header">
     <a routerLink="/meetings" class="back-link">

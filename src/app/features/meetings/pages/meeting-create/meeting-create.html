@@ -117,7 +117,7 @@
             (click)="toggleUsersDropdown($event)"
           >
             @if (!meetingForm.get('participants')?.value) {
-              <span class="selected-text-placeholder">Select participants from list...</span>
+              <span class="selected-text-placeholder">Select participants...</span>
             } @else {
               <span class="selected-text">{{ meetingForm.get('participants')?.value }}</span>
             }
@@ -128,18 +128,44 @@
 
           @if (showUsersDropdown) {
             <div class="custom-select-dropdown glass-panel" (click)="$event.stopPropagation()">
-              @for (user of availableUsers; track user.id) {
-                <label class="dropdown-user-option">
-                  <input 
-                    type="checkbox" 
-                    [checked]="isUserSelected(user.name)"
-                    (change)="toggleUserSelection(user.name)"
+              <div class="dropdown-search-wrapper">
+                <span class="material-icons-round search-icon">search</span>
+                <input 
+                  type="text" 
+                  class="dropdown-search-input" 
+                  placeholder="Search participants..." 
+                  [(ngModel)]="userSearchQuery" 
+                  [ngModelOptions]="{standalone: true}"
+                  (click)="$event.stopPropagation()"
+                />
+                @if (userSearchQuery) {
+                  <button 
+                    type="button" 
+                    class="clear-search-btn" 
+                    (click)="userSearchQuery = ''; $event.stopPropagation()"
                   >
-                  <span class="checkbox-custom"></span>
-                  <span class="user-avatar-circle">{{ getInitials(user.name) }}</span>
-                  <span class="user-name">{{ user.name }}</span>
-                </label>
-              }
+                    <span class="material-icons-round">close</span>
+                  </button>
+                }
+              </div>
+
+              <!-- Options list -->
+              <div class="dropdown-options-list">
+                @for (user of filteredAvailableUsers; track user.id) {
+                  <label class="dropdown-user-option">
+                    <input 
+                      type="checkbox" 
+                      [checked]="isUserSelected(user.name)"
+                      (change)="toggleUserSelection(user.name)"
+                    >
+                    <span class="checkbox-custom"></span>
+                    <span class="user-avatar-circle">{{ getInitials(user.name) }}</span>
+                    <span class="user-name">{{ user.name }}</span>
+                  </label>
+                } @empty {
+                  <div class="no-users-found">No participants found</div>
+                }
+              </div>
             </div>
           }
           

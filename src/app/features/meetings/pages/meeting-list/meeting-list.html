@@ -11,6 +11,35 @@
         <span class="material-icons-round">add</span>
         <span>Create Meeting</span>
       </a>
+
+      <!-- Status Filter Dropdown -->
+      <div class="status-dropdown-container">
+        <button class="filter-dropdown-btn" (click)="toggleDropdown($event)">
+          <span class="material-icons-round filter-icon">filter_alt</span>
+          <span>Status: {{ getStatusLabel(selectedStatus) }}</span>
+          <span class="material-icons-round arrow-icon" [class.open]="isDropdownOpen">keyboard_arrow_down</span>
+        </button>
+        
+        @if (isDropdownOpen) {
+          <div class="status-dropdown-menu glass-panel animate-fade-in">
+            <button class="dropdown-item" [class.active]="selectedStatus === 'all'" (click)="selectStatus('all')">
+              All Meetings
+            </button>
+            <button class="dropdown-item" [class.active]="selectedStatus === 'scheduled'" (click)="selectStatus('scheduled')">
+              <span class="status-dot scheduled"></span>
+              Scheduled
+            </button>
+            <button class="dropdown-item" [class.active]="selectedStatus === 'processing'" (click)="selectStatus('processing')">
+              <span class="status-dot processing"></span>
+              Processing
+            </button>
+            <button class="dropdown-item" [class.active]="selectedStatus === 'completed'" (click)="selectStatus('completed')">
+              <span class="status-dot completed"></span>
+              Completed
+            </button>
+          </div>
+        }
+      </div>
     </div>
   </div>
 

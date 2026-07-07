@@ -1,5 +1,5 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -44,10 +44,13 @@ interface MeetingDetailData {
 })
 export class MeetingDetail implements OnInit {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   meetingId!: string;
   meeting!: MeetingDetailData;
   activeTab: 'summary' | 'transcript' = 'summary';
+  showToast = false;
 
   // Selection state for multiple recordings
   selectedRecordingId = '';
@@ -173,6 +176,26 @@ export class MeetingDetail implements OnInit {
     if (this.meeting.recordings && this.meeting.recordings.length > 0) {
       this.selectedRecordingId = this.meeting.recordings[0].id;
     }
+
+    // Listen for success toast query param
+    this.route.queryParams.subscribe(params => {
+      if (params['edited'] === 'true') {
+        this.showToast = true;
+        this.cdr.detectChanges();
+        
+        // Auto hide toast after 3 seconds
+        setTimeout(() => {
+          this.showToast = false;
+          this.cdr.detectChanges();
+          
+          // Clear query parameter without page reload
+          this.router.navigate([], {
+            queryParams: { edited: null },
+            queryParamsHandling: 'merge'
+          });
+        }, 3000);
+      }
+    });
   }
 
   selectRecording(recId: string) {
