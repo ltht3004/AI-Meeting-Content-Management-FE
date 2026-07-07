@@ -1,4 +1,4 @@
-import { Component, OnInit, effect, inject } from '@angular/core';
+import { Component, OnInit, effect, inject, HostListener } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -141,6 +141,8 @@ export class MeetingList implements OnInit {
   filteredMeetings: Meeting[] = [];
   currentPage = 1;
   pageSize = 9;
+  selectedStatus: 'all' | 'scheduled' | 'processing' | 'completed' = 'all';
+  isDropdownOpen = false;
 
   get totalPages(): number {
     return Math.ceil(this.filteredMeetings.length / this.pageSize);
@@ -205,16 +207,51 @@ export class MeetingList implements OnInit {
 
   filterMeetings(query: string) {
     const cleanQuery = query.toLowerCase().trim();
-    if (!cleanQuery) {
-      this.filteredMeetings = [...this.meetings];
-    } else {
-      this.filteredMeetings = this.meetings.filter(m =>
+    let tempMeetings = this.meetings;
+    
+    if (cleanQuery) {
+      tempMeetings = this.meetings.filter(m =>
         m.title.toLowerCase().includes(cleanQuery) ||
         m.description.toLowerCase().includes(cleanQuery) ||
         m.location.toLowerCase().includes(cleanQuery)
       );
     }
+    
+    if (this.selectedStatus !== 'all') {
+      tempMeetings = tempMeetings.filter(m => m.status === this.selectedStatus);
+    }
+    
+    this.filteredMeetings = tempMeetings;
     this.currentPage = 1;
+  }
+
+  setStatusFilter(status: 'all' | 'scheduled' | 'processing' | 'completed') {
+    this.selectedStatus = status;
+    this.filterMeetings(this.searchService.searchQuery());
+  }
+
+  toggleDropdown(event: Event) {
+    event.stopPropagation();
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  selectStatus(status: 'all' | 'scheduled' | 'processing' | 'completed') {
+    this.setStatusFilter(status);
+    this.isDropdownOpen = false;
+  }
+
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'scheduled': return 'Scheduled';
+      case 'processing': return 'Processing';
+      case 'completed': return 'Completed';
+      default: return 'All';
+    }
+  }
+
+  @HostListener('document:click')
+  closeDropdown() {
+    this.isDropdownOpen = false;
   }
 
   deleteMeeting(id: string) {

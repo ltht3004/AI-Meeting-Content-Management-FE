@@ -42,6 +42,18 @@ export class MeetingEdit implements OnInit {
   showSuggestions = false;
   private searchDebounceTimeout: any;
 
+  userSearchQuery = '';
+
+  get filteredAvailableUsers() {
+    if (!this.userSearchQuery.trim()) {
+      return this.availableUsers;
+    }
+    const query = this.userSearchQuery.toLowerCase().trim();
+    return this.availableUsers.filter(user => 
+      user.name.toLowerCase().includes(query)
+    );
+  }
+
   availableUsers = [
     { id: '1', name: 'Alex Rivera' },
     { id: '2', name: 'Sarah Connor' },
@@ -59,6 +71,9 @@ export class MeetingEdit implements OnInit {
   toggleUsersDropdown(event: Event) {
     event.stopPropagation();
     this.showUsersDropdown = !this.showUsersDropdown;
+    if (this.showUsersDropdown) {
+      this.userSearchQuery = '';
+    }
   }
 
   toggleUserSelection(name: string) {
@@ -149,6 +164,8 @@ export class MeetingEdit implements OnInit {
       participants: ['', [Validators.required, this.minParticipantsValidator(2)]]
     });
 
+
+
     this.loadMeetingData();
   }
 
@@ -181,6 +198,7 @@ export class MeetingEdit implements OnInit {
     return (control: any) => {
       const val = control.value;
       if (!val) return null;
+      if (control.pristine) return null;
       const selectedDate = new Date(val);
       const now = new Date();
       // Allow a 1-minute buffer for timezone latency
@@ -192,6 +210,7 @@ export class MeetingEdit implements OnInit {
     return (control: any) => {
       const val = control.value;
       if (!val) return null;
+      if (control.pristine) return null;
       
       const date = new Date(val);
       const day = date.getDay(); // 0 = Sunday, 6 = Saturday
@@ -270,8 +289,9 @@ export class MeetingEdit implements OnInit {
     setTimeout(() => {
       console.log('Meeting updated:', this.meetingForm.value);
       this.isSubmitting = false;
-      this.router.navigate(['/meetings', this.meetingId]);
-    }, 1000);
+      // Redirect back to details page immediately with success query parameter
+      this.router.navigate(['/meetings', this.meetingId], { queryParams: { edited: 'true' } });
+    }, 800);
   }
 
   isInvalid(fieldName: string): boolean {
@@ -305,24 +325,41 @@ export class MeetingEdit implements OnInit {
     this.selectedAddress = this.meetingForm.get('location')?.value || '';
     
     this.loadLeaflet().then((L) => {
-      setTimeout(() => {
-        this.initMap(L);
-      }, 100);
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            setTimeout(() => {
+              this.initMap(L, lat, lon);
+            }, 100);
+          },
+          () => {
+            setTimeout(() => {
+              this.initMap(L);
+            }, 100);
+          },
+          { enableHighAccuracy: true, timeout: 3000 }
+        );
+      } else {
+        setTimeout(() => {
+          this.initMap(L);
+        }, 100);
+      }
     });
   }
 
-  initMap(L: any) {
-    // Default coordinates: Hanoi, Vietnam (21.0285, 105.8542)
-    let lat = 21.0285;
-    let lon = 105.8542;
+  initMap(L: any, gpsLat?: number, gpsLon?: number) {
+    // Default coordinates: Quy Nhon, Binh Dinh (13.7594, 109.2213)
+    let defaultLat = gpsLat || 13.7594;
+    let defaultLon = gpsLon || 109.2213;
     
     const currentLoc = this.meetingForm.get('location')?.value;
-    
     const mapContainer = document.getElementById('map-picker');
     if (!mapContainer) return;
     
     // Create map instance
-    this.map = L.map('map-picker').setView([lat, lon], 13);
+    this.map = L.map('map-picker').setView([defaultLat, defaultLon], 15);
     
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -341,7 +378,7 @@ export class MeetingEdit implements OnInit {
     L.Marker.prototype.options.icon = DefaultIcon;
     
     // Create marker
-    this.marker = L.marker([lat, lon], { draggable: true }).addTo(this.map);
+    this.marker = L.marker([defaultLat, defaultLon], { draggable: true }).addTo(this.map);
     
     // Handle click on map
     this.map.on('click', (e: any) => {
@@ -357,28 +394,68 @@ export class MeetingEdit implements OnInit {
       this.reverseGeocode(coords.lat, coords.lng);
     });
     
-    // If there is already a location, search it to center map
-    if (currentLoc && currentLoc.trim().length > 3) {
+    // If there is already a location (and no GPS coordinates provided), search it to center map
+    if (!gpsLat && currentLoc && currentLoc.trim().length > 3) {
       this.mapSearchQuery = currentLoc;
-      this.searchAddress(currentLoc);
-    } else {
-      // Try to get user current location
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-          const uLat = position.coords.latitude;
-          const uLon = position.coords.longitude;
-          if (this.map && this.marker) {
-            this.map.setView([uLat, uLon], 15);
-            this.marker.setLatLng([uLat, uLon]);
-            this.reverseGeocode(uLat, uLon);
+      this.isMapSearching = true;
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(currentLoc)}&limit=1&countrycodes=vn`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.length > 0) {
+            const lat = parseFloat(data[0].lat);
+            const lon = parseFloat(data[0].lon);
+            if (this.map && this.marker) {
+              this.map.setView([lat, lon], 16);
+              this.marker.setLatLng([lat, lon]);
+              this.selectedAddress = data[0].display_name;
+            }
+            this.isMapSearching = false;
+          } else {
+            this.isMapSearching = false;
+            this.reverseGeocode(defaultLat, defaultLon);
           }
-        }, () => {
-          this.reverseGeocode(lat, lon);
+        })
+        .catch(() => {
+          this.isMapSearching = false;
+          this.reverseGeocode(defaultLat, defaultLon);
         });
-      } else {
-        this.reverseGeocode(lat, lon);
+    } else {
+      this.reverseGeocode(defaultLat, defaultLon);
+    }
+  }
+
+  mergeAddressWithQuery(query: string, osmAddress: string): string {
+    if (!query || !osmAddress) return osmAddress || query;
+    
+    const normQuery = query.toLowerCase().trim();
+    const normOsm = osmAddress.toLowerCase().trim();
+    
+    // Match house number or block prefix at start of query, e.g. "12", "12a", "Lô 12", "Số 12", "12/3"
+    const leadingPattern = /^((?:số\s+)?\d+[a-z]?(?:\/\d+)?(?:\s+lô\s+\d+)?)\b/i;
+    const match = query.trim().match(leadingPattern);
+    
+    if (match) {
+      const prefix = match[1];
+      if (!normOsm.startsWith(prefix.toLowerCase())) {
+        const restOfQuery = query.substring(match[0].length).trim();
+        const cleanRest = restOfQuery.replace(/,.*$/, '').trim();
+        
+        if (normOsm.startsWith(cleanRest.toLowerCase())) {
+          return `${prefix} ${restOfQuery}${osmAddress.substring(cleanRest.length)}`;
+        } else {
+          return `${prefix}, ${osmAddress}`;
+        }
       }
     }
+    
+    return osmAddress;
+  }
+
+  cleanSearchQuery(query: string): string {
+    let clean = query.trim();
+    // Remove common prefixes
+    clean = clean.replace(/^(công ty|tập đoàn|văn phòng|chi nhánh|trụ sở|company|group|office|branch|tòa nhà|building)\s+/i, '');
+    return clean.trim();
   }
 
   reverseGeocode(lat: number, lon: number) {
@@ -397,12 +474,37 @@ export class MeetingEdit implements OnInit {
   }
 
   searchAddress(query?: string) {
-    const searchVal = query || this.mapSearchQuery;
-    if (!searchVal || searchVal.trim().length < 3) return;
+    const originalQuery = query || this.mapSearchQuery;
+    if (!originalQuery || originalQuery.trim().length < 3) return;
     
+    let viewboxParam = '';
+    if (this.map) {
+      const center = this.map.getCenter();
+      const lat = center.lat;
+      const lon = center.lng;
+      viewboxParam = `&viewbox=${lon - 0.25},${lat - 0.25},${lon + 0.25},${lat + 0.25}`;
+    }
+
     this.isMapSearching = true;
-    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchVal)}&limit=1`)
-      .then(res => res.json())
+
+    const performSearch = (searchVal: string): Promise<any> => {
+      return fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchVal)}&limit=1&countrycodes=vn${viewboxParam}`)
+        .then(res => res.json());
+    };
+
+    const cleaned = this.cleanSearchQuery(originalQuery);
+
+    performSearch(cleaned)
+      .then(data => {
+        if (data && data.length > 0) {
+          return data;
+        }
+        const words = cleaned.split(/\s+/);
+        if (words.length > 1) {
+          return performSearch(words[0]);
+        }
+        return [];
+      })
       .then(data => {
         if (data && data.length > 0) {
           const lat = parseFloat(data[0].lat);
@@ -410,7 +512,7 @@ export class MeetingEdit implements OnInit {
           if (this.map && this.marker) {
             this.map.setView([lat, lon], 16);
             this.marker.setLatLng([lat, lon]);
-            this.selectedAddress = data[0].display_name;
+            this.selectedAddress = this.mergeAddressWithQuery(originalQuery, data[0].display_name);
           }
         }
         this.isMapSearching = false;
@@ -450,17 +552,46 @@ export class MeetingEdit implements OnInit {
   }
 
   fetchSuggestions() {
-    const query = this.mapSearchQuery;
-    if (!query || query.trim().length < 3) {
+    const originalQuery = this.mapSearchQuery;
+    if (!originalQuery || originalQuery.trim().length < 3) {
       this.mapSuggestions = [];
       this.showSuggestions = false;
       return;
     }
 
-    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`)
-      .then(res => res.json())
+    let viewboxParam = '';
+    if (this.map) {
+      const center = this.map.getCenter();
+      const lat = center.lat;
+      const lon = center.lng;
+      viewboxParam = `&viewbox=${lon - 0.25},${lat - 0.25},${lon + 0.25},${lat + 0.25}`;
+    }
+
+    const performSuggest = (searchVal: string): Promise<any> => {
+      return fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchVal)}&limit=5&countrycodes=vn${viewboxParam}`)
+        .then(res => res.json());
+    };
+
+    const cleaned = this.cleanSearchQuery(originalQuery);
+
+    performSuggest(cleaned)
       .then(data => {
-        this.mapSuggestions = data || [];
+        if (data && data.length > 0) {
+          return data;
+        }
+        const words = cleaned.split(/\s+/);
+        if (words.length > 1) {
+          return performSuggest(words[0]);
+        }
+        return [];
+      })
+      .then(data => {
+        this.mapSuggestions = (data || []).map((item: any) => {
+          return {
+            ...item,
+            display_name: this.mergeAddressWithQuery(originalQuery, item.display_name)
+          };
+        });
         this.showSuggestions = this.mapSuggestions.length > 0;
       })
       .catch(() => {

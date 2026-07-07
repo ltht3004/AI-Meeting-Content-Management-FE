@@ -26,8 +26,129 @@
 .create-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 10px 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Header Right Layout */
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  width: 180px;
+}
+
+/* Status Filter Dropdown */
+.status-dropdown-container {
+  position: relative;
+  width: 100%;
+}
+
+.filter-dropdown-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.filter-dropdown-btn:hover {
+  background-color: var(--bg-surface-hover);
+  border-color: var(--border-color-hover);
+  transform: translateY(-1px);
+}
+
+.filter-dropdown-btn .filter-icon {
+  font-size: 18px;
+  color: var(--primary);
+}
+
+.filter-dropdown-btn .arrow-icon {
+  font-size: 18px;
+  color: var(--text-muted);
+  transition: transform var(--transition-speed) ease;
+}
+
+.filter-dropdown-btn .arrow-icon.open {
+  transform: rotate(180deg);
+}
+
+/* Dropdown Menu */
+.status-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+
+.dropdown-item:hover {
+  background-color: var(--bg-surface-hover);
+}
+
+.dropdown-item.active {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.dropdown-item .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dropdown-item .status-dot.scheduled {
+  background-color: #3b82f6;
+}
+
+.dropdown-item .status-dot.processing {
+  background-color: #a855f7;
+  animation: pulse-dot 1.5s infinite;
+}
+
+.dropdown-item .status-dot.completed {
+  background-color: #22c55e;
 }
 
 /* Filter Bar */
