@@ -3,7 +3,11 @@ import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SearchService } from '../../../../shared/services/search.service';
+import { ToastService } from '../../../../shared/services/toast.service';
 import { ConfirmDialog } from '../../../../shared/components/confirm-dialog/confirm-dialog';
+import { PaginationComponent } from '../../../../shared/components/pagination/pagination';
+import { ButtonComponent } from '../../../../shared/components/button/button';
+import { DropdownComponent } from '../../../../shared/components/dropdown/dropdown';
 
 export interface Meeting {
   id: string;
@@ -20,7 +24,7 @@ export interface Meeting {
 @Component({
   selector: 'app-meeting-list',
   standalone: true,
-  imports: [RouterLink, CommonModule, FormsModule, ConfirmDialog],
+  imports: [RouterLink, CommonModule, FormsModule, ConfirmDialog, PaginationComponent, ButtonComponent, DropdownComponent],
   templateUrl: './meeting-list.html',
   styleUrl: './meeting-list.css'
 })
@@ -142,7 +146,6 @@ export class MeetingList implements OnInit {
   currentPage = 1;
   pageSize = 9;
   selectedStatus: 'all' | 'scheduled' | 'processing' | 'completed' = 'all';
-  isDropdownOpen = false;
 
   get totalPages(): number {
     return Math.ceil(this.filteredMeetings.length / this.pageSize);
@@ -153,30 +156,9 @@ export class MeetingList implements OnInit {
     return this.filteredMeetings.slice(startIndex, startIndex + this.pageSize);
   }
 
-  get pages(): number[] {
-    const total = this.totalPages;
-    const array: number[] = [];
-    for (let i = 1; i <= total; i++) {
-      array.push(i);
-    }
-    return array;
-  }
-
   goToPage(page: number) {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
-    }
-  }
-
-  prevPage() {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-    }
-  }
-
-  nextPage() {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
     }
   }
 
@@ -193,6 +175,7 @@ export class MeetingList implements OnInit {
   currentUserId = '1'; // Mock logged-in user ID (Alex Rivera)
   isAdmin = false;      // Mock admin privilege toggler
   private searchService = inject(SearchService);
+  private toastService = inject(ToastService);
 
   constructor() {
     effect(() => {
@@ -230,14 +213,8 @@ export class MeetingList implements OnInit {
     this.filterMeetings(this.searchService.searchQuery());
   }
 
-  toggleDropdown(event: Event) {
-    event.stopPropagation();
-    this.isDropdownOpen = !this.isDropdownOpen;
-  }
-
   selectStatus(status: 'all' | 'scheduled' | 'processing' | 'completed') {
     this.setStatusFilter(status);
-    this.isDropdownOpen = false;
   }
 
   getStatusLabel(status: string): string {
@@ -247,11 +224,6 @@ export class MeetingList implements OnInit {
       case 'completed': return 'Completed';
       default: return 'All';
     }
-  }
-
-  @HostListener('document:click')
-  closeDropdown() {
-    this.isDropdownOpen = false;
   }
 
   deleteMeeting(id: string) {
@@ -267,6 +239,7 @@ export class MeetingList implements OnInit {
     if (toDelete) {
       this.meetings = this.meetings.filter(m => m.id !== toDelete.id);
       this.filterMeetings(this.searchService.searchQuery());
+      this.toastService.success('Meeting Deleted', `Meeting "${toDelete.title}" has been deleted successfully.`);
     }
     this.showDeleteConfirm = false;
     this.meetingToDelete = null;

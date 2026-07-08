@@ -2,6 +2,10 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ButtonComponent } from '../../../../shared/components/button/button';
+import { DropdownComponent } from '../../../../shared/components/dropdown/dropdown';
+import { ToastService } from '../../../../shared/services/toast.service';
+import { ConfirmDialog } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 
 interface TranscriptSegment {
   time: string;
@@ -38,7 +42,7 @@ interface MeetingDetailData {
 @Component({
   selector: 'app-meeting-detail',
   standalone: true,
-  imports: [RouterLink, CommonModule, FormsModule],
+  imports: [RouterLink, CommonModule, FormsModule, ButtonComponent, DropdownComponent, ConfirmDialog],
   templateUrl: './meeting-detail.html',
   styleUrl: './meeting-detail.css'
 })
@@ -46,17 +50,20 @@ export class MeetingDetail implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private toastService = inject(ToastService);
 
   meetingId!: string;
   meeting!: MeetingDetailData;
   activeTab: 'summary' | 'transcript' = 'summary';
-  showToast = false;
 
   // Selection state for multiple recordings
   selectedRecordingId = '';
   isExporting = false;
   showPreviewModal = false;
   showExportDropdown = false;
+  showDeleteRecConfirm = false;
+  recToDelete = '';
+  recNameToDelete = '';
   exportType: 'pdf' | 'word' = 'pdf';
   today = new Date();
   currentUserId = '1'; // Mock logged-in user ID
@@ -176,26 +183,6 @@ export class MeetingDetail implements OnInit {
     if (this.meeting.recordings && this.meeting.recordings.length > 0) {
       this.selectedRecordingId = this.meeting.recordings[0].id;
     }
-
-    // Listen for success toast query param
-    this.route.queryParams.subscribe(params => {
-      if (params['edited'] === 'true') {
-        this.showToast = true;
-        this.cdr.detectChanges();
-        
-        // Auto hide toast after 3 seconds
-        setTimeout(() => {
-          this.showToast = false;
-          this.cdr.detectChanges();
-          
-          // Clear query parameter without page reload
-          this.router.navigate([], {
-            queryParams: { edited: null },
-            queryParamsHandling: 'merge'
-          });
-        }, 3000);
-      }
-    });
   }
 
   selectRecording(recId: string) {
@@ -205,6 +192,69 @@ export class MeetingDetail implements OnInit {
 
   getSelectedRecording() {
     return this.meeting.recordings.find(r => r.id === this.selectedRecordingId);
+  }
+
+  deleteRecording(recId: string, event: Event) {
+    event.stopPropagation(); // Prevent selecting the item when clicking delete
+    const recording = this.meeting.recordings.find(r => r.id === recId);
+    this.recToDelete = recId;
+    this.recNameToDelete = recording ? recording.file_name : 'Recording';
+    this.showDeleteRecConfirm = true;
+  }
+
+  onConfirmDeleteRec() {
+    const recId = this.recToDelete;
+    if (recId) {
+      const recording = this.meeting.recordings.find(r => r.id === recId);
+      const fileName = recording ? recording.file_name : 'Recording';
+      
+      this.meeting.recordings = this.meeting.recordings.filter(r => r.id !== recId);
+      delete this.meeting.transcripts[recId];
+      
+      if (this.selectedRecordingId === recId) {
+        if (this.meeting.recordings.length > 0) {
+          this.selectedRecordingId = this.meeting.recordings[0].id;
+        } else {
+          this.selectedRecordingId = '';
+        }
+      }
+      
+      // Update meeting status and summary based on remaining recordings
+      if (this.meeting.recordings.length === 0) {
+        this.meeting.status = 'scheduled';
+        this.meeting.summary = undefined;
+      } else {
+        // Intelligently update mock summary based on remaining recordings
+        if (recId === 'rec_1' && this.meetingId === '1') {
+          this.meeting.summary = {
+            content: 'The team synced on Part 2 of the Q3 Product Strategy regarding product schedules, where David highlighted the mid-November marketing campaign. Key agreements include prioritizing core API endpoints for marketing.'
+          };
+        } else if (recId === 'rec_2' && this.meetingId === '1') {
+          this.meeting.summary = {
+            content: 'The team synced on Part 1 of the Q3 Product Strategy. Sarah identified refactoring the database connection pool as critical technical debt (estimated at 2 weeks).'
+          };
+        } else if (recId.startsWith('rec_') && parseInt(recId.substring(4)) > 2) {
+          // If we deleted an added mock recording, revert the summary to its original state
+          if (this.meetingId === '1') {
+            this.meeting.summary = {
+              content: 'The team synced on the Q3 Product Strategy. Part 1 covered technical refactoring where Sarah identified refactoring the database connection pool as critical technical debt (estimated at 2 weeks). Part 2 covered product schedules, where David highlighted the mid-November marketing campaign. Key agreements include prioritizing core API endpoints for marketing by next Friday, while running database refactoring in parallel.'
+            };
+          }
+        }
+      }
+      
+      this.toastService.success('Recording Deleted', `File "${fileName}" has been deleted successfully.`);
+      this.cdr.detectChanges();
+    }
+    this.showDeleteRecConfirm = false;
+    this.recToDelete = '';
+    this.recNameToDelete = '';
+  }
+
+  onCancelDeleteRec() {
+    this.showDeleteRecConfirm = false;
+    this.recToDelete = '';
+    this.recNameToDelete = '';
   }
 
   // Drag & Drop event handlers
@@ -304,9 +354,7 @@ export class MeetingDetail implements OnInit {
     );
   }
 
-  toggleExportDropdown() {
-    this.showExportDropdown = !this.showExportDropdown;
-  }
+
 
   triggerExport(type: 'pdf' | 'word') {
     this.exportType = type;

@@ -1,0 +1,21 @@
+@if (totalPages > 1) {
+  <div class="pagination-container">
+    <button class="page-btn" (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 1">
+      <span class="material-icons-round">chevron_left</span>
+    </button>
+    
+    @for (page of pages; track page) {
+      <button 
+        class="page-btn" 
+        [class.active]="currentPage === page" 
+        (click)="onPageChange(page)"
+      >
+        {{ page }}
+      </button>
+    }
+    
+    <button class="page-btn" (click)="onPageChange(currentPage + 1)" [disabled]="currentPage === totalPages">
+      <span class="material-icons-round">chevron_right</span>
+    </button>
+  </div>
+}

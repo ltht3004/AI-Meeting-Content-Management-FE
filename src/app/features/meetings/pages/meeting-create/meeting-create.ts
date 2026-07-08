@@ -1,12 +1,14 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ButtonComponent } from '../../../../shared/components/button/button';
+import { ToastService } from '../../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-meeting-create',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule, CommonModule, FormsModule],
+  imports: [RouterLink, ReactiveFormsModule, CommonModule, FormsModule, ButtonComponent],
   templateUrl: './meeting-create.html',
   styleUrl: './meeting-create.css'
 })
@@ -14,6 +16,7 @@ export class MeetingCreate implements OnInit {
   meetingForm!: FormGroup;
   isSubmitting = false;
   showUsersDropdown = false;
+  private toastService = inject(ToastService);
 
   // Map Picker State
   showMapModal = false;
@@ -201,8 +204,10 @@ export class MeetingCreate implements OnInit {
     
     // Simulate API request delay
     setTimeout(() => {
+      const title = this.meetingForm.get('title')?.value;
       console.log('Meeting created:', this.meetingForm.value);
       this.isSubmitting = false;
+      this.toastService.success('Meeting Created', `Meeting "${title}" has been created successfully.`);
       this.router.navigate(['/meetings']);
     }, 1000);
   }

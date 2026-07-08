@@ -1,0 +1,118 @@
+.dropdown-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.dropdown-arrow {
+  transition: transform var(--transition-speed) ease;
+}
+
+.dropdown-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+/* Status Filter Dropdown specific trigger button style */
+.filter-dropdown-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background-color: transparent;
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.filter-dropdown-btn:hover {
+  background-color: var(--bg-main);
+}
+
+.filter-dropdown-btn span:not(.material-icons-round) {
+  flex-grow: 0;
+  text-align: left;
+}
+
+.filter-dropdown-btn .dropdown-arrow {
+  font-size: 16px;
+  color: var(--text-muted);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  background: var(--bg-surface-glass, rgba(255, 255, 255, 0.8));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Styles for dropdown items projected inside */
+:host ::ng-deep .dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  text-decoration: none;
+}
+
+:host ::ng-deep .dropdown-item:hover {
+  background-color: var(--bg-surface-hover);
+  color: var(--primary);
+}
+
+:host ::ng-deep .dropdown-item.active {
+  background-color: rgba(0, 82, 204, 0.08);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+:host ::ng-deep .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+:host ::ng-deep .status-dot.all {
+  background-color: var(--text-muted);
+}
+
+:host ::ng-deep .status-dot.scheduled {
+  background-color: #3b82f6;
+}
+
+:host ::ng-deep .status-dot.processing {
+  background-color: #a855f7;
+}
+
+:host ::ng-deep .status-dot.completed {
+  background-color: #22c55e;
+}

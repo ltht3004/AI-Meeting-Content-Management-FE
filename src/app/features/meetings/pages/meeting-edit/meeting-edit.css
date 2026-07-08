@@ -13,25 +13,6 @@
   gap: 8px;
 }
 
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--primary);
-  align-self: flex-start;
-  margin-bottom: 8px;
-  transition: transform var(--transition-speed) ease;
-}
-
-.back-link:hover {
-  transform: translateX(-3px);
-}
-
-.back-link span.material-icons-round {
-  font-size: 18px;
-}
 
 .page-header h2 {
   font-size: 24px;

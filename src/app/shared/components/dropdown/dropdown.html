@@ -1,0 +1,19 @@
+<div class="dropdown-container">
+  <button 
+    (click)="toggle()" 
+    [class]="triggerClass"
+    [disabled]="disabled"
+  >
+    @if (icon) {
+      <span class="material-icons-round" [class]="iconClass">{{ icon }}</span>
+    }
+    <span>{{ triggerText }}</span>
+    <span class="material-icons-round dropdown-arrow" [class.rotated]="isOpen">expand_more</span>
+  </button>
+  
+  @if (isOpen) {
+    <div class="dropdown-menu glass-panel animate-fade-in" (click)="close()">
+      <ng-content></ng-content>
+    </div>
+  }
+</div>
