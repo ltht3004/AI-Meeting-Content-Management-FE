@@ -1,1 +1,19 @@
 <router-outlet></router-outlet>
+
+<!-- Global Toast Notification -->
+@if (toastService.toast().show) {
+  <div class="toast-notification slide-down" [class.danger]="toastService.toast().type === 'danger'" [class.info]="toastService.toast().type === 'info'">
+    <div class="toast-icon-box" [class.danger]="toastService.toast().type === 'danger'" [class.info]="toastService.toast().type === 'info'">
+      <span class="material-icons-round">
+        {{ toastService.toast().type === 'danger' ? 'error' : (toastService.toast().type === 'info' ? 'info' : 'check_circle') }}
+      </span>
+    </div>
+    <div class="toast-content">
+      <h4 class="toast-title">{{ toastService.toast().title }}</h4>
+      <p class="toast-desc">{{ toastService.toast().desc }}</p>
+    </div>
+    <button class="toast-close" (click)="toastService.hide()">
+      <span class="material-icons-round">close</span>
+    </button>
+  </div>
+}

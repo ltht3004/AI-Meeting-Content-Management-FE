@@ -1,26 +1,7 @@
 <div class="detail-container animate-fade-in">
-  <!-- Success Toast -->
-  @if (showToast) {
-    <div class="toast-notification slide-down">
-      <div class="toast-icon-box">
-        <span class="material-icons-round">check_circle</span>
-      </div>
-      <div class="toast-content">
-        <h4 class="toast-title">Changes Saved</h4>
-        <p class="toast-desc">Meeting details have been updated successfully.</p>
-      </div>
-      <button class="toast-close" (click)="showToast = false">
-        <span class="material-icons-round">close</span>
-      </button>
-    </div>
-  }
-
   <!-- Back Button & Page Header -->
   <div class="page-header">
-    <a routerLink="/meetings" class="back-link">
-      <span class="material-icons-round">arrow_back</span>
-      <span>Back to Meetings</span>
-    </a>
+    <app-button type="back" routerLink="/meetings">Back to Meetings</app-button>
     <div class="header-main">
       <div class="header-left-info">
         <div class="title-with-status">
@@ -34,47 +15,28 @@
       </div>
       <div class="header-right-actions">
         <!-- Export Dropdown Wrapper -->
-        <div class="export-dropdown-container">
-          <button 
-            (click)="toggleExportDropdown()" 
-            class="btn btn-secondary export-dropdown-trigger"
-            [disabled]="isExporting"
-          >
-            @if (isExporting) {
-              <span class="material-icons-round spin-icon">sync</span>
-              <span>Exporting...</span>
-            } @else {
-              <span class="material-icons-round">download</span>
-              <span>Export Report</span>
-              <span class="material-icons-round dropdown-arrow">expand_more</span>
-            }
+        <app-dropdown
+          [triggerText]="isExporting ? 'Exporting...' : 'Export Report'"
+          [icon]="isExporting ? 'sync' : 'download'"
+          [iconClass]="isExporting ? 'spin-icon' : ''"
+          [disabled]="isExporting"
+          triggerClass="btn btn-secondary export-dropdown-trigger"
+        >
+          <button (click)="triggerExport('pdf')" class="dropdown-item">
+            <span class="material-icons-round text-danger">picture_as_pdf</span>
+            <span>PDF Document (.pdf)</span>
           </button>
-          
-          @if (showExportDropdown) {
-            <div class="export-dropdown-menu glass-panel animate-fade-in">
-              <button (click)="triggerExport('pdf')" class="dropdown-item">
-                <span class="material-icons-round text-danger">picture_as_pdf</span>
-                <span>PDF Document (.pdf)</span>
-              </button>
-              <button (click)="triggerExport('word')" class="dropdown-item">
-                <span class="material-icons-round text-primary">description</span>
-                <span>Word Document (.docx)</span>
-              </button>
-            </div>
-          }
-        </div>
+          <button (click)="triggerExport('word')" class="dropdown-item">
+            <span class="material-icons-round text-primary">description</span>
+            <span>Word Document (.docx)</span>
+          </button>
+        </app-dropdown>
 
         @if (isAdmin || currentUserId === meeting.creator_id) {
           @if (meeting.status === 'scheduled') {
-            <a routerLink="/meetings/edit/{{ meeting.id }}" class="btn btn-secondary edit-meeting-btn">
-              <span class="material-icons-round">edit</span>
-              <span>Edit Meeting</span>
-            </a>
+            <app-button type="secondary" icon="edit" [routerLink]="['/meetings/edit', meeting.id]">Edit Meeting</app-button>
           } @else {
-            <button class="btn btn-secondary edit-meeting-btn disabled" [title]="meeting.status === 'processing' ? 'Cannot edit while processing' : 'Cannot edit completed meetings'">
-              <span class="material-icons-round">edit</span>
-              <span>Edit Meeting</span>
-            </button>
+            <app-button type="secondary" icon="edit" [disabled]="true" [title]="meeting.status === 'processing' ? 'Cannot edit while processing' : 'Cannot edit completed meetings'">Edit Meeting</app-button>
           }
         }
       </div>
@@ -220,6 +182,14 @@
                     <span class="rec-meta">{{ rec.size }} • {{ rec.created_at | date:'shortTime' }}</span>
                   </div>
                 </div>
+                <!-- Delete recording button -->
+                <button 
+                  class="btn-delete-rec" 
+                  title="Delete this recording" 
+                  (click)="deleteRecording(rec.id, $event)"
+                >
+                  <span class="material-icons-round">delete</span>
+                </button>
               </div>
             }
           </div>
@@ -431,3 +401,13 @@
     </div>
   </div>
 }
+
+<app-confirm-dialog
+  [isOpen]="showDeleteRecConfirm"
+  [title]="'Delete Recording?'"
+  [message]="'Are you sure you want to permanently delete \'' + recNameToDelete + '\'?'"
+  [confirmText]="'Delete Permanently'"
+  [cancelText]="'Cancel'"
+  (confirm)="onConfirmDeleteRec()"
+  (cancel)="onCancelDeleteRec()"
+></app-confirm-dialog>

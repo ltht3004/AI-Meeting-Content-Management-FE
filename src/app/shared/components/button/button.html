@@ -1,0 +1,38 @@
+@if (routerLink) {
+  <a 
+    [routerLink]="routerLink"
+    [class]="getButtonClass()"
+    [class.disabled]="disabled"
+    [title]="title || ''"
+  >
+    <ng-container *ngTemplateOutlet="buttonContent"></ng-container>
+  </a>
+} @else {
+  <button 
+    [type]="nativeType"
+    [class]="getButtonClass()"
+    [disabled]="disabled"
+    [title]="title || ''"
+    (click)="onClick($event)"
+  >
+    <ng-container *ngTemplateOutlet="buttonContent"></ng-container>
+  </button>
+}
+
+<ng-template #buttonContent>
+  @if (type === 'back') {
+    <span class="material-icons-round">arrow_back</span>
+  }
+  @if (type === 'delete') {
+    <span class="material-icons-round">delete_outline</span>
+  }
+  @if (icon && type !== 'back' && type !== 'view-detail' && type !== 'delete') {
+    <span class="material-icons-round">{{ icon }}</span>
+  }
+  
+  <ng-content></ng-content>
+  
+  @if (type === 'view-detail') {
+    <span class="material-icons-round">arrow_forward</span>
+  }
+</ng-template>

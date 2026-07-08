@@ -276,6 +276,14 @@ a {
   max-width: 90vw;
 }
 
+.toast-notification.danger {
+  border-left-color: var(--danger);
+}
+
+.toast-notification.info {
+  border-left-color: var(--info);
+}
+
 .slide-down {
   animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -301,6 +309,16 @@ a {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.toast-icon-box.danger {
+  background-color: var(--danger-light);
+  color: var(--danger);
+}
+
+.toast-icon-box.info {
+  background-color: var(--info-light);
+  color: var(--info);
 }
 
 .toast-content {
@@ -336,3 +354,5 @@ a {
   background-color: var(--bg-body, rgba(0,0,0,0.05));
   color: var(--text-main);
 }
+
+

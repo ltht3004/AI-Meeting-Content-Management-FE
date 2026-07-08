@@ -11,24 +11,6 @@
   gap: 12px;
 }
 
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--primary);
-  align-self: flex-start;
-  transition: transform var(--transition-speed) ease;
-}
-
-.back-link:hover {
-  transform: translateX(-3px);
-}
-
-.back-link span.material-icons-round {
-  font-size: 18px;
-}
 
 .header-main {
   display: flex;
@@ -1027,69 +1009,7 @@
   color: #94a3b8;
 }
 
-/* Export Dropdown Container */
-.export-dropdown-container {
-  position: relative;
-  display: inline-block;
-}
 
-.export-dropdown-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.dropdown-arrow {
-  font-size: 18px;
-  color: var(--text-muted);
-  transition: transform var(--transition-speed) ease;
-}
-
-.export-dropdown-container:hover .dropdown-arrow {
-  transform: translateY(1px);
-}
-
-.export-dropdown-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  width: 220px;
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  box-shadow: var(--shadow-md);
-  padding: 6px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  z-index: 100;
-}
-
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 14px;
-  border: none;
-  background: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-main);
-  text-align: left;
-  transition: all var(--transition-speed) ease;
-}
-
-.dropdown-item:hover {
-  background-color: var(--bg-surface-hover);
-  color: var(--primary);
-}
-
-.dropdown-item span.material-icons-round {
-  font-size: 18px;
-}
 
 /* Word (Docx) Document Specific Preview Styling */
 .a4-page.word-border {
@@ -1174,4 +1094,36 @@
   0% { transform: scale(0.8); opacity: 0.5; }
   50% { transform: scale(1.2); opacity: 1; }
   100% { transform: scale(0.8); opacity: 0.5; }
+}
+
+.btn-delete-rec {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all var(--transition-speed) ease;
+  opacity: 0;
+  flex-shrink: 0;
+}
+
+.recording-list-item:hover .btn-delete-rec {
+  opacity: 1;
+}
+
+.btn-delete-rec:hover {
+  background-color: var(--danger-light);
+  color: var(--danger);
+}
+
+.recording-list-item.active .btn-delete-rec:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+}
+
+.btn-delete-rec span.material-icons-round {
+  font-size: 18px;
 }

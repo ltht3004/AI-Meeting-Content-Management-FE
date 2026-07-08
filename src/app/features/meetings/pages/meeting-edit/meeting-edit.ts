@@ -2,6 +2,8 @@ import { Component, OnInit, inject, HostListener } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ButtonComponent } from '../../../../shared/components/button/button';
+import { ToastService } from '../../../../shared/services/toast.service';
 
 interface MeetingData {
   id: string;
@@ -17,7 +19,7 @@ interface MeetingData {
 @Component({
   selector: 'app-meeting-edit',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule, CommonModule, FormsModule],
+  imports: [RouterLink, ReactiveFormsModule, CommonModule, FormsModule, ButtonComponent],
   templateUrl: './meeting-edit.html',
   styleUrl: './meeting-edit.css'
 })
@@ -25,6 +27,7 @@ export class MeetingEdit implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private toastService = inject(ToastService);
 
   meetingId!: string;
   meetingForm!: FormGroup;
@@ -289,8 +292,8 @@ export class MeetingEdit implements OnInit {
     setTimeout(() => {
       console.log('Meeting updated:', this.meetingForm.value);
       this.isSubmitting = false;
-      // Redirect back to details page immediately with success query parameter
-      this.router.navigate(['/meetings', this.meetingId], { queryParams: { edited: 'true' } });
+      this.toastService.success('Changes Saved', 'Meeting details have been updated successfully.');
+      this.router.navigate(['/meetings', this.meetingId]);
     }, 800);
   }
 

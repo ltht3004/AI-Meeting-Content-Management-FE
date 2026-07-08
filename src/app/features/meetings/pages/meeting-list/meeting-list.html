@@ -13,33 +13,27 @@
       </a>
 
       <!-- Status Filter Dropdown -->
-      <div class="status-dropdown-container">
-        <button class="filter-dropdown-btn" (click)="toggleDropdown($event)">
-          <span class="material-icons-round filter-icon">filter_alt</span>
-          <span>Status: {{ getStatusLabel(selectedStatus) }}</span>
-          <span class="material-icons-round arrow-icon" [class.open]="isDropdownOpen">keyboard_arrow_down</span>
+      <app-dropdown
+        [triggerText]="selectedStatus === 'all' ? 'All Status' : getStatusLabel(selectedStatus)"
+        triggerClass="filter-dropdown-btn"
+        class="status-filter-dropdown"
+      >
+        <button class="dropdown-item" [class.active]="selectedStatus === 'all'" (click)="selectStatus('all')">
+          All Meetings
         </button>
-        
-        @if (isDropdownOpen) {
-          <div class="status-dropdown-menu glass-panel animate-fade-in">
-            <button class="dropdown-item" [class.active]="selectedStatus === 'all'" (click)="selectStatus('all')">
-              All Meetings
-            </button>
-            <button class="dropdown-item" [class.active]="selectedStatus === 'scheduled'" (click)="selectStatus('scheduled')">
-              <span class="status-dot scheduled"></span>
-              Scheduled
-            </button>
-            <button class="dropdown-item" [class.active]="selectedStatus === 'processing'" (click)="selectStatus('processing')">
-              <span class="status-dot processing"></span>
-              Processing
-            </button>
-            <button class="dropdown-item" [class.active]="selectedStatus === 'completed'" (click)="selectStatus('completed')">
-              <span class="status-dot completed"></span>
-              Completed
-            </button>
-          </div>
-        }
-      </div>
+        <button class="dropdown-item" [class.active]="selectedStatus === 'scheduled'" (click)="selectStatus('scheduled')">
+          <span class="status-dot scheduled"></span>
+          Scheduled
+        </button>
+        <button class="dropdown-item" [class.active]="selectedStatus === 'processing'" (click)="selectStatus('processing')">
+          <span class="status-dot processing"></span>
+          Processing
+        </button>
+        <button class="dropdown-item" [class.active]="selectedStatus === 'completed'" (click)="selectStatus('completed')">
+          <span class="status-dot completed"></span>
+          Completed
+        </button>
+      </app-dropdown>
     </div>
   </div>
 
@@ -102,15 +96,12 @@
 
             <!-- Footer actions -->
             <div class="footer-actions">
-              <a [routerLink]="['/meetings', meeting.id]" class="btn-action-view">
+              <app-button type="view-detail" [routerLink]="['/meetings', meeting.id]">
                 <span>View Details</span>
-                <span class="material-icons-round">arrow_forward</span>
-              </a>
+              </app-button>
               @if (isAdmin || currentUserId === meeting.creator_id) {
                 <div class="divider"></div>
-                <button (click)="deleteMeeting(meeting.id)" class="btn-action-delete" title="Delete Meeting" [disabled]="meeting.status === 'processing'">
-                  <span class="material-icons-round">delete_outline</span>
-                </button>
+                <app-button type="delete" (btnClick)="deleteMeeting(meeting.id)" title="Delete Meeting" [disabled]="meeting.status === 'processing'"></app-button>
               }
             </div>
           </div>
@@ -119,27 +110,11 @@
     </div>
 
     <!-- Pagination controls -->
-    @if (totalPages > 1) {
-      <div class="pagination-container">
-        <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">
-          <span class="material-icons-round">chevron_left</span>
-        </button>
-        
-        @for (page of pages; track page) {
-          <button 
-            class="page-btn" 
-            [class.active]="currentPage === page" 
-            (click)="goToPage(page)"
-          >
-            {{ page }}
-          </button>
-        }
-        
-        <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
-          <span class="material-icons-round">chevron_right</span>
-        </button>
-      </div>
-    }
+    <app-pagination
+      [currentPage]="currentPage"
+      [totalPages]="totalPages"
+      (pageChange)="goToPage($event)"
+    ></app-pagination>
   } @else {
     <!-- Empty state -->
     <div class="empty-state glass-panel">

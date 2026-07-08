@@ -1,0 +1,162 @@
+/* Core button styling */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  outline: none;
+  text-decoration: none;
+  color: inherit;
+}
+
+.btn:disabled, .btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: var(--text-inverse);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 82, 204, 0.2);
+}
+
+.btn-secondary {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--bg-surface-hover);
+  border-color: var(--border-color-hover);
+}
+
+.btn-danger {
+  background-color: var(--danger);
+  color: var(--text-inverse);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #dc2626; /* Darker red */
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+/* Back Link Style */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+  align-self: flex-start;
+  transition: transform var(--transition-speed) ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.back-link:hover:not(.disabled) {
+  transform: translateX(-3px);
+}
+
+.back-link span.material-icons-round {
+  font-size: 18px;
+}
+
+.back-link.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Action View Style */
+.btn-action-view {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+  transition: transform var(--transition-speed) ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-action-view span {
+  font-size: 13px;
+}
+
+.btn-action-view span.material-icons-round {
+  font-size: 18px;
+}
+
+.btn-action-view:hover:not(.disabled) {
+  transform: translateX(3px);
+}
+
+.btn-action-view.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Action Delete Style */
+.btn-action-delete {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-speed) ease;
+}
+
+.btn-action-delete span {
+  font-size: 18px;
+}
+
+.btn-action-delete:hover:not(:disabled) {
+  background-color: var(--danger-light);
+  color: var(--danger);
+}
+
+.btn-action-delete:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  background-color: transparent !important;
+  color: var(--text-muted) !important;
+}
+
+/* Link Style */
+.btn-link {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color var(--transition-speed) ease;
+}
+
+.btn-link:hover:not(:disabled) {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
