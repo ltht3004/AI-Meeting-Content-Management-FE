@@ -37,20 +37,6 @@ export class AuthService {
         this.setSession(res);
       }),
       catchError(err => {
-        // Fallback mock check to keep FE runnable when BE is not running or empty
-        if (credentials.email === 'alex.rivera@kinetic-sync.ai' || credentials.email === 'admin@gmail.com') {
-          const mockRes = {
-            access_token: 'mock-jwt-token-12345',
-            user: {
-              id: 'alex-rivera-uuid-1111',
-              full_name: 'Alex Rivera',
-              email: credentials.email,
-              role: credentials.email.includes('admin') || credentials.email === 'alex.rivera@kinetic-sync.ai' ? 'admin' : 'user'
-            }
-          };
-          this.setSession(mockRes);
-          return of(mockRes);
-        }
         throw err;
       })
     );
@@ -62,17 +48,7 @@ export class AuthService {
         this.setSession(res);
       }),
       catchError(err => {
-        const mockRes = {
-          access_token: 'mock-jwt-token-67890',
-          user: {
-            id: 'mock-user-uuid',
-            full_name: userData.full_name,
-            email: userData.email,
-            role: 'user'
-          }
-        };
-        this.setSession(mockRes);
-        return of(mockRes);
+        throw err;
       })
     );
   }
@@ -88,18 +64,7 @@ export class AuthService {
         localStorage.setItem('user', JSON.stringify(user));
       }),
       catchError(err => {
-        if (!this.currentUser()) {
-          const mockUser = {
-            id: 'alex-rivera-uuid-1111',
-            full_name: 'Alex Rivera',
-            email: 'alex.rivera@kinetic-sync.ai',
-            phone: '+1 (555) 123-4567',
-            role: 'admin'
-          };
-          this.currentUser.set(mockUser);
-          localStorage.setItem('user', JSON.stringify(mockUser));
-        }
-        return of(this.currentUser());
+        throw err;
       })
     );
   }
@@ -111,10 +76,7 @@ export class AuthService {
         localStorage.setItem('user', JSON.stringify(user));
       }),
       catchError(err => {
-        const updatedUser = { ...this.currentUser(), ...profileData };
-        this.currentUser.set(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        return of(updatedUser);
+        throw err;
       })
     );
   }
