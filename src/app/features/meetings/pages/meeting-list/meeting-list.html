@@ -97,7 +97,9 @@
             <!-- Footer actions -->
             <div class="footer-actions">
               <app-button type="view-detail" [routerLink]="['/meetings', meeting.id]">
-                <span>View Details</span>
+                <span class="view-details-link">
+                      View Details 
+                </span>
               </app-button>
               @if (isAdmin || currentUserId === meeting.creator_id) {
                 <div class="divider"></div>
