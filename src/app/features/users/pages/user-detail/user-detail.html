@@ -6,7 +6,6 @@
     </a>
     
     <div class="nav-actions">
-      <button class="btn btn-outline">Reset Password</button>
       @if (user) {
         <a [routerLink]="['/users', user.id, 'edit']" class="btn btn-primary">
           <span class="material-icons-round icon-left">edit</span> Edit User
@@ -32,7 +31,6 @@
         <div class="profile-header">
           <div class="avatar-wrapper">
             <img [src]="user.avatarUrl" alt="Avatar" class="avatar-lg">
-            <span class="status-indicator" [class.active]="user.status === 'Active'"></span>
           </div>
           <div class="profile-meta">
             <div class="name-row">

@@ -64,6 +64,11 @@
   gap: 4px;
 }
 
+.dropdown-menu.align-left {
+  right: auto;
+  left: 0;
+}
+
 /* Styles for dropdown items projected inside */
 :host ::ng-deep .dropdown-item {
   width: 100%;

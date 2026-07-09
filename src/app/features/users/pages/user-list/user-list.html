@@ -13,24 +13,36 @@
     <div class="toolbar">
       <div class="filters">
         <div class="select-wrapper-inline">
-          <select class="btn btn-outline filter-btn" [(ngModel)]="filterRole">
-            <option value="all">All Roles</option>
-            <option value="admin">Admin</option>
-            <option value="user">User</option>
-          </select>
+          <app-dropdown
+            [triggerText]="getRoleLabel(filterRole)"
+            triggerClass="btn btn-outline filter-btn"
+            align="left"
+          >
+            <button class="dropdown-item" [class.active]="filterRole === 'all'" (click)="setRoleFilter('all')">All Roles</button>
+            <button class="dropdown-item" [class.active]="filterRole === 'admin'" (click)="setRoleFilter('admin')">Admin</button>
+            <button class="dropdown-item" [class.active]="filterRole === 'user'" (click)="setRoleFilter('user')">User</button>
+          </app-dropdown>
         </div>
         <div class="select-wrapper-inline">
-          <select class="btn btn-outline filter-btn" [(ngModel)]="filterStatus">
-            <option value="all">All Status</option>
-            <option value="Active">Active</option>
-            <option value="Unactive">Unactive</option>
-          </select>
+          <app-dropdown
+            [triggerText]="getStatusLabel(filterStatus)"
+            triggerClass="btn btn-outline filter-btn"
+            align="left"
+          >
+            <button class="dropdown-item" [class.active]="filterStatus === 'all'" (click)="setStatusFilter('all')">All Status</button>
+            <button class="dropdown-item" [class.active]="filterStatus === 'Active'" (click)="setStatusFilter('Active')">Active</button>
+            <button class="dropdown-item" [class.active]="filterStatus === 'Unactive'" (click)="setStatusFilter('Unactive')">Unactive</button>
+          </app-dropdown>
         </div>
         <div class="select-wrapper-inline">
-          <select class="btn btn-outline filter-btn" [(ngModel)]="sortOrder">
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-          </select>
+          <app-dropdown
+            [triggerText]="getSortLabel(sortOrder)"
+            triggerClass="btn btn-outline filter-btn"
+            align="left"
+          >
+            <button class="dropdown-item" [class.active]="sortOrder === 'newest'" (click)="setSortOrder('newest')">Newest</button>
+            <button class="dropdown-item" [class.active]="sortOrder === 'oldest'" (click)="setSortOrder('oldest')">Oldest</button>
+          </app-dropdown>
         </div>
 
       </div>
@@ -64,7 +76,7 @@
               </td>
             </tr>
           } @else {
-            @for (user of filteredUsers; track user.id) {
+            @for (user of paginatedUsers; track user.id) {
               <tr class="table-row">
                 <td>
                   <div class="user-cell">
@@ -92,6 +104,9 @@
                   <button class="btn-icon" [routerLink]="['/users', user.id, 'edit']" title="Edit User">
                     <span class="material-icons-round">edit</span>
                   </button>
+                  <button class="btn-icon text-danger" (click)="deleteUser(user)" title="Delete User">
+                    <span class="material-icons-round">delete_outline</span>
+                  </button>
                 </td>
               </tr>
             }
@@ -103,17 +118,14 @@
     <!-- Pagination -->
     <div class="pagination-footer">
       <div class="pagination-info">
-        Showing <strong>1-{{ filteredUsers.length }}</strong> of <strong>24</strong> users
+        Showing <strong>{{ (currentPage - 1) * pageSize + 1 }}-{{ getEndIndex() }}</strong> of <strong>{{ filteredUsers.length }}</strong> users
       </div>
-      <div class="pagination-controls">
-        <button class="page-btn"><span class="material-icons-round">chevron_left</span></button>
-        <button class="page-btn active">1</button>
-        <button class="page-btn">2</button>
-        <button class="page-btn">3</button>
-        <span class="page-ellipsis">...</span>
-        <button class="page-btn">6</button>
-        <button class="page-btn"><span class="material-icons-round">chevron_right</span></button>
-      </div>
+      <app-pagination
+        class="table-pagination"
+        [currentPage]="currentPage"
+        [totalPages]="totalPages"
+        (pageChange)="goToPage($event)"
+      ></app-pagination>
     </div>
   </div>
 
@@ -145,3 +157,13 @@
 
   </div>
 </div>
+
+<app-confirm-dialog
+  [isOpen]="showDeleteConfirm"
+  [title]="'Delete User?'"
+  [message]="'Are you sure you want to permanently delete \'' + (userToDelete?.full_name || '') + '\'? This action cannot be undone.'"
+  [confirmText]="'Delete Permanently'"
+  [cancelText]="'Cancel'"
+  (confirm)="onConfirmDelete()"
+  (cancel)="onCancelDelete()"
+></app-confirm-dialog>

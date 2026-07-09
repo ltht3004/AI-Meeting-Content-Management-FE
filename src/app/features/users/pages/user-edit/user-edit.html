@@ -54,6 +54,13 @@
             }
           </div>
           <div class="form-group">
+            <label class="form-label">Phone Number <span class="required" style="color: red;">*</span></label>
+            <input type="tel" class="form-control" [(ngModel)]="editPhone" required #editPhoneField="ngModel" [class.input-error]="editPhoneField.invalid && (editPhoneField.touched || editPhoneField.dirty)" placeholder="Phone Number">
+            @if (editPhoneField.invalid && (editPhoneField.touched || editPhoneField.dirty)) {
+              <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">Phone Number is required.</span>
+            }
+          </div>
+          <div class="form-group">
             <label class="form-label">Role</label>
             <div class="select-wrapper">
               <select class="form-control form-select" [(ngModel)]="editRole">
@@ -83,7 +90,7 @@
         <!-- Form Actions -->
         <div class="form-actions">
           <button class="btn btn-text" [routerLink]="['/users', user.id]">Cancel</button>
-          <button class="btn btn-primary" (click)="saveChanges()" [disabled]="isSaving || !editFullName || !editEmail">
+          <button class="btn btn-primary" (click)="saveChanges()" [disabled]="isSaving || !editFullName || !editEmail || !editPhone">
             @if (isSaving) {
               <span class="spinner-white"></span>
             } @else {
@@ -104,22 +111,16 @@
         </div>
 
       </div>
+
+<app-confirm-dialog
+  [isOpen]="showDeleteConfirm"
+  [title]="'Delete User?'"
+  [message]="'Are you sure you want to permanently delete this user? This action cannot be undone.'"
+  [confirmText]="'Delete Permanently'"
+  [cancelText]="'Cancel'"
+  (confirm)="onConfirmDelete()"
+  (cancel)="onCancelDelete()"
+></app-confirm-dialog>
     </div>
   }
 </div>
-
-<!-- Success Toast -->
-@if (showToast) {
-  <div class="toast-notification slide-down">
-    <div class="toast-icon-box">
-      <span class="material-icons-round">check_circle</span>
-    </div>
-    <div class="toast-content">
-      <h4 class="toast-title">Changes Saved</h4>
-      <p class="toast-desc">User profile has been updated successfully.</p>
-    </div>
-    <button class="toast-close" (click)="showToast = false">
-      <span class="material-icons-round">close</span>
-    </button>
-  </div>
-}

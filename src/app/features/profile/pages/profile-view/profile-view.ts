@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ToastService } from '../../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-profile-view',
@@ -14,11 +15,12 @@ import { AuthService } from '../../../../core/services/auth.service';
 export class ProfileView implements OnInit {
   authService = inject(AuthService);
   private router = inject(Router);
+  private toastService = inject(ToastService);
 
   isEditing = false;
   editName = '';
   editEmail = '';
-  successMessage = '';
+  editPhone = '';
   errorMessage = '';
   isLoading = false;
 
@@ -49,7 +51,7 @@ export class ProfileView implements OnInit {
     this.isEditing = true;
     this.editName = this.user?.full_name || '';
     this.editEmail = this.user?.email || '';
-    this.successMessage = '';
+    this.editPhone = this.user?.phone || '';
     this.errorMessage = '';
   }
 
@@ -59,7 +61,7 @@ export class ProfileView implements OnInit {
   }
 
   saveProfile() {
-    if (!this.editName || !this.editEmail) {
+    if (!this.editName || !this.editEmail || !this.editPhone) {
       this.errorMessage = 'Please fill in all required fields.';
       return;
     }
@@ -69,13 +71,13 @@ export class ProfileView implements OnInit {
 
     this.authService.updateProfile({
       full_name: this.editName,
-      email: this.editEmail
+      email: this.editEmail,
+      phone: this.editPhone
     }).subscribe({
       next: () => {
         this.isLoading = false;
         this.isEditing = false;
-        this.successMessage = 'Profile updated successfully!';
-        setTimeout(() => this.successMessage = '', 3000);
+        this.toastService.success('Changes Saved', 'Profile updated successfully!');
       },
       error: (err) => {
         this.isLoading = false;

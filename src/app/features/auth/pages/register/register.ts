@@ -16,6 +16,7 @@ export class Register {
 
   fullName = '';
   email = '';
+  phone = '';
   password = '';
   confirmPassword = '';
   showPassword = false;
@@ -32,7 +33,7 @@ export class Register {
   }
 
   onSubmit() {
-    if (!this.fullName || !this.email || !this.password || !this.confirmPassword) {
+    if (!this.fullName || !this.email || !this.phone || !this.password || !this.confirmPassword) {
       this.errorMessage = 'Please fill in all fields.';
       return;
     }
@@ -53,6 +54,7 @@ export class Register {
     this.authService.register({
       full_name: this.fullName,
       email: this.email,
+      phone: this.phone,
       password: this.password
     }).subscribe({
       next: () => {

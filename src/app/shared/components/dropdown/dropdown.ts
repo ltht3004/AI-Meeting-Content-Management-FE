@@ -14,6 +14,7 @@ export class DropdownComponent {
   @Input() iconClass = '';
   @Input() disabled = false;
   @Input() triggerClass = 'btn btn-secondary';
+  @Input() align: 'left' | 'right' = 'right';
   
   isOpen = false;
 

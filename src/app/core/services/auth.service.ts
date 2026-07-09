@@ -93,6 +93,7 @@ export class AuthService {
             id: 'alex-rivera-uuid-1111',
             full_name: 'Alex Rivera',
             email: 'alex.rivera@kinetic-sync.ai',
+            phone: '+1 (555) 123-4567',
             role: 'admin'
           };
           this.currentUser.set(mockUser);
@@ -103,7 +104,7 @@ export class AuthService {
     );
   }
 
-  updateProfile(profileData: { full_name: string; email: string }): Observable<any> {
+  updateProfile(profileData: { full_name: string; email: string; phone?: string }): Observable<any> {
     return this.http.put<any>(`${this.apiService.baseUrl}/profile/me`, profileData).pipe(
       tap(user => {
         this.currentUser.set(user);

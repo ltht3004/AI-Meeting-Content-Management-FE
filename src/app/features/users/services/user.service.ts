@@ -23,6 +23,7 @@ export interface User {
   id: string;
   full_name: string;
   email: string;
+  phone?: string;
   role: 'admin' | 'user';
   created_at: string;
   status: 'Active' | 'Unactive';
@@ -46,6 +47,7 @@ export class UserService {
       id: '1',
       full_name: 'Alex Rivera',
       email: 'alex.rivera@meetingai.com',
+      phone: '+1 (555) 123-4567',
       role: 'admin',
       created_at: 'Oct 12, 2023',
       status: 'Active',
@@ -65,6 +67,7 @@ export class UserService {
       id: '2',
       full_name: 'Sarah Chen',
       email: 'sarah.chen@meetingai.com',
+      phone: '+1 (555) 234-5678',
       role: 'user',
       created_at: 'Nov 05, 2023',
       status: 'Active',
@@ -84,6 +87,7 @@ export class UserService {
       id: '3',
       full_name: 'Jordan Smyth',
       email: 'jordan.s@meetingai.com',
+      phone: '+1 (555) 345-6789',
       role: 'user',
       created_at: 'Jan 18, 2024',
       status: 'Unactive',
@@ -100,6 +104,7 @@ export class UserService {
       id: '4',
       full_name: 'Elena Rodriguez',
       email: 'e.rodriguez@meetingai.com',
+      phone: '+1 (555) 456-7890',
       role: 'admin',
       created_at: 'Mar 02, 2023',
       status: 'Active',
@@ -116,6 +121,7 @@ export class UserService {
       id: '5',
       full_name: 'Alex Thompson',
       email: 'alex.thompson@meetingai.com',
+      phone: '+1 (555) 567-8901',
       role: 'admin',
       created_at: 'October 12, 2023',
       status: 'Active',
@@ -131,6 +137,111 @@ export class UserService {
         { id: 'm6', title: 'Product Roadmap Review', date: 'Oct 22, 2024', participants: 2, duration: '1h 15m' },
         { id: 'm7', title: 'Design Critiques: V2 Shell', date: 'Oct 20, 2024', participants: 3, duration: '30m' }
       ]
+    },
+    {
+      id: '6',
+      full_name: 'David Kim',
+      email: 'david.k@meetingai.com',
+      phone: '+1 (555) 678-9012',
+      role: 'user',
+      created_at: 'April 10, 2024',
+      status: 'Active',
+      last_active: 'Last active 10m ago',
+      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      twoFactorEnabled: false,
+      totalQuota: 300,
+      usedQuota: 120,
+      resetDate: 'Nov 10, 2024'
+    },
+    {
+      id: '7',
+      full_name: 'Emily Davis',
+      email: 'emily.d@meetingai.com',
+      phone: '+1 (555) 789-0123',
+      role: 'user',
+      created_at: 'Feb 15, 2024',
+      status: 'Active',
+      last_active: 'Last active 1h ago',
+      avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      twoFactorEnabled: true,
+      totalQuota: 300,
+      usedQuota: 250,
+      resetDate: 'Nov 15, 2024'
+    },
+    {
+      id: '8',
+      full_name: 'Michael Brown',
+      email: 'michael.b@meetingai.com',
+      phone: '+1 (555) 890-1234',
+      role: 'user',
+      created_at: 'May 20, 2024',
+      status: 'Unactive',
+      last_active: 'Last active 2 weeks ago',
+      avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      twoFactorEnabled: false,
+      totalQuota: 300,
+      usedQuota: 50,
+      resetDate: 'Nov 20, 2024'
+    },
+    {
+      id: '9',
+      full_name: 'Sophia Wilson',
+      email: 'sophia.w@meetingai.com',
+      phone: '+1 (555) 901-2345',
+      role: 'admin',
+      created_at: 'June 05, 2023',
+      status: 'Active',
+      last_active: 'Last active 5m ago',
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      twoFactorEnabled: true,
+      totalQuota: 1000,
+      usedQuota: 800,
+      resetDate: 'Nov 05, 2024'
+    },
+    {
+      id: '10',
+      full_name: 'James Taylor',
+      email: 'james.t@meetingai.com',
+      phone: '+1 (555) 012-3456',
+      role: 'user',
+      created_at: 'July 12, 2024',
+      status: 'Active',
+      last_active: 'Last active 3h ago',
+      avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      twoFactorEnabled: false,
+      totalQuota: 300,
+      usedQuota: 100,
+      resetDate: 'Nov 12, 2024'
+    },
+    {
+      id: '11',
+      full_name: 'Olivia Martinez',
+      email: 'olivia.m@meetingai.com',
+      phone: '+1 (555) 135-7924',
+      role: 'user',
+      created_at: 'August 22, 2024',
+      status: 'Active',
+      last_active: 'Last active 30m ago',
+      avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      twoFactorEnabled: true,
+      totalQuota: 300,
+      usedQuota: 290,
+      resetDate: 'Nov 22, 2024'
+    },
+    {
+      id: '12',
+      full_name: 'William Anderson',
+      email: 'william.a@meetingai.com',
+      phone: '+1 (555) 246-8035',
+      role: 'admin',
+      created_at: 'September 14, 2023',
+      status: 'Unactive',
+      last_active: 'Last active 1 month ago',
+      avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      twoFactorEnabled: false,
+      totalQuota: 1000,
+      usedQuota: 10,
+      resetDate: 'Nov 14, 2024'
     }
   ];
 

@@ -62,6 +62,18 @@
         </div>
 
         <div class="info-field">
+          <span class="info-label">Phone Number <span class="required" style="color: red;">*</span></span>
+          @if (isEditing) {
+            <input type="tel" class="info-input" [(ngModel)]="editPhone" required #editPhoneField="ngModel" [class.input-error]="editPhoneField.invalid && (editPhoneField.touched || editPhoneField.dirty)" placeholder="Phone Number">
+            @if (editPhoneField.invalid && (editPhoneField.touched || editPhoneField.dirty)) {
+              <span class="error-msg">Phone Number is required.</span>
+            }
+          } @else {
+            <div class="info-value-box">{{ user?.phone || '—' }}</div>
+          }
+        </div>
+
+        <div class="info-field">
           <span class="info-label">Role</span>
           <div class="info-value-box">{{ user?.role === 'admin' ? 'Enterprise Admin' : 'User' }}</div>
         </div>
@@ -89,7 +101,7 @@
       <div class="info-actions">
         @if (isEditing) {
           <button class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
-          <button class="btn btn-primary" (click)="saveProfile()" [disabled]="isLoading || !editName || !editEmail">
+          <button class="btn btn-primary" (click)="saveProfile()" [disabled]="isLoading || !editName || !editEmail || !editPhone">
             @if (isLoading) {
               <span class="spinner"></span>
             } @else {
@@ -183,20 +195,5 @@
       </div>
     </div>
   </div>
-</div>
 
-<!-- Success toast -->
-@if (successMessage) {
-  <div class="toast-notification slide-down">
-    <div class="toast-icon-box">
-      <span class="material-icons-round">check_circle</span>
-    </div>
-    <div class="toast-content">
-      <h4 class="toast-title">Changes Saved</h4>
-      <p class="toast-desc">{{ successMessage }}</p>
-    </div>
-    <button class="toast-close" (click)="successMessage = ''">
-      <span class="material-icons-round">close</span>
-    </button>
-  </div>
-}
+</div>

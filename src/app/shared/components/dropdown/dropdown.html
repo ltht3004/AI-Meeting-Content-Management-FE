@@ -12,7 +12,7 @@
   </button>
   
   @if (isOpen) {
-    <div class="dropdown-menu glass-panel animate-fade-in" (click)="close()">
+    <div class="dropdown-menu glass-panel animate-fade-in" [class.align-left]="align === 'left'" (click)="close()">
       <ng-content></ng-content>
     </div>
   }

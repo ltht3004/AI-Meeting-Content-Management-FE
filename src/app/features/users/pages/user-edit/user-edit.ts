@@ -4,11 +4,14 @@ import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { UserService, User } from '../../services/user.service';
 import { switchMap } from 'rxjs/operators';
+import { ToastService } from '../../../../shared/services/toast.service';
+
+import { ConfirmDialog } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-user-edit',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, ConfirmDialog],
   templateUrl: './user-edit.html',
   styleUrl: './user-edit.css'
 })
@@ -16,16 +19,17 @@ export class UserEdit implements OnInit {
   userService = inject(UserService);
   route = inject(ActivatedRoute);
   router = inject(Router);
+  toastService = inject(ToastService);
 
   user: User | null = null;
   isLoading = true;
   isSaving = false;
   error = '';
-  showToast = false;
 
   // Form fields
   editFullName = '';
   editEmail = '';
+  editPhone = '';
   editRole: 'admin' | 'user' = 'user';
   editStatus: 'Active' | 'Unactive' = 'Active';
 
@@ -41,6 +45,7 @@ export class UserEdit implements OnInit {
         this.user = user;
         this.editFullName = user.full_name;
         this.editEmail = user.email;
+        this.editPhone = user.phone || '';
         this.editRole = user.role;
         this.editStatus = user.status;
         this.isLoading = false;
@@ -57,18 +62,20 @@ export class UserEdit implements OnInit {
   }
 
   saveChanges() {
-    if (!this.user || !this.editFullName || !this.editEmail) return;
+    if (!this.user || !this.editFullName || !this.editEmail || !this.editPhone) return;
 
     this.isSaving = true;
     this.userService.updateUser(this.user.id, {
       full_name: this.editFullName,
       email: this.editEmail,
+      phone: this.editPhone,
       role: this.editRole,
       status: this.editStatus
     }).subscribe({
       next: () => {
         this.isSaving = false;
-        this.showSuccessToast();
+        this.toastService.success('Changes Saved', 'User profile has been updated successfully.');
+        setTimeout(() => this.router.navigate(['/users']), 1500);
       },
       error: (err) => {
         this.isSaving = false;
@@ -77,21 +84,22 @@ export class UserEdit implements OnInit {
     });
   }
 
+  showDeleteConfirm = false;
+
   deleteUser() {
-    if (!this.user) return;
-    if (confirm('Are you sure you want to permanently remove this user? This action cannot be undone.')) {
-      this.userService.deleteUser(this.user.id).subscribe(() => {
-        this.router.navigate(['/users']);
-      });
-    }
+    this.showDeleteConfirm = true;
   }
 
-  showSuccessToast() {
-    this.showToast = true;
-    setTimeout(() => {
-      this.showToast = false;
-      // Navigate back after toast hides
-      this.router.navigate(['/users', this.user?.id]);
-    }, 2500);
+  onConfirmDelete() {
+    if (!this.user) return;
+    this.userService.deleteUser(this.user.id).subscribe(() => {
+      this.toastService.success('User Deleted', 'User has been permanently removed.');
+      this.router.navigate(['/users']);
+    });
+    this.showDeleteConfirm = false;
+  }
+
+  onCancelDelete() {
+    this.showDeleteConfirm = false;
   }
 }
