@@ -42,7 +42,7 @@ export class AuthService {
           const mockRes = {
             access_token: 'mock-jwt-token-12345',
             user: {
-              id: 'alex-rivera-uuid-1111',
+              id: '99aa3eab-7784-4074-a385-d03911468810',
               full_name: 'Alex Rivera',
               email: credentials.email,
               role: credentials.email.includes('admin') || credentials.email === 'alex.rivera@kinetic-sync.ai' ? 'admin' : 'user'
@@ -65,7 +65,7 @@ export class AuthService {
         const mockRes = {
           access_token: 'mock-jwt-token-67890',
           user: {
-            id: 'mock-user-uuid',
+            id: '273765c5-825e-4602-b12d-034dffa6bbc1',
             full_name: userData.full_name,
             email: userData.email,
             role: 'user'
@@ -90,7 +90,7 @@ export class AuthService {
       catchError(err => {
         if (!this.currentUser()) {
           const mockUser = {
-            id: 'alex-rivera-uuid-1111',
+            id: '99aa3eab-7784-4074-a385-d03911468810',
             full_name: 'Alex Rivera',
             email: 'alex.rivera@kinetic-sync.ai',
             phone: '+1 (555) 123-4567',
