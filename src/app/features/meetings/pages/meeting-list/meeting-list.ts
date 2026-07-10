@@ -46,7 +46,9 @@ export class MeetingList implements OnInit {
 
   currentPage = 1;
   pageSize = 9;
+  totalItems = 0;
   selectedStatus: 'all' | 'scheduled' | 'completed' | 'processing' = 'all';
+  isLoading = true;
 
   showDeleteConfirm = false;
   meetingToDelete: Meeting | null = null;
@@ -68,8 +70,8 @@ export class MeetingList implements OnInit {
   constructor() {
     effect(() => {
       const query = this.searchService.searchQuery();
-      this.filterMeetings(query);
-      this.cdr.detectChanges();
+      this.currentPage = 1;
+      this.loadMeetings();
     });
   }
 
@@ -78,9 +80,11 @@ export class MeetingList implements OnInit {
   }
 
   loadMeetings() {
-    this.meetingService.getMeetings().subscribe({
-      next: (data: any[]) => {
-        this.meetings = data.map((m) => ({
+    this.isLoading = true;
+    const query = this.searchService.searchQuery();
+    this.meetingService.getMeetings(this.selectedStatus, query, this.currentPage, this.pageSize, this.currentUserId).subscribe({
+      next: (data: any) => {
+        this.meetings = data.meetings.map((m: any) => ({
           id: m.id,
           user_id: m.user_id,
           creator_id: m.user_id,
@@ -93,12 +97,16 @@ export class MeetingList implements OnInit {
           status: this.normalizeStatus(m.status)
         }));
 
-        this.filterMeetings(this.searchService.searchQuery());
+        this.filteredMeetings = this.meetings;
+        this.totalItems = data.total;
+        this.isLoading = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error(err);
         this.toastService.error('Error', 'Cannot load meetings from server.');
+        this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -113,45 +121,24 @@ export class MeetingList implements OnInit {
   }
 
   get totalPages(): number {
-    return Math.ceil(this.filteredMeetings.length / this.pageSize);
+    return Math.ceil(this.totalItems / this.pageSize) || 1;
   }
 
   get paginatedMeetings(): Meeting[] {
-    const startIndex = (this.currentPage - 1) * this.pageSize;
-    return this.filteredMeetings.slice(startIndex, startIndex + this.pageSize);
+    return this.filteredMeetings;
   }
 
   goToPage(page: number) {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
-      this.cdr.detectChanges();
+      this.loadMeetings();
     }
-  }
-
-  filterMeetings(query: string) {
-    const cleanQuery = query.toLowerCase().trim();
-    let tempMeetings = this.meetings;
-
-    if (cleanQuery) {
-      tempMeetings = this.meetings.filter((m) =>
-        m.title.toLowerCase().includes(cleanQuery) ||
-        m.description.toLowerCase().includes(cleanQuery) ||
-        m.location.toLowerCase().includes(cleanQuery)
-      );
-    }
-
-    if (this.selectedStatus !== 'all') {
-      tempMeetings = tempMeetings.filter((m) => m.status === this.selectedStatus);
-    }
-
-    this.filteredMeetings = tempMeetings;
-    this.currentPage = 1;
   }
 
   setStatusFilter(status: 'all' | 'scheduled' | 'completed' | 'processing') {
     this.selectedStatus = status;
-    this.filterMeetings(this.searchService.searchQuery());
-    this.cdr.detectChanges();
+    this.currentPage = 1;
+    this.loadMeetings();
   }
 
   selectStatus(status: 'all' | 'scheduled' | 'completed' | 'processing') {
@@ -187,13 +174,11 @@ export class MeetingList implements OnInit {
     if (toDelete) {
       this.meetingService.deleteMeeting(toDelete.id, this.currentUserId).subscribe({
         next: () => {
-          this.meetings = this.meetings.filter((m) => m.id !== toDelete.id);
-          this.filterMeetings(this.searchService.searchQuery());
           this.toastService.success(
             'Meeting Deleted',
             `Meeting "${toDelete.title}" has been deleted successfully.`
           );
-          this.cdr.detectChanges();
+          this.loadMeetings();
         },
         error: (err) => {
           console.error(err);

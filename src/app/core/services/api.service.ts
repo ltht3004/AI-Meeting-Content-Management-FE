@@ -8,4 +8,5 @@ export class ApiService {
 
   readonly auth = `${this.baseUrl}/auth`;
   readonly meetings = `${this.baseUrl}/meetings`;
+  readonly users = `${this.baseUrl}/users`;
 }

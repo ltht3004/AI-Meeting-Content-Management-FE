@@ -10,6 +10,12 @@ import { ConfirmDialog } from '../../../../shared/components/confirm-dialog/conf
 import { MeetingService, Meeting } from '../../../../core/services/meeting.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
+interface ParticipantDetail {
+  name: string;
+  status: string;
+  is_active: boolean;
+}
+
 interface MeetingDetailData extends Meeting {
   creator_id: string;
   recordings: any[];
@@ -17,6 +23,7 @@ interface MeetingDetailData extends Meeting {
   summary?: {
     content: string;
   };
+  participant_details: ParticipantDetail[];
 }
 
 @Component({
@@ -43,12 +50,14 @@ export class MeetingDetail implements OnInit {
 
   meetingId!: string;
   meeting!: MeetingDetailData;
+  isLoading = true;
 
   activeTab: 'summary' | 'transcript' = 'summary';
 
   selectedRecordingId = '';
   isExporting = false;
   showPreviewModal = false;
+  showParticipantsModal = false;
   showExportDropdown = false;
   showDeleteRecConfirm = false;
 
@@ -93,7 +102,8 @@ export class MeetingDetail implements OnInit {
   }
 
   loadMeetingDetail() {
-    this.meetingService.getMeetingById(this.meetingId).subscribe({
+    this.isLoading = true;
+    this.meetingService.getMeetingById(this.meetingId, this.currentUserId).subscribe({
       next: (data) => {
         this.meeting = {
           ...data,
@@ -101,15 +111,19 @@ export class MeetingDetail implements OnInit {
           status: this.normalizeStatus(data.status),
           recordings: [],
           transcripts: {},
-          summary: undefined
+          summary: undefined,
+          participant_details: (data as any).participant_details || []
         };
 
         this.selectedRecordingId = '';
+        this.isLoading = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error(err);
         this.toastService.error('Error', 'Cannot load meeting detail.');
+        this.isLoading = false;
+        this.cdr.detectChanges();
         this.router.navigate(['/meetings']);
       }
     });
@@ -122,6 +136,11 @@ export class MeetingDetail implements OnInit {
     if (value === 'processing' || value === 'archived') return 'processing';
 
     return 'scheduled';
+  }
+
+  getOtherParticipantsTooltip(others: any[]): string {
+    if (!others) return '';
+    return others.map(o => o.name.trim() + (o.status === 'Unactive' || !o.is_active ? ' (Unactive)' : '')).join(', ');
   }
 
   selectRecording(recId: string) {
@@ -189,5 +208,15 @@ export class MeetingDetail implements OnInit {
   downloadReport() {
     this.showPreviewModal = false;
     this.toastService.info('Info', 'Export API is not implemented yet.');
+  }
+
+  openParticipantsModal() {
+    this.showParticipantsModal = true;
+    this.cdr.detectChanges();
+  }
+
+  closeParticipantsModal() {
+    this.showParticipantsModal = false;
+    this.cdr.detectChanges();
   }
 }

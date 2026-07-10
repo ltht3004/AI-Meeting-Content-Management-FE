@@ -25,12 +25,27 @@ export class MeetingService {
   private http = inject(HttpClient);
   private api = inject(ApiService);
 
-  getMeetings(): Observable<Meeting[]> {
-    return this.http.get<Meeting[]>(`${this.api.meetings}/`);
+  getMeetings(status?: string, search?: string, page: number = 1, pageSize: number = 9, currentUserId?: string): Observable<{ meetings: Meeting[], total: number }> {
+    const params: string[] = [];
+    if (status && status !== 'all') {
+      params.push(`status=${status}`);
+    }
+    if (search && search.trim()) {
+      params.push(`search=${search.trim()}`);
+    }
+    params.push(`page=${page}`);
+    params.push(`page_size=${pageSize}`);
+    if (currentUserId) {
+      params.push(`current_user_id=${currentUserId}`);
+    }
+    
+    const queryString = `?${params.join('&')}`;
+    return this.http.get<{ meetings: Meeting[], total: number }>(`${this.api.meetings}/${queryString}`);
   }
 
-  getMeetingById(id: string): Observable<Meeting> {
-    return this.http.get<Meeting>(`${this.api.meetings}/${id}`);
+  getMeetingById(id: string, currentUserId?: string): Observable<Meeting> {
+    const url = currentUserId ? `${this.api.meetings}/${id}?current_user_id=${currentUserId}` : `${this.api.meetings}/${id}`;
+    return this.http.get<Meeting>(url);
   }
 
   createMeeting(meeting: Partial<Meeting>): Observable<Meeting> {
