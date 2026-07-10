@@ -48,7 +48,7 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 40px;
 }
 
@@ -56,18 +56,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   background-color: var(--primary);
   color: var(--text-inverse);
   border-radius: 10px;
 }
 
-.logo-icon { font-size: 24px; }
+.logo-icon { font-size: 26px; }
 
 .brand-name {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
   color: var(--primary);
   letter-spacing: -0.02em;
 }

@@ -54,7 +54,19 @@ export class AuthService {
   }
 
   forgotPassword(email: string): Observable<any> {
-    return of({ success: true, message: 'Reset link sent.' });
+    return this.http.post<any>(`${this.apiService.baseUrl}/auth/forgot-password`, { email }).pipe(
+      catchError(err => {
+        throw err;
+      })
+    );
+  }
+
+  resetPassword(data: { email: string; reset_code: string; new_password: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiService.baseUrl}/auth/reset-password`, data).pipe(
+      catchError(err => {
+        throw err;
+      })
+    );
   }
 
   getProfile(): Observable<any> {

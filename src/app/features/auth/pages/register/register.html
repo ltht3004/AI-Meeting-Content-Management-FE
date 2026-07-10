@@ -107,7 +107,7 @@
                 [type]="showPassword ? 'text' : 'password'" 
                 id="regPassword" name="password" 
                 class="form-control password-control" placeholder="••••••••" 
-                [(ngModel)]="password" required minlength="6"
+                [(ngModel)]="password" required minlength="8"
                 #passwordField="ngModel"
                 [class.input-error]="passwordField.invalid && (passwordField.touched || passwordField.dirty)"
               >
@@ -118,11 +118,11 @@
               </button>
             </div>
             @if (passwordField.invalid && (passwordField.touched || passwordField.dirty)) {
-              <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">
+              <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px; display: block;">
                 @if (passwordField.errors?.['required']) {
                   Password is required.
                 } @else if (passwordField.errors?.['minlength']) {
-                  Password must be at least 6 characters.
+                  Password must be at least 8 characters.
                 }
               </span>
             }
@@ -157,6 +157,10 @@
             }
           </div>
         </div>
+
+        <p class="password-hint" style="font-size: 12px; color: var(--text-muted); margin-top: -4px; margin-bottom: 16px; line-height: 1.4; opacity: 0.8;">
+          Must contain at least 8 characters, an uppercase letter, a lowercase letter, a number, and a special character.
+        </p>
 
         <!-- Submit -->
         <button type="submit" class="btn btn-primary btn-block" [disabled]="isLoading">
