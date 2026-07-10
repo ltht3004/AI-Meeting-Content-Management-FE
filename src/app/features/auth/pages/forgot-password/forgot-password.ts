@@ -32,7 +32,10 @@ export class ForgotPassword {
     this.authService.forgotPassword(this.email).subscribe({
       next: () => {
         this.isLoading = false;
-        this.successMessage = 'Password reset link has been sent to your email.';
+        this.successMessage = 'Password reset code has been sent to your email.';
+        setTimeout(() => {
+          this.router.navigate(['/auth/reset-password'], { queryParams: { email: this.email } });
+        }, 1500);
       },
       error: (err) => {
         this.isLoading = false;
