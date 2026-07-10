@@ -42,6 +42,8 @@
             id="meeting_date" 
             formControlName="meeting_date" 
             [min]="getMinDateTime()"
+            step="900"
+            (change)="onDateTimeChange()"
             [class.input-error]="isInvalid('meeting_date')"
           >
           @if (isInvalid('meeting_date')) {
@@ -116,7 +118,7 @@
             @if (!meetingForm.get('participants')?.value) {
               <span class="selected-text-placeholder">Select participants...</span>
             } @else {
-              <span class="selected-text">{{ meetingForm.get('participants')?.value }}</span>
+              <span class="selected-text">{{ getSelectedNamesDisplay() }}</span>
             }
             <span class="material-icons-round dropdown-icon">
               {{ showUsersDropdown ? 'expand_less' : 'expand_more' }}
@@ -133,13 +135,14 @@
                   placeholder="Search participants..." 
                   [(ngModel)]="userSearchQuery" 
                   [ngModelOptions]="{standalone: true}"
+                  (input)="onUserSearchInput()"
                   (click)="$event.stopPropagation()"
                 />
                 @if (userSearchQuery) {
                   <button 
                     type="button" 
                     class="clear-search-btn" 
-                    (click)="userSearchQuery = ''; $event.stopPropagation()"
+                    (click)="userSearchQuery = ''; onUserSearchInput(); $event.stopPropagation()"
                   >
                     <span class="material-icons-round">close</span>
                   </button>
@@ -147,17 +150,17 @@
               </div>
 
               <!-- Options list -->
-              <div class="dropdown-options-list">
+              <div class="dropdown-options-list" (scroll)="onDropdownScroll($event)">
                 @for (user of filteredAvailableUsers; track user.id) {
                   <label class="dropdown-user-option">
                     <input 
                       type="checkbox" 
-                      [checked]="isUserSelected(user.name)"
-                      (change)="toggleUserSelection(user.name)"
+                      [checked]="isUserSelected(user.id)"
+                      (change)="toggleUserSelection(user.id)"
                     >
                     <span class="checkbox-custom"></span>
-                    <span class="user-avatar-circle">{{ getInitials(user.name) }}</span>
-                    <span class="user-name">{{ user.name }}</span>
+                    <span class="user-avatar-circle">{{ getInitials(user.full_name) }}</span>
+                    <span class="user-name">{{ user.full_name }}</span>
                   </label>
                 } @empty {
                   <div class="no-users-found">No participants found</div>
@@ -171,7 +174,7 @@
               @if (meetingForm.get('participants')?.hasError('required')) {
                 At least one participant must be selected.
               } @else if (meetingForm.get('participants')?.hasError('minParticipants')) {
-                At least 2 participants must be selected.
+                At least one other participant must be selected.
               }
             </span>
           }

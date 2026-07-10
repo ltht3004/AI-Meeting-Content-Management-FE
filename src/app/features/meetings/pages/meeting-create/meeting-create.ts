@@ -4,6 +4,10 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } 
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '../../../../shared/components/button/button';
 import { ToastService } from '../../../../shared/services/toast.service';
+import { HttpClient } from '@angular/common/http';
+import { ApiService } from '../../../../core/services/api.service';
+import { MeetingService } from '../../../../core/services/meeting.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-meeting-create',
@@ -17,6 +21,10 @@ export class MeetingCreate implements OnInit {
   isSubmitting = false;
   showUsersDropdown = false;
   private toastService = inject(ToastService);
+  private http = inject(HttpClient);
+  private api = inject(ApiService);
+  private meetingService = inject(MeetingService);
+  private authService = inject(AuthService);
 
   // Map Picker State
   showMapModal = false;
@@ -32,30 +40,17 @@ export class MeetingCreate implements OnInit {
   userSearchQuery = '';
 
   get filteredAvailableUsers() {
-    if (!this.userSearchQuery.trim()) {
-      return this.availableUsers;
-    }
-    const query = this.userSearchQuery.toLowerCase().trim();
-    return this.availableUsers.filter(user => 
-      user.name.toLowerCase().includes(query)
-    );
+    return this.availableUsers;
   }
 
-  availableUsers = [
-    { id: '1', name: 'Alex Rivera' },
-    { id: '2', name: 'Sarah Connor' },
-    { id: '3', name: 'David Miller' },
-    { id: '4', name: 'Emma Watson' },
-    { id: '5', name: 'John Doe' },
-    { id: '6', name: 'Peter Parker' }
-  ];
-
-  existingMeetingTitles = [
-    'Q3 Product Strategy Sync',
-    'Customer Feedback Loop',
-    'Design System Refactor',
-    'Urgent: Server Outage Review'
-  ];
+  availableUsers: any[] = [];
+  existingMeetingTitles: string[] = [];
+  usersPage = 1;
+  usersPageSize = 10;
+  isLoadingUsers = false;
+  hasMoreUsers = true;
+  private searchUsersTimeout: any;
+  private usersById = new Map<string, any>();
 
   constructor(
     private fb: FormBuilder,
@@ -69,7 +64,17 @@ export class MeetingCreate implements OnInit {
       meeting_date: ['', [Validators.required, this.futureDateValidator(), this.workingHoursValidator()]],
       location: ['', [Validators.required]],
       duration: [60, [Validators.required, Validators.min(15), Validators.max(240)]],
-      participants: ['', [Validators.required, this.minParticipantsValidator(2)]]
+      participants: ['', [Validators.required, this.minParticipantsValidator(1)]]
+    });
+
+    this.loadAvailableUsers(false);
+
+    this.meetingService.getMeetings('all', '', 1, 100).subscribe({
+      next: (data: any) => {
+        if (data && data.meetings) {
+          this.existingMeetingTitles = data.meetings.map((m: any) => m.title);
+        }
+      }
     });
   }
 
@@ -141,6 +146,35 @@ export class MeetingCreate implements OnInit {
     };
   }
 
+  onDateTimeChange() {
+    const control = this.meetingForm.get('meeting_date');
+    if (!control) return;
+
+    control.markAsDirty();
+    control.markAsTouched();
+    control.updateValueAndValidity();
+
+    const errors = control.errors;
+    if (!errors) return;
+
+    let message = '';
+    if (errors['pastDate']) {
+      message = 'Meeting date cannot be in the past.';
+    } else if (errors['weekend']) {
+      message = 'Meeting must be scheduled on weekdays.';
+    } else if (errors['lunchBreak']) {
+      message = 'Meeting cannot be scheduled during lunch break (12:00 - 13:30).';
+    } else if (errors['workingHours']) {
+      message = 'Meeting must be scheduled during working hours (08:00 - 17:30).';
+    }
+
+    if (message) {
+      this.toastService.error('Invalid Date & Time', message);
+      control.setValue('');
+      control.markAsTouched();
+    }
+  }
+
   minParticipantsValidator(min: number) {
     return (control: any) => {
       const val = control.value || '';
@@ -162,15 +196,20 @@ export class MeetingCreate implements OnInit {
     }
   }
 
-  toggleUserSelection(name: string) {
+  toggleUserSelection(id: string) {
     const control = this.meetingForm.get('participants');
     let currentVal = control?.value || '';
     let selectedList = currentVal ? currentVal.split(',').map((n: string) => n.trim()) : [];
+    const selectedUser = this.availableUsers.find(user => user.id === id);
+
+    if (selectedUser) {
+      this.usersById.set(id, selectedUser);
+    }
     
-    if (selectedList.includes(name)) {
-      selectedList = selectedList.filter((n: string) => n !== name);
+    if (selectedList.includes(id)) {
+      selectedList = selectedList.filter((n: string) => n !== id);
     } else {
-      selectedList.push(name);
+      selectedList.push(id);
     }
     
     control?.setValue(selectedList.join(', '));
@@ -178,11 +217,85 @@ export class MeetingCreate implements OnInit {
     control?.markAsTouched();
   }
 
-  isUserSelected(name: string): boolean {
+  isUserSelected(id: string): boolean {
     const currentVal = this.meetingForm.get('participants')?.value || '';
     if (!currentVal) return false;
     const selectedList = currentVal.split(',').map((n: string) => n.trim());
-    return selectedList.includes(name);
+    return selectedList.includes(id);
+  }
+
+  getSelectedNamesDisplay(): string {
+    const val = this.meetingForm.get('participants')?.value || '';
+    if (!val) return '';
+    const ids = val.split(',').map((id: string) => id.trim());
+    return ids.map((id: string) => {
+      const u = this.usersById.get(id) || this.availableUsers.find(user => user.id === id);
+      return u ? u.full_name : id;
+    }).join(', ');
+  }
+
+  private buildParticipantsWithCreator(selectedParticipants: string): string {
+    const creatorId = this.authService.currentUser()?.id || '';
+    const participantIds = selectedParticipants
+      .split(',')
+      .map((id: string) => id.trim())
+      .filter((id: string) => id.length > 0);
+
+    if (creatorId && !participantIds.includes(creatorId)) {
+      participantIds.unshift(creatorId);
+    }
+
+    return participantIds.join(', ');
+  }
+
+  loadAvailableUsers(append = false) {
+    if (this.isLoadingUsers) return;
+    
+    this.isLoadingUsers = true;
+    const queryParams = `?page=${this.usersPage}&page_size=${this.usersPageSize}&search=${encodeURIComponent(this.userSearchQuery.trim())}`;
+    
+    this.http.get<any>(`${this.api.users}/${queryParams}`).subscribe({
+      next: (res) => {
+        this.isLoadingUsers = false;
+        const users = res.users || [];
+        const total = res.total || 0;
+        users.forEach((user: any) => this.usersById.set(user.id, user));
+        
+        if (append) {
+          this.availableUsers = [...this.availableUsers, ...users];
+        } else {
+          this.availableUsers = users;
+        }
+        
+        this.hasMoreUsers = this.availableUsers.length < total;
+      },
+      error: (err) => {
+        console.error(err);
+        this.isLoadingUsers = false;
+        this.toastService.error('Error', 'Failed to load participants.');
+      }
+    });
+  }
+
+  onUserSearchInput() {
+    if (this.searchUsersTimeout) {
+      clearTimeout(this.searchUsersTimeout);
+    }
+    this.searchUsersTimeout = setTimeout(() => {
+      this.usersPage = 1;
+      this.hasMoreUsers = true;
+      this.loadAvailableUsers(false);
+    }, 300);
+  }
+
+  onDropdownScroll(event: Event) {
+    const element = event.target as HTMLElement;
+    const atBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 10;
+    
+    if (atBottom && this.hasMoreUsers && !this.isLoadingUsers) {
+      this.usersPage++;
+      this.loadAvailableUsers(true);
+    }
   }
 
   getInitials(name: string): string {
@@ -201,15 +314,30 @@ export class MeetingCreate implements OnInit {
     }
 
     this.isSubmitting = true;
-    
-    // Simulate API request delay
-    setTimeout(() => {
-      const title = this.meetingForm.get('title')?.value;
-      console.log('Meeting created:', this.meetingForm.value);
-      this.isSubmitting = false;
-      this.toastService.success('Meeting Created', `Meeting "${title}" has been created successfully.`);
-      this.router.navigate(['/meetings']);
-    }, 1000);
+    const formValue = this.meetingForm.value;
+    const meetingPayload = {
+      user_id: this.authService.currentUser()?.id || '',
+      title: formValue.title,
+      description: formValue.description,
+      meeting_date: formValue.meeting_date,
+      location: formValue.location,
+      duration: Number(formValue.duration),
+      participants: this.buildParticipantsWithCreator(formValue.participants),
+      status: 'Scheduled'
+    };
+
+    this.meetingService.createMeeting(meetingPayload).subscribe({
+      next: (res) => {
+        this.isSubmitting = false;
+        this.toastService.success('Meeting Created', `Meeting "${res.title}" has been created successfully.`);
+        this.router.navigate(['/meetings']);
+      },
+      error: (err) => {
+        console.error(err);
+        this.isSubmitting = false;
+        this.toastService.error('Error', err.error?.detail || 'Failed to create meeting.');
+      }
+    });
   }
 
   isInvalid(fieldName: string): boolean {

@@ -38,7 +38,13 @@
   </div>
 
   <!-- Card Grid -->
-  @if (filteredMeetings.length > 0) {
+  @if (isLoading) {
+    <!-- Loading State -->
+    <div class="loading-state glass-panel animate-fade-in">
+      <span class="spinner-blue"></span>
+      <p>Loading meetings...</p>
+    </div>
+  } @else if (filteredMeetings.length > 0) {
     <div class="meetings-grid">
       @for (meeting of paginatedMeetings; track meeting.id) {
         <div class="meeting-card glass-panel">
