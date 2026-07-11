@@ -55,13 +55,19 @@
               class="form-control" 
               placeholder="name@company.com" 
               [(ngModel)]="email" 
-              required
+              required email
               #emailField="ngModel"
               [class.input-error]="emailField.invalid && (emailField.touched || emailField.dirty)"
             >
           </div>
           @if (emailField.invalid && (emailField.touched || emailField.dirty)) {
-            <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">Email is required.</span>
+            <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">
+              @if (emailField.errors?.['required']) {
+                Email is required.
+              } @else if (emailField.errors?.['email']) {
+                Must be a valid email format.
+              }
+            </span>
           }
         </div>
 
@@ -80,7 +86,7 @@
               class="form-control password-control" 
               placeholder="••••••••" 
               [(ngModel)]="password" 
-              required
+              required minlength="8"
               #passwordField="ngModel"
               [class.input-error]="passwordField.invalid && (passwordField.touched || passwordField.dirty)"
             >
@@ -95,7 +101,13 @@
             </button>
           </div>
           @if (passwordField.invalid && (passwordField.touched || passwordField.dirty)) {
-            <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">Password is required.</span>
+            <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">
+              @if (passwordField.errors?.['required']) {
+                Password is required.
+              } @else if (passwordField.errors?.['minlength']) {
+                Password must be at least 8 characters.
+              }
+            </span>
           }
         </div>
 
