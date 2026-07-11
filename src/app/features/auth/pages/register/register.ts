@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -13,6 +13,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 export class Register {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   fullName = '';
   email = '';
@@ -84,11 +85,17 @@ export class Register {
     }).subscribe({
       next: () => {
         this.isLoading = false;
+        this.cdr.detectChanges();
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.detail || 'Registration failed. Please try again.';
+        let detail = err.error?.detail;
+        if (Array.isArray(detail)) {
+          detail = detail[0].msg;
+        }
+        this.errorMessage = detail || 'Registration failed. Please try again.';
+        this.cdr.detectChanges();
       }
     });
   }

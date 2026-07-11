@@ -84,7 +84,11 @@ export class ResetPassword implements OnInit {
       },
       error: (err: any) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.detail || 'Failed to reset password. Please try again.';
+        let detail = err.error?.detail;
+        if (Array.isArray(detail)) {
+          detail = detail[0].msg;
+        }
+        this.errorMessage = detail || 'Failed to reset password. Please try again.';
       }
     });
   }
