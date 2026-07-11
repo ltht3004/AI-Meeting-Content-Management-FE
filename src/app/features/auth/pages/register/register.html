@@ -51,13 +51,19 @@
             <input 
               type="text" id="fullName" name="fullName" 
               class="form-control" placeholder="John Doe" 
-              [(ngModel)]="fullName" required
+              [(ngModel)]="fullName" required minlength="4"
               #fullNameField="ngModel"
               [class.input-error]="fullNameField.invalid && (fullNameField.touched || fullNameField.dirty)"
             >
           </div>
           @if (fullNameField.invalid && (fullNameField.touched || fullNameField.dirty)) {
-            <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">Full Name is required.</span>
+            <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">
+              @if (fullNameField.errors?.['required']) {
+                Full Name is required.
+              } @else if (fullNameField.errors?.['minlength']) {
+                Full Name must be at least 4 characters.
+              }
+            </span>
           }
         </div>
 
@@ -69,13 +75,19 @@
             <input 
               type="email" id="regEmail" name="email" 
               class="form-control" placeholder="name@company.com" 
-              [(ngModel)]="email" required
+              [(ngModel)]="email" required email
               #emailField="ngModel"
               [class.input-error]="emailField.invalid && (emailField.touched || emailField.dirty)"
             >
           </div>
           @if (emailField.invalid && (emailField.touched || emailField.dirty)) {
-            <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">Work Email is required.</span>
+            <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">
+              @if (emailField.errors?.['required']) {
+                Work Email is required.
+              } @else if (emailField.errors?.['email']) {
+                Must be a valid email format.
+              }
+            </span>
           }
         </div>
 
@@ -87,13 +99,19 @@
             <input 
               type="tel" id="regPhone" name="phone" 
               class="form-control" placeholder="+1 (555) 123-4567" 
-              [(ngModel)]="phone" required
+              [(ngModel)]="phone" required pattern="^\d{10}$"
               #phoneField="ngModel"
               [class.input-error]="phoneField.invalid && (phoneField.touched || phoneField.dirty)"
             >
           </div>
           @if (phoneField.invalid && (phoneField.touched || phoneField.dirty)) {
-            <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">Phone Number is required.</span>
+            <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">
+              @if (phoneField.errors?.['required']) {
+                Phone Number is required.
+              } @else if (phoneField.errors?.['pattern']) {
+                Phone number must be exactly 10 digits.
+              }
+            </span>
           }
         </div>
 
@@ -108,6 +126,7 @@
                 id="regPassword" name="password" 
                 class="form-control password-control" placeholder="••••••••" 
                 [(ngModel)]="password" required minlength="8"
+                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$"
                 #passwordField="ngModel"
                 [class.input-error]="passwordField.invalid && (passwordField.touched || passwordField.dirty)"
               >
@@ -123,6 +142,8 @@
                   Password is required.
                 } @else if (passwordField.errors?.['minlength']) {
                   Password must be at least 8 characters.
+                } @else if (passwordField.errors?.['pattern']) {
+                  Must contain uppercase, lowercase, number, and special character.
                 }
               </span>
             }

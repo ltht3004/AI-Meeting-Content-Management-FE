@@ -18,7 +18,9 @@ export class ResetPassword implements OnInit {
   email = '';
   resetCode = '';
   newPassword = '';
+  confirmPassword = '';
   showPassword = false;
+  showConfirmPassword = false;
   errorMessage = '';
   successMessage = '';
   isLoading = false;
@@ -35,9 +37,18 @@ export class ResetPassword implements OnInit {
     this.showPassword = !this.showPassword;
   }
 
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
   onSubmit() {
-    if (!this.email || !this.resetCode || !this.newPassword) {
+    if (!this.email || !this.resetCode || !this.newPassword || !this.confirmPassword) {
       this.errorMessage = 'Please fill in all fields.';
+      return;
+    }
+
+    if (this.newPassword !== this.confirmPassword) {
+      this.errorMessage = 'Passwords do not match.';
       return;
     }
 
