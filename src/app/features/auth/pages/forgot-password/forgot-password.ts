@@ -39,7 +39,11 @@ export class ForgotPassword {
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.detail || 'Failed to send link. Please try again.';
+        let detail = err.error?.detail;
+        if (Array.isArray(detail)) {
+          detail = detail[0].msg;
+        }
+        this.errorMessage = detail || 'Failed to send link. Please try again.';
       }
     });
   }

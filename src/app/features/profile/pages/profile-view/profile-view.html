@@ -12,7 +12,7 @@
       <div class="avatar-section">
         <div class="avatar-frame">
           <img 
-            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
+            [src]="avatarUrl" 
             alt="Profile Avatar" 
             class="avatar-img"
           >
@@ -22,11 +22,12 @@
       </div>
 
       <div class="avatar-actions">
-        <button class="btn btn-primary btn-sm">
+        <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none;">
+        <button class="btn btn-primary btn-sm" (click)="fileInput.click()" [disabled]="isLoading">
           <span class="material-icons-round btn-icon">cloud_upload</span>
           Upload New Avatar
         </button>
-        <button class="btn btn-secondary btn-sm">Remove Avatar</button>
+        <button class="btn btn-secondary btn-sm" (click)="promptRemoveAvatar()" [disabled]="isLoading || !user?.avatar_url">Remove Avatar</button>
       </div>
     </div>
 
@@ -52,9 +53,16 @@
         <div class="info-field">
           <span class="info-label">Email Address <span class="required" style="color: red;">*</span></span>
           @if (isEditing) {
-            <input type="email" class="info-input" [(ngModel)]="editEmail" placeholder="Email" required #editEmailField="ngModel" [class.input-error]="editEmailField.invalid && (editEmailField.touched || editEmailField.dirty)">
+            <input type="email" class="info-input" [(ngModel)]="editEmail" placeholder="Email" required email #editEmailField="ngModel" [class.input-error]="editEmailField.invalid && (editEmailField.touched || editEmailField.dirty)">
             @if (editEmailField.invalid && (editEmailField.touched || editEmailField.dirty)) {
-              <span class="error-msg">Email is required.</span>
+              <span class="error-msg">
+                @if (editEmailField.errors?.['required']) {
+                  Email is required.
+                }
+                @if (editEmailField.errors?.['email']) {
+                  Must be a valid email format.
+                }
+              </span>
             }
           } @else {
             <div class="info-value-box">{{ user?.email || '—' }}</div>
@@ -64,9 +72,16 @@
         <div class="info-field">
           <span class="info-label">Phone Number <span class="required" style="color: red;">*</span></span>
           @if (isEditing) {
-            <input type="tel" class="info-input" [(ngModel)]="editPhone" required #editPhoneField="ngModel" [class.input-error]="editPhoneField.invalid && (editPhoneField.touched || editPhoneField.dirty)" placeholder="Phone Number">
+            <input type="tel" class="info-input" [(ngModel)]="editPhone" required pattern="^\d{10}$" #editPhoneField="ngModel" [class.input-error]="editPhoneField.invalid && (editPhoneField.touched || editPhoneField.dirty)" placeholder="Phone Number">
             @if (editPhoneField.invalid && (editPhoneField.touched || editPhoneField.dirty)) {
-              <span class="error-msg">Phone Number is required.</span>
+              <span class="error-msg">
+                @if (editPhoneField.errors?.['required']) {
+                  Phone Number is required.
+                }
+                @if (editPhoneField.errors?.['pattern']) {
+                  Phone number must be exactly 10 digits.
+                }
+              </span>
             }
           } @else {
             <div class="info-value-box">{{ user?.phone || '—' }}</div>
@@ -195,5 +210,15 @@
       </div>
     </div>
   </div>
-
 </div>
+
+<!-- Remove Avatar Confirmation Modal -->
+<app-confirm-dialog
+  [isOpen]="showRemoveAvatarModal"
+  title="Remove Avatar"
+  message="Are you sure you want to remove your profile picture? This action cannot be undone and your avatar will be replaced with the default one."
+  confirmText="Remove"
+  type="danger"
+  (confirm)="confirmRemoveAvatar()"
+  (cancel)="cancelRemoveAvatar()">
+</app-confirm-dialog>
