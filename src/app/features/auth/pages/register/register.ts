@@ -24,6 +24,9 @@ export class Register {
   showConfirmPassword = false;
   errorMessage = '';
   isLoading = false;
+  isVerifying = false;
+  verificationCode = '';
+  registeredEmail = '';
 
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
@@ -44,8 +47,8 @@ export class Register {
       return;
     }
 
-    if (!/^\d{10}$/.test(this.phone)) {
-      this.errorMessage = 'Phone number must be exactly 10 digits.';
+    if (!/^(03|05|07|08|09)\d{8}$/.test(this.phone)) {
+      this.errorMessage = 'Phone number must be 10 digits and start with 03, 05, 07, 08, or 09.';
       return;
     }
 
@@ -83,6 +86,37 @@ export class Register {
       phone: this.phone,
       password: this.password
     }).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        this.isVerifying = true;
+        this.registeredEmail = this.email;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        let detail = err.error?.detail;
+        if (Array.isArray(detail)) {
+          detail = detail[0].msg;
+        }
+        this.errorMessage = detail || 'Registration failed. Please try again.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  onVerify() {
+    if (!this.verificationCode) {
+      this.errorMessage = 'Please enter the verification code.';
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.authService.verifyEmail({
+      email: this.registeredEmail,
+      code: this.verificationCode
+    }).subscribe({
       next: () => {
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -94,7 +128,7 @@ export class Register {
         if (Array.isArray(detail)) {
           detail = detail[0].msg;
         }
-        this.errorMessage = detail || 'Registration failed. Please try again.';
+        this.errorMessage = detail || 'Verification failed. Please try again.';
         this.cdr.detectChanges();
       }
     });

@@ -40,7 +40,11 @@ export class AuthService {
   }
 
   register(userData: any): Observable<any> {
-    return this.http.post<any>(`${this.apiService.baseUrl}/auth/register`, userData).pipe(
+    return this.http.post<any>(`${this.apiService.baseUrl}/auth/register`, userData);
+  }
+
+  verifyEmail(data: { email: string; code: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiService.baseUrl}/auth/verify-email`, data).pipe(
       tap(res => {
         this.setSession(res);
       })

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -14,6 +14,7 @@ export class ResetPassword implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private cdr = inject(ChangeDetectorRef);
 
   email = '';
   resetCode = '';
@@ -89,6 +90,7 @@ export class ResetPassword implements OnInit {
       next: () => {
         this.isLoading = false;
         this.successMessage = 'Password has been reset successfully. Redirecting to login...';
+        this.cdr.detectChanges();
         setTimeout(() => {
           this.router.navigate(['/auth/login']);
         }, 2000);
@@ -100,6 +102,7 @@ export class ResetPassword implements OnInit {
           detail = detail[0].msg;
         }
         this.errorMessage = detail || 'Failed to reset password. Please try again.';
+        this.cdr.detectChanges();
       }
     });
   }

@@ -29,6 +29,7 @@
 
     <!-- Right Form Split -->
     <div class="auth-form-container">
+      @if (!isVerifying) {
       <div class="form-header">
         <h1 class="form-title">Create Account</h1>
         <p class="form-desc">Get started with your enterprise workspace today.</p>
@@ -99,7 +100,7 @@
             <input 
               type="tel" id="regPhone" name="phone" 
               class="form-control" placeholder="+1 (555) 123-4567" 
-              [(ngModel)]="phone" required pattern="^\d{10}$"
+              [(ngModel)]="phone" required pattern="^(03|05|07|08|09)[0-9]*$" minlength="10" maxlength="10"
               #phoneField="ngModel"
               [class.input-error]="phoneField.invalid && (phoneField.touched || phoneField.dirty)"
             >
@@ -109,6 +110,8 @@
               @if (phoneField.errors?.['required']) {
                 Phone Number is required.
               } @else if (phoneField.errors?.['pattern']) {
+                Phone number must start with a valid prefix (03, 05, 07, 08, 09).
+              } @else if (phoneField.errors?.['minlength']) {
                 Phone number must be exactly 10 digits.
               }
             </span>
@@ -199,6 +202,45 @@
       <div class="auth-footer">
         <p>Already have an account? <a routerLink="/auth/login" class="login-link">Login</a></p>
       </div>
+      } @else {
+      <!-- Verification Form -->
+      <div class="form-header">
+        <h1 class="form-title">Verify Email</h1>
+        <p class="form-desc">We've sent a 6-digit verification code to <strong>{{ registeredEmail }}</strong>.</p>
+      </div>
+
+      @if (errorMessage) {
+        <div class="alert alert-danger">
+          <span class="material-icons-round alert-icon">error_outline</span>
+          <span class="alert-text">{{ errorMessage }}</span>
+        </div>
+      }
+
+      <form (ngSubmit)="onVerify()" class="auth-form">
+        <div class="form-group">
+          <label class="form-label" for="verCode">Verification Code <span class="required" style="color: red;">*</span></label>
+          <div class="input-icon-wrapper">
+            <span class="material-icons-round input-icon">pin</span>
+            <input type="text" id="verCode" name="verificationCode" class="form-control" placeholder="123456" [(ngModel)]="verificationCode" required maxlength="6" pattern="^\d{6}$" #codeField="ngModel" [class.input-error]="codeField.invalid && (codeField.touched || codeField.dirty)">
+          </div>
+          @if (codeField.invalid && (codeField.touched || codeField.dirty)) {
+            <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">
+              @if (codeField.errors?.['required']) { Code is required. }
+              @else if (codeField.errors?.['pattern']) { Must be 6 digits. }
+            </span>
+          }
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" [disabled]="isLoading || !verificationCode">
+          @if (isLoading) {
+            <span class="spinner"></span>
+            <span>Verifying...</span>
+          } @else {
+            <span>Verify & Continue</span>
+            <span class="material-icons-round btn-arrow">arrow_forward</span>
+          }
+        </button>
+      </form>
+      }
     </div>
   </div>
 </div>
