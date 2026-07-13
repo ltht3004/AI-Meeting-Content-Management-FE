@@ -91,7 +91,7 @@
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 24px;
-  align-items: flex-start;
+  align-items: stretch;
 }
 
 @media (max-width: 1024px) {
@@ -271,6 +271,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  min-height: 0;
 }
 
 .quick-actions-card {
@@ -336,6 +337,10 @@
 /* Timeline Card */
 .activity-card {
   padding: 24px;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
 }
 
 .activity-card h3 {
@@ -346,8 +351,25 @@
 
 .timeline {
   display: flex;
+  flex: 1;
+  min-height: 0;
   flex-direction: column;
   padding-left: 8px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.timeline::-webkit-scrollbar {
+  width: 6px;
+}
+
+.timeline::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 999px;
+}
+
+.timeline::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .timeline-item {
@@ -410,4 +432,43 @@
   font-size: 11px;
   color: var(--text-muted);
   margin-top: 4px;
+}
+
+.activity-empty {
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
+
+/* Loading State & Spinner */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 180px);
+  width: 100%;
+  gap: 16px;
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 500;
+  background: transparent;
+}
+
+.loading-state p {
+  margin: 0;
+}
+
+.spinner-blue {
+  display: inline-block;
+  width: 42px;
+  height: 42px;
+  border: 3px solid rgba(0, 82, 204, 0.12);
+  border-radius: 50%;
+  border-top-color: var(--primary);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
