@@ -14,9 +14,15 @@
           </div>
         </div>
         <div class="stat-value">{{ stats.totalMeetings | number }}</div>
-        <div class="stat-footer text-success">
-          <span class="material-icons-round footer-trend-icon">trending_up</span>
-          <span>+12% vs last month</span>
+        <div
+          class="stat-footer"
+          [class.text-success]="stats.meetingGrowthPercent > 0"
+          [class.text-danger]="stats.meetingGrowthPercent < 0"
+        >
+          <span class="material-icons-round footer-trend-icon">
+            {{ stats.meetingGrowthPercent < 0 ? 'trending_down' : 'trending_up' }}
+          </span>
+          <span>{{ getMeetingGrowthLabel() }}</span>
         </div>
       </div>
 
@@ -29,7 +35,7 @@
         </div>
         <div class="stat-value">{{ stats.totalRecordings | number }}</div>
         <div class="stat-footer">
-          <span>84% storage used</span>
+          <span>{{ getStorageUsedLabel() }}</span>
         </div>
       </div>
 
@@ -42,7 +48,7 @@
         </div>
         <div class="stat-value">{{ stats.totalTranscripts | number }}</div>
         <div class="stat-footer">
-          <span>98% accuracy avg.</span>
+          <span>{{ getTranscriptAccuracyLabel() }}</span>
         </div>
       </div>
 
@@ -55,7 +61,7 @@
         </div>
         <div class="stat-value">{{ stats.totalSummaries | number }}</div>
         <div class="stat-footer text-primary-inline">
-          <span>85 hours saved</span>
+          <span>{{ getSummarizedDurationLabel() }}</span>
         </div>
       </div>
     </div>

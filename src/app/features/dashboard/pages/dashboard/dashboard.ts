@@ -39,7 +39,11 @@ export class Dashboard implements OnInit {
     totalMeetings: 0,
     totalRecordings: 0,
     totalTranscripts: 0,
-    totalSummaries: 0
+    totalSummaries: 0,
+    meetingGrowthPercent: 0,
+    totalStorageBytes: 0,
+    transcriptAccuracyAvg: null as number | null,
+    summarizedDurationMinutes: 0
   };
 
   recentMeetings: MeetingSummary[] = [];
@@ -73,7 +77,11 @@ export class Dashboard implements OnInit {
           totalMeetings: data.stats?.total_meetings ?? 0,
           totalRecordings: data.stats?.total_recordings ?? 0,
           totalTranscripts: data.stats?.total_transcripts ?? 0,
-          totalSummaries: data.stats?.total_summaries ?? 0
+          totalSummaries: data.stats?.total_summaries ?? 0,
+          meetingGrowthPercent: data.stats?.meeting_growth_percent ?? 0,
+          totalStorageBytes: data.stats?.total_storage_bytes ?? 0,
+          transcriptAccuracyAvg: data.stats?.transcript_accuracy_avg ?? null,
+          summarizedDurationMinutes: data.stats?.summarized_duration_minutes ?? 0
         };
 
         this.recentMeetings = (data.recent_meetings || []).map((meeting: any) => ({
@@ -106,6 +114,40 @@ export class Dashboard implements OnInit {
     if (value === 'processing' || value === 'archived') return 'processing';
 
     return 'scheduled';
+  }
+
+  getMeetingGrowthLabel(): string {
+    const value = this.stats.meetingGrowthPercent;
+    if (value > 0) return `+${value}% vs last month`;
+    if (value < 0) return `${value}% vs last month`;
+    return '0% vs last month';
+  }
+
+  getStorageUsedLabel(): string {
+    const bytes = this.stats.totalStorageBytes;
+    if (bytes <= 0) return '0 MB used';
+
+    const mb = bytes / (1024 * 1024);
+    if (mb < 1024) return `${mb.toFixed(mb >= 10 ? 0 : 1)} MB used`;
+
+    const gb = mb / 1024;
+    return `${gb.toFixed(gb >= 10 ? 0 : 1)} GB used`;
+  }
+
+  getTranscriptAccuracyLabel(): string {
+    const accuracy = this.stats.transcriptAccuracyAvg;
+    if (accuracy === null || accuracy === undefined) return 'No accuracy data';
+
+    return `${accuracy}% accuracy avg.`;
+  }
+
+  getSummarizedDurationLabel(): string {
+    const minutes = this.stats.summarizedDurationMinutes;
+    if (minutes <= 0) return '0 minutes summarized';
+    if (minutes < 60) return `${minutes} minutes summarized`;
+
+    const hours = minutes / 60;
+    return `${hours.toFixed(hours >= 10 ? 0 : 1)} hours summarized`;
   }
 
   getRelativeTime(dateValue: string): string {
