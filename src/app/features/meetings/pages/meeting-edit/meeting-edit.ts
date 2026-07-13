@@ -127,13 +127,14 @@ export class MeetingEdit implements OnInit {
     if (this.isLoadingUsers) return;
     
     this.isLoadingUsers = true;
-    const queryParams = `?page=${this.usersPage}&page_size=${this.usersPageSize}&search=${encodeURIComponent(this.userSearchQuery.trim())}`;
+    const skip = (this.usersPage - 1) * this.usersPageSize;
+    const queryParams = `?skip=${skip}&limit=${this.usersPageSize}&search=${encodeURIComponent(this.userSearchQuery.trim())}`;
     
     this.http.get<any>(`${this.api.users}/${queryParams}`).subscribe({
       next: (res) => {
         this.isLoadingUsers = false;
-        const users = res.users || [];
-        const total = res.total || 0;
+        const users = res.items || res.users || [];
+        const total = res.total_count ?? res.total ?? 0;
         users.forEach((user: any) => this.usersById.set(user.id, user));
         
         if (append) {

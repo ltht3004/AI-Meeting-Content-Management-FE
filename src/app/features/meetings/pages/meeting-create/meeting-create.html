@@ -172,9 +172,9 @@
           @if (isInvalid('participants')) {
             <span class="error-msg">
               @if (meetingForm.get('participants')?.hasError('required')) {
-                At least one participant must be selected.
+                At least 2 participants must be selected.
               } @else if (meetingForm.get('participants')?.hasError('minParticipants')) {
-                At least one other participant must be selected.
+                At least 2 participants must be selected.
               }
             </span>
           }

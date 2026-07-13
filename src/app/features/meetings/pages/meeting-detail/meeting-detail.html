@@ -32,22 +32,22 @@
             [iconClass]="isExporting ? 'spin-icon' : ''"
             [disabled]="isExporting"
             triggerClass="btn btn-secondary export-dropdown-trigger"
-          >
-            <button (click)="triggerExport('pdf')" class="dropdown-item">
-              <span class="material-icons-round text-danger">picture_as_pdf</span>
+            >
+              <button (click)="triggerExport('pdf')" class="dropdown-item">
+              <span class="material-icons-round dropdown-file-icon">picture_as_pdf</span>
               <span>PDF Document (.pdf)</span>
             </button>
             <button (click)="triggerExport('word')" class="dropdown-item">
-              <span class="material-icons-round text-primary">description</span>
+              <span class="material-icons-round dropdown-file-icon">description</span>
               <span>Word Document (.docx)</span>
             </button>
           </app-dropdown>
 
           @if (isAdmin || currentUserId === meeting.creator_id) {
             @if (meeting.status === 'scheduled') {
-              <app-button type="secondary" icon="edit" [routerLink]="['/meetings/edit', meeting.id]">Edit Meeting</app-button>
+              <app-button type="primary" icon="edit" [routerLink]="['/meetings/edit', meeting.id]">Edit Meeting</app-button>
             } @else {
-              <app-button type="secondary" icon="edit" [disabled]="true" [title]="meeting.status === 'processing' ? 'Cannot edit while processing' : 'Cannot edit completed meetings'">Edit Meeting</app-button>
+              <app-button type="primary" icon="edit" [disabled]="true" [title]="meeting.status === 'processing' ? 'Cannot edit while processing' : 'Cannot edit completed meetings'">Edit Meeting</app-button>
             }
           }
         </div>

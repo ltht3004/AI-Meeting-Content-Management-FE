@@ -9,6 +9,7 @@ import { ConfirmDialog } from '../../../../shared/components/confirm-dialog/conf
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination';
 import { ButtonComponent } from '../../../../shared/components/button/button';
 import { DropdownComponent } from '../../../../shared/components/dropdown/dropdown';
+import { PageHeader } from '../../../../shared/components/page-header/page-header';
 import { MeetingService } from '../../../../core/services/meeting.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
@@ -22,7 +23,14 @@ export interface Meeting {
   location: string;
   duration: number;
   participants: string;
+  participant_details?: Participant[];
   status: 'scheduled' | 'completed' | 'processing';
+}
+
+export interface Participant {
+  id: string;
+  name: string;
+  initials: string;
 }
 
 @Component({
@@ -35,7 +43,8 @@ export interface Meeting {
     ConfirmDialog,
     PaginationComponent,
     ButtonComponent,
-    DropdownComponent
+    DropdownComponent,
+    PageHeader
   ],
   templateUrl: './meeting-list.html',
   styleUrl: './meeting-list.css'
@@ -94,6 +103,11 @@ export class MeetingList implements OnInit {
           location: m.location ?? '',
           duration: m.duration ?? 0,
           participants: m.participants ?? '',
+          participant_details: (m.participant_details || []).map((p: any) => ({
+            id: p.id,
+            name: p.name,
+            initials: this.getInitials(p.name)
+          })),
           status: this.normalizeStatus(m.status)
         }));
 
@@ -215,32 +229,42 @@ export class MeetingList implements OnInit {
       .slice(0, 3);
   }
 
-  getParticipantsList(participantsStr: string) {
-    if (!participantsStr) return [];
+  getParticipantsList(meeting: Meeting): Participant[] {
+    if (meeting.participant_details?.length) {
+      return meeting.participant_details;
+    }
 
-    return participantsStr.split(',').map((p, index) => {
+    if (!meeting.participants) return [];
+
+    return meeting.participants.split(',').map((p, index) => {
       const name = p.trim();
-      const parts = name.split(' ');
-
-      let initials = '';
-
-      if (parts.length >= 2) {
-        initials = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-      } else if (parts.length === 1 && parts[0].length > 0) {
-        initials = parts[0][0].toUpperCase();
-      }
 
       return {
         id: String(index + 1),
         name,
-        initials
+        initials: this.getInitials(name)
       };
     });
   }
 
-  getParticipantCount(participantsStr: string): number {
-    if (!participantsStr) return 0;
+  getParticipantCount(meeting: Meeting): number {
+    if (meeting.participant_details?.length) {
+      return meeting.participant_details.length;
+    }
 
-    return participantsStr.split(',').length;
+    if (!meeting.participants) return 0;
+
+    return meeting.participants.split(',').length;
+  }
+
+  getInitials(name: string): string {
+    if (!name) return '';
+    const parts = name.trim().split(' ').filter(Boolean);
+
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    return parts[0]?.substring(0, 2).toUpperCase() || '';
   }
 }

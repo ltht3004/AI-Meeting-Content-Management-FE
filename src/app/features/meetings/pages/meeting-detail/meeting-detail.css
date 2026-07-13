@@ -43,21 +43,37 @@
   flex-shrink: 0;
 }
 
-.export-dropdown-trigger,
-.edit-meeting-btn {
+.export-dropdown-trigger {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  padding: 8px 16px;
+  padding: 8px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  background-color: var(--bg-surface);
+  color: var(--text-main);
   font-size: 13px;
   font-weight: 600;
   height: 38px;
+  min-width: 178px;
   box-sizing: border-box;
 }
 
-.export-dropdown-trigger span.material-icons-round,
-.edit-meeting-btn span.material-icons-round {
+.export-dropdown-trigger:hover {
+  background-color: var(--bg-main);
+}
+
+.export-dropdown-trigger span.material-icons-round {
   font-size: 18px;
+}
+
+.export-dropdown-trigger .material-icons-round {
+  color: var(--text-muted);
+}
+
+.export-dropdown-trigger:hover .material-icons-round {
+  color: var(--primary);
 }
 
 .meta-strip {

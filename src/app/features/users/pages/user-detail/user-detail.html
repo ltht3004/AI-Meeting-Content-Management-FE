@@ -1,12 +1,12 @@
 <div class="page-container animate-fade-in">
   <!-- Top Navigation Bar -->
   <div class="page-nav">
-    <a routerLink="/users" class="btn btn-text back-btn">
+    <a [routerLink]="isAdmin ? '/users' : '/meetings'" class="btn btn-text back-btn">
       <span class="material-icons-round icon-left">arrow_back</span> Back
     </a>
     
     <div class="nav-actions">
-      @if (user) {
+      @if (user && isAdmin) {
         <a [routerLink]="['/users', user.id, 'edit']" class="btn btn-primary">
           <span class="material-icons-round icon-left">edit</span> Edit User
         </a>

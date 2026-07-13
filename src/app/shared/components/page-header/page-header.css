@@ -1,0 +1,59 @@
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.page-header-text {
+  min-width: 0;
+}
+
+.page-title {
+  margin: 0 0 4px;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--primary);
+}
+
+.page-subtitle {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.page-header-actions {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+}
+
+:host ::ng-deep .header-right,
+:host ::ng-deep .page-header-control-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  width: 180px;
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-header-actions {
+    justify-content: stretch;
+  }
+
+  :host ::ng-deep .header-right,
+  :host ::ng-deep .page-header-control-group {
+    width: 100%;
+    align-items: stretch;
+  }
+}

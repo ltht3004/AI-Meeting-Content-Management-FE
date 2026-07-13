@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
-import { adminGuard } from './core/auth/admin.guard';
 
 export const routes: Routes = [
   // Authentication Routes (unauthenticated)
@@ -34,8 +33,7 @@ export const routes: Routes = [
       },
       {
         path: 'users',
-        loadChildren: () => import('./features/users/users.routes'),
-        canActivate: [adminGuard]
+        loadChildren: () => import('./features/users/users.routes')
       }
     ]
   },
