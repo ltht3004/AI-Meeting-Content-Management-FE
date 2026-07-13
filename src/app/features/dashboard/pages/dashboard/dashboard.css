@@ -2,6 +2,8 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  height: calc(100vh - 136px);
+  overflow: hidden;
 }
 
 /* Stats Grid Layout */
@@ -9,6 +11,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 24px;
+  flex: 0 0 auto;
 }
 
 .stat-card {
@@ -86,24 +89,40 @@
   color: var(--primary);
 }
 
+.text-danger {
+  color: #ef4444;
+}
+
 /* Main Content Grid */
 .dashboard-main-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 24px;
   align-items: stretch;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 @media (max-width: 1024px) {
+  .dashboard-wrapper {
+    height: auto;
+    overflow: visible;
+  }
+
   .dashboard-main-grid {
     grid-template-columns: 1fr;
+    overflow: visible;
   }
 }
 
 /* Left Card: Recent Meetings */
 .meetings-card {
   padding: 24px;
-  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .card-header {
@@ -129,7 +148,9 @@
 }
 
 .table-container {
-  overflow-x: auto;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
 }
 
 .meetings-table {
@@ -271,7 +292,9 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  height: 100%;
   min-height: 0;
+  overflow: hidden;
 }
 
 .quick-actions-card {
