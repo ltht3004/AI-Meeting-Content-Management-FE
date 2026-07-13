@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -20,18 +20,20 @@ export class UserEdit implements OnInit {
   route = inject(ActivatedRoute);
   router = inject(Router);
   toastService = inject(ToastService);
+  cdr = inject(ChangeDetectorRef);
 
   user: User | null = null;
   isLoading = true;
   isSaving = false;
   error = '';
+  saveError = '';
 
   // Form fields
   editFullName = '';
   editEmail = '';
   editPhone = '';
   editRole: 'admin' | 'user' = 'user';
-  editStatus: 'Active' | 'Unactive' = 'Active';
+  editStatus: 'Active' | 'Inactive' = 'Active';
 
   ngOnInit() {
     this.route.paramMap.pipe(
@@ -49,22 +51,35 @@ export class UserEdit implements OnInit {
         this.editRole = user.role;
         this.editStatus = user.status;
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.error = 'Failed to load user details.';
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
+  private getErrorMessage(err: any): string {
+    if (err.error?.detail) {
+      if (Array.isArray(err.error.detail)) {
+        return err.error.detail.map((e: any) => e.msg).join(', ');
+      }
+      return err.error.detail;
+    }
+    return 'An unexpected error occurred.';
+  }
+
   toggleStatus() {
-    this.editStatus = this.editStatus === 'Active' ? 'Unactive' : 'Active';
+    this.editStatus = this.editStatus === 'Active' ? 'Inactive' : 'Active';
   }
 
   saveChanges() {
     if (!this.user || !this.editFullName || !this.editEmail || !this.editPhone) return;
 
     this.isSaving = true;
+    this.saveError = '';
     this.userService.updateUser(this.user.id, {
       full_name: this.editFullName,
       email: this.editEmail,
@@ -75,11 +90,13 @@ export class UserEdit implements OnInit {
       next: () => {
         this.isSaving = false;
         this.toastService.success('Changes Saved', 'User profile has been updated successfully.');
+        this.cdr.detectChanges();
         setTimeout(() => this.router.navigate(['/users']), 1500);
       },
       error: (err) => {
         this.isSaving = false;
-        this.error = 'Failed to save changes.';
+        this.saveError = this.getErrorMessage(err);
+        this.cdr.detectChanges();
       }
     });
   }
@@ -92,9 +109,15 @@ export class UserEdit implements OnInit {
 
   onConfirmDelete() {
     if (!this.user) return;
-    this.userService.deleteUser(this.user.id).subscribe(() => {
-      this.toastService.success('User Deleted', 'User has been permanently removed.');
-      this.router.navigate(['/users']);
+    this.userService.deleteUser(this.user.id).subscribe({
+      next: () => {
+        this.toastService.success('User Deleted', 'User has been permanently removed.');
+        this.router.navigate(['/users']);
+      },
+      error: (err) => {
+        this.toastService.error('Error', this.getErrorMessage(err));
+        this.cdr.detectChanges();
+      }
     });
     this.showDeleteConfirm = false;
   }

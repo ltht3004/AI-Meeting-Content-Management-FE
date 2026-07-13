@@ -4,7 +4,7 @@
     <h1 class="page-title-local">Users</h1>
     <div class="local-search">
       <span class="material-icons-round search-icon">search</span>
-      <input type="text" placeholder="Search user..." [(ngModel)]="searchQuery" class="search-input">
+      <input type="text" placeholder="Search user..." [(ngModel)]="searchQuery" (keyup.enter)="onSearch()" class="search-input">
     </div>
   </div>
 
@@ -31,7 +31,7 @@
           >
             <button class="dropdown-item" [class.active]="filterStatus === 'all'" (click)="setStatusFilter('all')">All Status</button>
             <button class="dropdown-item" [class.active]="filterStatus === 'Active'" (click)="setStatusFilter('Active')">Active</button>
-            <button class="dropdown-item" [class.active]="filterStatus === 'Unactive'" (click)="setStatusFilter('Unactive')">Unactive</button>
+            <button class="dropdown-item" [class.active]="filterStatus === 'Inactive'" (click)="setStatusFilter('Inactive')">Inactive</button>
           </app-dropdown>
         </div>
         <div class="select-wrapper-inline">
@@ -69,7 +69,7 @@
                 <span class="spinner-blue"></span> Loading users...
               </td>
             </tr>
-          } @else if (filteredUsers.length === 0) {
+          } @else if (users.length === 0) {
             <tr>
               <td colspan="6" class="text-center py-4 text-muted">
                 No users found.
@@ -80,10 +80,9 @@
               <tr class="table-row">
                 <td>
                   <div class="user-cell">
-                    <img [src]="user.avatarUrl" alt="Avatar" class="avatar-sm">
+                    <img [src]="user.avatar_url || 'assets/images/default-avatar.png'" alt="Avatar" class="avatar-sm">
                     <div class="user-meta">
                       <a [routerLink]="['/users', user.id]" class="user-name-link">{{ user.full_name }}</a>
-                      <span class="user-active-time">{{ user.last_active }}</span>
                     </div>
                   </div>
                 </td>
@@ -93,7 +92,7 @@
                     {{ user.role === 'admin' ? 'Admin' : 'User' }}
                   </span>
                 </td>
-                <td class="text-muted">{{ user.created_at }}</td>
+                <td class="text-muted">{{ user.created_at | date:'mediumDate' }}</td>
                 <td>
                   <div class="status-cell">
                     <span class="status-dot" [class.active]="user.status === 'Active'"></span>
@@ -118,7 +117,7 @@
     <!-- Pagination -->
     <div class="pagination-footer">
       <div class="pagination-info">
-        Showing <strong>{{ (currentPage - 1) * pageSize + 1 }}-{{ getEndIndex() }}</strong> of <strong>{{ filteredUsers.length }}</strong> users
+        Showing <strong>{{ totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1 }}-{{ getEndIndex() }}</strong> of <strong>{{ totalCount }}</strong> users
       </div>
       <app-pagination
         class="table-pagination"

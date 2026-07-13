@@ -20,44 +20,56 @@
             <span class="breadcrumb-current">Edit User</span>
           </div>
           <h1 class="edit-title">User Profile Settings</h1>
-          <p class="edit-desc">Manage permissions, access levels, and account status for this user.</p>
+          <p class="edit-desc">Update personal information, role, and account status for this user.</p>
         </div>
 
         <!-- Avatar Section -->
         <div class="avatar-section">
           <div class="avatar-wrapper">
-            <img [src]="user.avatarUrl" alt="Avatar" class="avatar-img">
-            <button class="edit-avatar-btn">
-              <span class="material-icons-round">edit</span>
-            </button>
+            <img [src]="user.avatar_url || 'assets/images/default-avatar.png'" alt="Avatar" class="avatar-img">
           </div>
           <div class="avatar-meta">
             <h2 class="avatar-name">{{ user.full_name }}</h2>
-            <p class="avatar-subtitle">Product Designer • Joined {{ user.created_at }}</p>
+            <p class="avatar-subtitle">Joined {{ user.created_at | date:'mediumDate' }}</p>
           </div>
         </div>
 
         <!-- Form Fields -->
+        @if (saveError) {
+          <div class="error-banner" style="background: rgba(255,0,0,0.1); color: red; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+            <span class="material-icons-round">error_outline</span>
+            <span>{{ saveError }}</span>
+          </div>
+        }
         <div class="form-grid">
           <div class="form-group">
             <label class="form-label">Full Name <span class="required" style="color: red;">*</span></label>
-            <input type="text" class="form-control" [(ngModel)]="editFullName" required #editNameField="ngModel" [class.input-error]="editNameField.invalid && (editNameField.touched || editNameField.dirty)">
+            <input type="text" class="form-control" [(ngModel)]="editFullName" required minlength="4" #editNameField="ngModel" [class.input-error]="editNameField.invalid && (editNameField.touched || editNameField.dirty)">
             @if (editNameField.invalid && (editNameField.touched || editNameField.dirty)) {
-              <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">Full Name is required.</span>
+              <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">
+                @if (editNameField.errors?.['required']) { Full Name is required. }
+                @else if (editNameField.errors?.['minlength']) { Full Name must be at least 4 characters. }
+              </span>
             }
           </div>
           <div class="form-group">
             <label class="form-label">Email Address <span class="required" style="color: red;">*</span></label>
-            <input type="email" class="form-control" [(ngModel)]="editEmail" required #editEmailField="ngModel" [class.input-error]="editEmailField.invalid && (editEmailField.touched || editEmailField.dirty)">
+            <input type="email" class="form-control" [(ngModel)]="editEmail" required email #editEmailField="ngModel" [class.input-error]="editEmailField.invalid && (editEmailField.touched || editEmailField.dirty)">
             @if (editEmailField.invalid && (editEmailField.touched || editEmailField.dirty)) {
-              <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">Email is required.</span>
+              <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">
+                @if (editEmailField.errors?.['required']) { Email is required. }
+                @else if (editEmailField.errors?.['email']) { Please enter a valid email address. }
+              </span>
             }
           </div>
           <div class="form-group">
             <label class="form-label">Phone Number <span class="required" style="color: red;">*</span></label>
-            <input type="tel" class="form-control" [(ngModel)]="editPhone" required #editPhoneField="ngModel" [class.input-error]="editPhoneField.invalid && (editPhoneField.touched || editPhoneField.dirty)" placeholder="Phone Number">
+            <input type="tel" class="form-control" [(ngModel)]="editPhone" required pattern="^[0-9]{10}$" #editPhoneField="ngModel" [class.input-error]="editPhoneField.invalid && (editPhoneField.touched || editPhoneField.dirty)" placeholder="Phone Number">
             @if (editPhoneField.invalid && (editPhoneField.touched || editPhoneField.dirty)) {
-              <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">Phone Number is required.</span>
+              <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">
+                @if (editPhoneField.errors?.['required']) { Phone Number is required. }
+                @else if (editPhoneField.errors?.['pattern']) { Phone Number must be exactly 10 digits. }
+              </span>
             }
           </div>
           <div class="form-group">
@@ -90,7 +102,7 @@
         <!-- Form Actions -->
         <div class="form-actions">
           <button class="btn btn-text" [routerLink]="['/users', user.id]">Cancel</button>
-          <button class="btn btn-primary" (click)="saveChanges()" [disabled]="isSaving || !editFullName || !editEmail || !editPhone">
+          <button class="btn btn-primary" (click)="saveChanges()" [disabled]="isSaving || editNameField.invalid || editEmailField.invalid || editPhoneField.invalid">
             @if (isSaving) {
               <span class="spinner-white"></span>
             } @else {

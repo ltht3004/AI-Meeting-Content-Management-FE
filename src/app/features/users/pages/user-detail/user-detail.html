@@ -30,7 +30,7 @@
       <div class="profile-card glass-panel">
         <div class="profile-header">
           <div class="avatar-wrapper">
-            <img [src]="user.avatarUrl" alt="Avatar" class="avatar-lg">
+            <img [src]="user.avatar_url || 'assets/images/default-avatar.png'" alt="Avatar" class="avatar-lg">
           </div>
           <div class="profile-meta">
             <div class="name-row">
@@ -68,12 +68,12 @@
       <div class="productivity-card">
         <div class="card-top">
           <span class="card-label">USAGE QUOTA</span>
-          <h2 class="score-value">{{ user.usedQuota || 0 }} / {{ user.totalQuota || 0 }} <span style="font-size: 16px; font-weight: 500; opacity: 0.8;">mins</span></h2>
+          <h2 class="score-value">{{ user.used_quota || 0 }} / {{ user.total_quota || 0 }} <span style="font-size: 16px; font-weight: 500; opacity: 0.8;">mins</span></h2>
           <div class="progress-bar-container mt-2" style="background-color: rgba(255,255,255,0.2);">
-            <div class="progress-bar" style="background-color: #fff;" [style.width.%]="((user.usedQuota || 0) / (user.totalQuota || 1)) * 100"></div>
+            <div class="progress-bar" style="background-color: #fff;" [style.width.%]="((user.used_quota || 0) / (user.total_quota || 1)) * 100"></div>
           </div>
           <p class="score-desc" style="margin-top: 16px;">
-            {{ user.full_name.split(' ')[0] }} has used {{ (((user.usedQuota || 0) / (user.totalQuota || 1)) * 100).toFixed(1) }}% of their allocated AI transcript minutes for this billing cycle.
+            {{ user.full_name.split(' ')[0] }} has used {{ (((user.used_quota || 0) / (user.total_quota || 1)) * 100).toFixed(1) }}% of their allocated AI transcript minutes for this billing cycle.
           </p>
         </div>
         <div class="card-bottom">
