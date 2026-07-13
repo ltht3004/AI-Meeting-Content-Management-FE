@@ -24,7 +24,7 @@
     </div>
   } @else {
     <!-- Main Profile & Productivity Grid -->
-    <div class="profile-grid">
+    <div class="profile-grid" [style.grid-template-columns]="isAdmin ? '2fr 1fr' : '1fr'">
       
       <!-- Left: User Profile Info -->
       <div class="profile-card glass-panel">
@@ -48,7 +48,7 @@
             <span class="material-icons-round detail-icon">calendar_today</span>
             <div class="detail-text">
               <span class="detail-label">JOINED DATE</span>
-              <span class="detail-value">{{ user.created_at }}</span>
+              <span class="detail-value">{{ user.created_at | date:'mediumDate' }}</span>
             </div>
           </div>
           
@@ -64,28 +64,30 @@
         </div>
       </div>
 
-      <!-- Right: Usage Quota Card -->
-      <div class="productivity-card">
-        <div class="card-top">
-          <span class="card-label">USAGE QUOTA</span>
-          <h2 class="score-value">{{ user.used_quota || 0 }} / {{ user.total_quota || 0 }} <span style="font-size: 16px; font-weight: 500; opacity: 0.8;">mins</span></h2>
-          <div class="progress-bar-container mt-2" style="background-color: rgba(255,255,255,0.2);">
-            <div class="progress-bar" style="background-color: #fff;" [style.width.%]="((user.used_quota || 0) / (user.total_quota || 1)) * 100"></div>
+      @if (isAdmin) {
+        <!-- Right: Usage Quota Card -->
+        <div class="productivity-card">
+          <div class="card-top">
+            <span class="card-label">USAGE QUOTA</span>
+            <h2 class="score-value">{{ user.used_quota || 0 }} / {{ user.total_quota || 0 }} <span style="font-size: 16px; font-weight: 500; opacity: 0.8;">mins</span></h2>
+            <div class="progress-bar-container mt-2" style="background-color: rgba(255,255,255,0.2);">
+              <div class="progress-bar" style="background-color: #fff;" [style.width.%]="((user.used_quota || 0) / (user.total_quota || 1)) * 100"></div>
+            </div>
+            <p class="score-desc" style="margin-top: 16px;">
+              {{ user.full_name.split(' ')[0] }} has used {{ (((user.used_quota || 0) / (user.total_quota || 1)) * 100).toFixed(1) }}% of their allocated AI transcript minutes for this billing cycle.
+            </p>
           </div>
-          <p class="score-desc" style="margin-top: 16px;">
-            {{ user.full_name.split(' ')[0] }} has used {{ (((user.used_quota || 0) / (user.total_quota || 1)) * 100).toFixed(1) }}% of their allocated AI transcript minutes for this billing cycle.
-          </p>
+          <div class="card-bottom">
+            <div class="review-info">
+              <span class="review-label">NEXT RESET</span>
+              <span class="review-date">{{ user.resetDate || 'N/A' }}</span>
+            </div>
+            <div class="trend-icon-box">
+              <span class="material-icons-round">autorenew</span>
+            </div>
+          </div>
         </div>
-        <div class="card-bottom">
-          <div class="review-info">
-            <span class="review-label">NEXT RESET</span>
-            <span class="review-date">{{ user.resetDate || 'N/A' }}</span>
-          </div>
-          <div class="trend-icon-box">
-            <span class="material-icons-round">autorenew</span>
-          </div>
-        </div>
-      </div>
+      }
     </div>
 
     <!-- Stats Cards -->

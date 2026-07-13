@@ -72,13 +72,16 @@
         <div class="info-field">
           <span class="info-label">Phone Number <span class="required" style="color: red;">*</span></span>
           @if (isEditing) {
-            <input type="tel" class="info-input" [(ngModel)]="editPhone" required pattern="^\d{10}$" #editPhoneField="ngModel" [class.input-error]="editPhoneField.invalid && (editPhoneField.touched || editPhoneField.dirty)" placeholder="Phone Number">
+            <input type="tel" class="info-input" [(ngModel)]="editPhone" required pattern="^(03|05|07|08|09)[0-9]*$" minlength="10" maxlength="10" #editPhoneField="ngModel" [class.input-error]="editPhoneField.invalid && (editPhoneField.touched || editPhoneField.dirty)" placeholder="Phone Number">
             @if (editPhoneField.invalid && (editPhoneField.touched || editPhoneField.dirty)) {
               <span class="error-msg">
                 @if (editPhoneField.errors?.['required']) {
                   Phone Number is required.
                 }
                 @if (editPhoneField.errors?.['pattern']) {
+                  Phone number must start with a valid prefix (03, 05, 07, 08, 09).
+                }
+                @if (editPhoneField.errors?.['minlength']) {
                   Phone number must be exactly 10 digits.
                 }
               </span>

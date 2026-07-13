@@ -139,8 +139,8 @@ export class ProfileView implements OnInit {
       return;
     }
 
-    if (!/^\d{10}$/.test(this.editPhone)) {
-      this.errorMessage = 'Phone number must be exactly 10 digits.';
+    if (!/^(03|05|07|08|09)\d{8}$/.test(this.editPhone)) {
+      this.errorMessage = 'Phone number must be 10 digits and start with 03, 05, 07, 08, or 09.';
       return;
     }
 

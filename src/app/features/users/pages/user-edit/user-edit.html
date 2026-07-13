@@ -64,11 +64,12 @@
           </div>
           <div class="form-group">
             <label class="form-label">Phone Number <span class="required" style="color: red;">*</span></label>
-            <input type="tel" class="form-control" [(ngModel)]="editPhone" required pattern="^[0-9]{10}$" #editPhoneField="ngModel" [class.input-error]="editPhoneField.invalid && (editPhoneField.touched || editPhoneField.dirty)" placeholder="Phone Number">
+            <input type="tel" class="form-control" [(ngModel)]="editPhone" required pattern="^(03|05|07|08|09)[0-9]*$" minlength="10" maxlength="10" #editPhoneField="ngModel" [class.input-error]="editPhoneField.invalid && (editPhoneField.touched || editPhoneField.dirty)" placeholder="Phone Number">
             @if (editPhoneField.invalid && (editPhoneField.touched || editPhoneField.dirty)) {
               <span class="error-msg" style="color: red; font-size: 12px; margin-top: 4px;">
                 @if (editPhoneField.errors?.['required']) { Phone Number is required. }
-                @else if (editPhoneField.errors?.['pattern']) { Phone Number must be exactly 10 digits. }
+                @else if (editPhoneField.errors?.['pattern']) { Phone number must start with a valid prefix (03, 05, 07, 08, 09). }
+                @else if (editPhoneField.errors?.['minlength']) { Phone number must be exactly 10 digits. }
               </span>
             }
           </div>

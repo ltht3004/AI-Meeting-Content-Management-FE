@@ -78,6 +78,11 @@ export class UserEdit implements OnInit {
   saveChanges() {
     if (!this.user || !this.editFullName || !this.editEmail || !this.editPhone) return;
 
+    if (!/^(03|05|07|08|09)\d{8}$/.test(this.editPhone)) {
+      this.saveError = 'Phone number must be 10 digits and start with 03, 05, 07, 08, or 09.';
+      return;
+    }
+
     this.isSaving = true;
     this.saveError = '';
     this.userService.updateUser(this.user.id, {
