@@ -4,25 +4,6 @@
   gap: 24px;
 }
 
-/* Header */
-.meetings-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.meetings-header h2 {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--text-main);
-  margin-bottom: 4px;
-}
-
-.subtitle {
-  font-size: 14px;
-  color: var(--text-muted);
-}
-
 .create-btn {
   display: flex;
   align-items: center;
@@ -31,15 +12,6 @@
   padding: 10px 20px;
   width: 100%;
   box-sizing: border-box;
-}
-
-/* Header Right Layout */
-.header-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 12px;
-  width: 180px;
 }
 
 .status-filter-dropdown {

@@ -4,6 +4,7 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
 import { UserService, User } from '../../services/user.service';
 import { switchMap } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-user-detail',
@@ -16,10 +17,15 @@ export class UserDetail implements OnInit {
   userService = inject(UserService);
   route = inject(ActivatedRoute);
   cdr = inject(ChangeDetectorRef);
+  private authService = inject(AuthService);
 
   user: User | null = null;
   isLoading = true;
   error = '';
+
+  get isAdmin(): boolean {
+    return this.authService.currentUser()?.role === 'admin';
+  }
 
   ngOnInit() {
     this.route.paramMap.pipe(

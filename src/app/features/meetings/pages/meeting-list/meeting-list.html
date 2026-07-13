@@ -1,11 +1,8 @@
 <div class="meetings-container animate-fade-in">
-  <!-- Header section -->
-  <div class="meetings-header">
-    <div class="header-left">
-      <h2>Meetings</h2>
-      <p class="subtitle">Manage, view details and generate AI summaries of your recorded meetings.</p>
-    </div>
-    
+  <app-page-header
+    title="Meetings"
+    subtitle="Manage, view details and generate AI summaries of your recorded meetings."
+  >
     <div class="header-right">
       <a routerLink="/meetings/create" class="btn btn-primary create-btn">
         <span class="material-icons-round">add</span>
@@ -35,7 +32,7 @@
         </button>
       </app-dropdown>
     </div>
-  </div>
+  </app-page-header>
 
   <!-- Card Grid -->
   @if (isLoading) {
@@ -81,7 +78,7 @@
             <!-- Participants list -->
             <div class="participants-section">
               <div class="avatar-group">
-                @for (p of getParticipantsList(meeting.participants).slice(0, 3); track p.name) {
+                @for (p of getParticipantsList(meeting).slice(0, 3); track p.id) {
                   <a 
                     [routerLink]="['/users', p.id]" 
                     class="avatar-circle-link" 
@@ -92,9 +89,9 @@
                     </div>
                   </a>
                 }
-                @if (getParticipantCount(meeting.participants) > 3) {
+                @if (getParticipantCount(meeting) > 3) {
                   <div class="avatar-circle-more">
-                    +{{ getParticipantCount(meeting.participants) - 3 }}
+                    +{{ getParticipantCount(meeting) - 3 }}
                   </div>
                 }
               </div>

@@ -64,7 +64,7 @@ export class MeetingCreate implements OnInit {
       meeting_date: ['', [Validators.required, this.futureDateValidator(), this.workingHoursValidator()]],
       location: ['', [Validators.required]],
       duration: [60, [Validators.required, Validators.min(15), Validators.max(240)]],
-      participants: ['', [Validators.required, this.minParticipantsValidator(1)]]
+      participants: ['', [Validators.required, this.minParticipantsValidator(2)]]
     });
 
     this.loadAvailableUsers(false);
@@ -234,31 +234,18 @@ export class MeetingCreate implements OnInit {
     }).join(', ');
   }
 
-  private buildParticipantsWithCreator(selectedParticipants: string): string {
-    const creatorId = this.authService.currentUser()?.id || '';
-    const participantIds = selectedParticipants
-      .split(',')
-      .map((id: string) => id.trim())
-      .filter((id: string) => id.length > 0);
-
-    if (creatorId && !participantIds.includes(creatorId)) {
-      participantIds.unshift(creatorId);
-    }
-
-    return participantIds.join(', ');
-  }
-
   loadAvailableUsers(append = false) {
     if (this.isLoadingUsers) return;
     
     this.isLoadingUsers = true;
-    const queryParams = `?page=${this.usersPage}&page_size=${this.usersPageSize}&search=${encodeURIComponent(this.userSearchQuery.trim())}`;
+    const skip = (this.usersPage - 1) * this.usersPageSize;
+    const queryParams = `?skip=${skip}&limit=${this.usersPageSize}&search=${encodeURIComponent(this.userSearchQuery.trim())}`;
     
     this.http.get<any>(`${this.api.users}/${queryParams}`).subscribe({
       next: (res) => {
         this.isLoadingUsers = false;
-        const users = res.users || [];
-        const total = res.total || 0;
+        const users = res.items || res.users || [];
+        const total = res.total_count ?? res.total ?? 0;
         users.forEach((user: any) => this.usersById.set(user.id, user));
         
         if (append) {
@@ -322,7 +309,7 @@ export class MeetingCreate implements OnInit {
       meeting_date: formValue.meeting_date,
       location: formValue.location,
       duration: Number(formValue.duration),
-      participants: this.buildParticipantsWithCreator(formValue.participants),
+      participants: formValue.participants,
       status: 'Scheduled'
     };
 

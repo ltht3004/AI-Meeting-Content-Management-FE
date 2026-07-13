@@ -51,7 +51,7 @@
   top: calc(100% + 8px);
   right: 0;
   min-width: 220px;
-  background: var(--bg-surface-glass, rgba(255, 255, 255, 0.8));
+  background: var(--bg-surface);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
@@ -81,7 +81,7 @@
   background: transparent;
   color: var(--text-main);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   text-align: left;
   cursor: pointer;
   transition: all var(--transition-speed) ease;
@@ -89,7 +89,19 @@
 }
 
 :host ::ng-deep .dropdown-item:hover {
-  background-color: var(--bg-surface-hover);
+  background-color: rgba(0, 82, 204, 0.08);
+  color: var(--primary);
+}
+
+:host ::ng-deep .dropdown-item .material-icons-round {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+:host ::ng-deep .dropdown-item:hover .material-icons-round {
   color: var(--primary);
 }
 
