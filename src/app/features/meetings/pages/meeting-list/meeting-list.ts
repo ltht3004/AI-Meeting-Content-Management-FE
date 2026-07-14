@@ -67,6 +67,7 @@ export class MeetingList implements OnInit {
   private meetingService = inject(MeetingService);
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
+  private searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   get currentUserId(): string {
     return this.authService.currentUser()?.id || '';
@@ -80,7 +81,7 @@ export class MeetingList implements OnInit {
     effect(() => {
       const query = this.searchService.searchQuery();
       this.currentPage = 1;
-      this.loadMeetings();
+      this.loadMeetingsDebounced();
     });
   }
 
@@ -123,6 +124,16 @@ export class MeetingList implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  loadMeetingsDebounced() {
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
+
+    this.searchDebounceTimer = setTimeout(() => {
+      this.loadMeetings();
+    }, 500);
   }
 
   normalizeStatus(status: string): 'scheduled' | 'completed' | 'processing' {
