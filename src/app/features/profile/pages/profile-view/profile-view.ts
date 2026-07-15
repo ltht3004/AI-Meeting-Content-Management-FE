@@ -6,11 +6,12 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ApiService } from '../../../../core/services/api.service';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { ConfirmDialog } from '../../../../shared/components/confirm-dialog/confirm-dialog';
+import { PageHeader } from '../../../../shared/components/page-header/page-header';
 
 @Component({
   selector: 'app-profile-view',
   standalone: true,
-  imports: [FormsModule, DecimalPipe, ConfirmDialog],
+  imports: [FormsModule, DecimalPipe, ConfirmDialog, PageHeader],
   templateUrl: './profile-view.html',
   styleUrl: './profile-view.css'
 })
@@ -28,6 +29,8 @@ export class ProfileView implements OnInit {
   errorMessage = '';
   isLoading = false;
   showRemoveAvatarModal = false;
+  showEmailVerifyModal = false;
+  emailVerifyCode = '';
 
   stats: any = {
     totalMeetings: 0,
@@ -152,11 +155,18 @@ export class ProfileView implements OnInit {
       email: this.editEmail,
       phone: this.editPhone
     }).subscribe({
-      next: () => {
+      next: (res) => {
         this.isLoading = false;
-        this.isEditing = false;
-        this.toastService.success('Changes Saved', 'Profile updated successfully!');
-        this.cdr.detectChanges();
+        
+        if (res.requires_email_verification) {
+          this.showEmailVerifyModal = true;
+          this.errorMessage = '';
+          this.cdr.detectChanges();
+        } else {
+          this.isEditing = false;
+          this.toastService.success('Changes Saved', 'Profile updated successfully!');
+          this.cdr.detectChanges();
+        }
       },
       error: (err) => {
         this.isLoading = false;
@@ -165,6 +175,43 @@ export class ProfileView implements OnInit {
           detail = detail[0].msg;
         }
         this.errorMessage = detail || 'Update failed.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  cancelEmailVerify() {
+    this.showEmailVerifyModal = false;
+    this.emailVerifyCode = '';
+    this.errorMessage = '';
+    this.cdr.detectChanges();
+  }
+
+  confirmEmailVerify() {
+    if (!this.emailVerifyCode) {
+      this.errorMessage = 'Please enter the verification code.';
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.authService.verifyEmailChange(this.emailVerifyCode).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.showEmailVerifyModal = false;
+        this.isEditing = false;
+        this.emailVerifyCode = '';
+        this.toastService.success('Email Verified', 'Profile updated successfully!');
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        let detail = err.error?.detail;
+        if (Array.isArray(detail)) {
+          detail = detail[0].msg;
+        }
+        this.errorMessage = detail || 'Verification failed. Please try again.';
         this.cdr.detectChanges();
       }
     });

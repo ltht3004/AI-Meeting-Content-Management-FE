@@ -1,9 +1,9 @@
 <div class="profile-page animate-fade-in">
   <!-- Page Header -->
-  <div class="page-header">
-    <h1 class="page-title">My Profile</h1>
-    <p class="page-desc">View and manage your personal account information.</p>
-  </div>
+  <app-page-header
+    title="My Profile"
+    subtitle="View and manage your personal account information."
+  ></app-page-header>
 
   <!-- Main Profile Card -->
   <div class="profile-content">
@@ -225,3 +225,32 @@
   (confirm)="confirmRemoveAvatar()"
   (cancel)="cancelRemoveAvatar()">
 </app-confirm-dialog>
+
+<!-- Email Verification Modal -->
+@if (showEmailVerifyModal) {
+  <div class="modal-overlay">
+    <div class="modal-content glass-panel">
+      <h3>Verify Email Change</h3>
+      <p>A verification code has been sent to <strong>{{ editEmail }}</strong>. Please enter it below to confirm your new email address.</p>
+      
+      <div class="info-field" style="text-align: left; margin-bottom: 0;">
+        <input type="text" class="info-input" [(ngModel)]="emailVerifyCode" placeholder="Enter 6-digit code" style="text-align: center; letter-spacing: 4px; font-weight: bold; font-size: 18px;">
+      </div>
+      
+      @if (errorMessage) {
+        <div class="error-msg" style="margin-top: 12px; text-align: left;">{{ errorMessage }}</div>
+      }
+      
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="cancelEmailVerify()" [disabled]="isLoading">Cancel</button>
+        <button class="btn btn-primary" (click)="confirmEmailVerify()" [disabled]="isLoading || !emailVerifyCode">
+          @if (isLoading) {
+            <span class="spinner"></span>
+          } @else {
+            Verify Code
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

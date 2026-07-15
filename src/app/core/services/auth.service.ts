@@ -79,6 +79,18 @@ export class AuthService {
   updateProfile(profileData: { full_name: string; email: string; phone?: string }): Observable<any> {
     return this.http.put<any>(`${this.apiService.baseUrl}/profile/me`, profileData).pipe(
       tap(user => {
+        // Only update local storage if email was NOT changed (no verification needed yet)
+        if (!user.requires_email_verification) {
+          this.currentUser.set(user);
+          localStorage.setItem('user', JSON.stringify(user));
+        }
+      })
+    );
+  }
+
+  verifyEmailChange(code: string): Observable<any> {
+    return this.http.post<any>(`${this.apiService.baseUrl}/profile/me/verify-email`, { code }).pipe(
+      tap(user => {
         this.currentUser.set(user);
         localStorage.setItem('user', JSON.stringify(user));
       })
