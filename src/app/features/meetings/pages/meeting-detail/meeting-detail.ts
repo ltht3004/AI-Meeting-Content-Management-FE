@@ -13,6 +13,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ApiService } from '../../../../core/services/api.service';
 
 interface ParticipantDetail {
+  id?: string | null;
   name: string;
   status: string;
   is_active: boolean;
@@ -27,6 +28,9 @@ interface MeetingDetailData extends Meeting {
   };
   participant_details: ParticipantDetail[];
 }
+
+const MAX_RECORDING_SIZE_BYTES = 50 * 1024 * 1024;
+const MAX_RECORDING_SIZE_LABEL = '50MB';
 
 @Component({
   selector: 'app-meeting-detail',
@@ -144,7 +148,10 @@ export class MeetingDetail implements OnInit {
 
   getOtherParticipantsTooltip(others: any[]): string {
     if (!others) return '';
-    return others.map(o => o.name.trim() + (o.status === 'Unactive' || !o.is_active ? ' (Unactive)' : '')).join(', ');
+    return others.map(o => {
+      if (o.status === 'Unavailable') return `${o.name.trim()} (Unavailable)`;
+      return o.name.trim() + (o.status === 'Unactive' || !o.is_active ? ' (Unactive)' : '');
+    }).join(', ');
   }
 
   selectRecording(recId: string) {
@@ -174,16 +181,34 @@ export class MeetingDetail implements OnInit {
 
   deleteRecording(recId: string, event: Event) {
     event.stopPropagation();
+    const recording = this.meeting?.recordings.find(rec => rec.id === recId);
     this.recToDelete = recId;
-    this.recNameToDelete = 'Recording';
+    this.recNameToDelete = recording?.file_name || 'Recording';
     this.showDeleteRecConfirm = true;
   }
 
   onConfirmDeleteRec() {
     this.showDeleteRecConfirm = false;
-    this.recToDelete = '';
-    this.recNameToDelete = '';
-    this.toastService.info('Info', 'Recording API is not implemented yet.');
+    const recordingId = this.recToDelete;
+    const recordingName = this.recNameToDelete;
+
+    if (!recordingId) return;
+
+    this.http.delete<{ message: string }>(`${this.api.recordings}/${recordingId}`).subscribe({
+      next: () => {
+        this.toastService.success('Deleted', `"${recordingName}" has been deleted.`);
+        this.recToDelete = '';
+        this.recNameToDelete = '';
+        this.loadMeetingDetail();
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastService.error('Error', err?.error?.detail || 'Cannot delete recording.');
+        this.recToDelete = '';
+        this.recNameToDelete = '';
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   onCancelDeleteRec() {
@@ -230,6 +255,11 @@ export class MeetingDetail implements OnInit {
 
     if (!allowedTypes.includes(file.type) && !hasAllowedExtension) {
       this.toastService.error('Invalid file', 'Please upload an audio file (.mp3, .wav, .m4a, .ogg, .opus, .aac, .flac).');
+      return;
+    }
+
+    if (file.size > MAX_RECORDING_SIZE_BYTES) {
+      this.toastService.error('Upload failed', `File size must not exceed ${MAX_RECORDING_SIZE_LABEL}.`);
       return;
     }
 
@@ -287,8 +317,42 @@ export class MeetingDetail implements OnInit {
   }
 
   downloadReport() {
+    const format = this.exportType === 'word' ? 'docx' : 'pdf';
+    const fileName = `${this.slugify(this.meeting?.title || 'meeting')}-report.${format}`;
+    const url = `${this.api.meetings}/${this.meetingId}/export?format=${format}&current_user_id=${this.currentUserId}`;
+
+    this.isExporting = true;
     this.showPreviewModal = false;
-    this.toastService.info('Info', 'Export API is not implemented yet.');
+
+    this.http.get(url, { responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = fileName;
+        link.click();
+        URL.revokeObjectURL(downloadUrl);
+
+        this.isExporting = false;
+        this.toastService.success('Exported', 'Report downloaded successfully.');
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error(err);
+        this.isExporting = false;
+        this.toastService.error('Export failed', err?.error?.detail || 'Cannot export report.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  slugify(value: string): string {
+    return value
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'meeting';
   }
 
   openParticipantsModal() {
@@ -299,5 +363,14 @@ export class MeetingDetail implements OnInit {
   closeParticipantsModal() {
     this.showParticipantsModal = false;
     this.cdr.detectChanges();
+  }
+
+  openParticipantProfile(participant: ParticipantDetail) {
+    if (!participant.id || participant.status === 'Unavailable') return;
+
+    this.showParticipantsModal = false;
+    this.router.navigate(['/users', participant.id], {
+      queryParams: { returnTo: `/meetings/${this.meetingId}` }
+    });
   }
 }

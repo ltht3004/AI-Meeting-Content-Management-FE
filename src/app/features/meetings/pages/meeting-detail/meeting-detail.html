@@ -237,12 +237,25 @@
             </div>
             <div class="participants-list">
               @for (p of meeting.participant_details; track p.name) {
-                <div class="participant-item" [class.unactive]="p.status === 'Unactive' || !p.is_active">
-                  <div class="avatar-sm" [class.avatar-unactive]="p.status === 'Unactive' || !p.is_active">
+                <div
+                  class="participant-item"
+                  [class.unactive]="p.status === 'Unactive' || p.status === 'Unavailable' || !p.is_active"
+                  [class.clickable]="p.id && p.status !== 'Unavailable'"
+                  [class.disabled-profile]="p.status === 'Unavailable' || !p.id"
+                  role="button"
+                  [attr.tabindex]="p.id && p.status !== 'Unavailable' ? 0 : -1"
+                  [attr.title]="p.id && p.status !== 'Unavailable' ? 'View participant profile' : 'Participant no longer exists'"
+                  (click)="openParticipantProfile(p)"
+                  (keydown.enter)="openParticipantProfile(p)"
+                  (keydown.space)="openParticipantProfile(p); $event.preventDefault()"
+                >
+                  <div class="avatar-sm" [class.avatar-unactive]="p.status === 'Unactive' || p.status === 'Unavailable' || !p.is_active">
                     {{ p.name.trim().charAt(0) }}
                   </div>
                   <span class="participant-name">{{ p.name.trim() }}</span>
-                  @if (p.status === 'Unactive' || !p.is_active) {
+                  @if (p.status === 'Unavailable') {
+                    <span class="participant-badge-unactive">Unavailable</span>
+                  } @else if (p.status === 'Unactive' || !p.is_active) {
                     <span class="participant-badge-unactive">Unactive</span>
                   }
                 </div>
@@ -380,52 +393,91 @@
           <!-- A4 Sheet Representation -->
           <div class="a4-page" [class.word-border]="exportType === 'word'">
             <div class="pdf-header">
-              <div class="pdf-doc-title">MEETING REPORT SUMMARY</div>
+              <div class="pdf-doc-title">AI Meeting Report</div>
+              <div class="pdf-doc-subtitle">{{ meeting.title }}</div>
               <div class="pdf-divider" [class.bg-word]="exportType === 'word'"></div>
-              
-              <div class="pdf-meta-grid">
-                <div class="pdf-meta-item">
-                  <strong>Title:</strong> <span>{{ meeting.title }}</span>
-                </div>
-                <div class="pdf-meta-item">
-                  <strong>Date:</strong> <span>{{ meeting.meeting_date | date:'dd/MM/yyyy • HH:mm':'Asia/Ho_Chi_Minh':'vi-VN' }}</span>
-                </div>
-                <div class="pdf-meta-item">
-                  <strong>Location:</strong> <span>{{ meeting.location }}</span>
-                </div>
-                <div class="pdf-meta-item">
-                  <strong>Duration:</strong> <span>{{ meeting.duration }} minutes</span>
-                </div>
-                <div class="pdf-meta-item full-width">
-                  <strong>Participants:</strong> <span>{{ meeting.participants }}</span>
-                </div>
+            </div>
+            
+            <div class="pdf-section">
+              <h4 class="pdf-sec-title" [class.border-word]="exportType === 'word'">Meeting Information</h4>
+              <div class="pdf-info-table">
+                <div class="pdf-info-label">Date &amp; Time</div>
+                <div class="pdf-info-value">{{ meeting.meeting_date | date:'dd/MM/yyyy - HH:mm':'Asia/Ho_Chi_Minh':'vi-VN' }}</div>
+
+                <div class="pdf-info-label">Location</div>
+                <div class="pdf-info-value">{{ meeting.location || 'N/A' }}</div>
+
+                <div class="pdf-info-label">Duration</div>
+                <div class="pdf-info-value">{{ meeting.duration }} minutes</div>
+
+                <div class="pdf-info-label">Status</div>
+                <div class="pdf-info-value">{{ meeting.status }}</div>
               </div>
             </div>
-            
+
             <div class="pdf-section">
-              <h4 class="pdf-sec-title" [class.border-word]="exportType === 'word'">1. AI Summary Overview</h4>
+              <h4 class="pdf-sec-title" [class.border-word]="exportType === 'word'">Description</h4>
+              <p class="pdf-summary-text">{{ meeting.description || 'No description.' }}</p>
+            </div>
+
+            <div class="pdf-section">
+              <h4 class="pdf-sec-title" [class.border-word]="exportType === 'word'">Participants</h4>
+              @if (meeting.participant_details.length) {
+                <div class="pdf-list" [class.pdf-list-columns]="meeting.participant_details.length > 8">
+                  @for (participant of meeting.participant_details; track participant.name) {
+                    <div class="pdf-list-item">- {{ participant.name }}</div>
+                  }
+                </div>
+              } @else {
+                <p class="pdf-summary-text">No participants.</p>
+              }
+            </div>
+
+            <div class="pdf-section">
+              <h4 class="pdf-sec-title" [class.border-word]="exportType === 'word'">AI Summary</h4>
               <p class="pdf-summary-text">{{ meeting.summary?.content || 'No summary generated yet.' }}</p>
+            </div>
+
+            <div class="pdf-section">
+              <h4 class="pdf-sec-title" [class.border-word]="exportType === 'word'">Recordings</h4>
+              @if (meeting.recordings.length) {
+                <div class="pdf-list">
+                  @for (rec of meeting.recordings; track rec.id) {
+                    <div class="pdf-list-item">- {{ rec.file_name }} ({{ formatRecordingSize(rec.file_size) }})</div>
+                  }
+                </div>
+              } @else {
+                <p class="pdf-summary-text">No recordings uploaded.</p>
+              }
             </div>
             
             <div class="pdf-section">
-              <h4 class="pdf-sec-title" [class.border-word]="exportType === 'word'">2. Meeting Transcripts</h4>
-              @for (rec of meeting.recordings; track rec.id) {
+              <h4 class="pdf-sec-title" [class.border-word]="exportType === 'word'">Transcript</h4>
+              @if (meeting.recordings.length) {
+                @for (rec of meeting.recordings; track rec.id) {
                 <div class="pdf-recording-block">
-                  <h5 class="pdf-rec-title" [class.text-word]="exportType === 'word'">File: {{ rec.file_name }}</h5>
-                  <div class="pdf-transcript-list">
-                    @for (seg of meeting.transcripts[rec.id]; track seg.time) {
-                      <div class="pdf-transcript-row">
-                        <span class="pdf-speaker">[{{ seg.time }}] {{ seg.speaker }}:</span>
-                        <span class="pdf-text">{{ seg.text }}</span>
+                    <h5 class="pdf-rec-title" [class.text-word]="exportType === 'word'">{{ rec.file_name }}</h5>
+                    @if (meeting.transcripts[rec.id]?.length) {
+                      <div class="pdf-transcript-list">
+                        @for (seg of meeting.transcripts[rec.id]; track seg.time) {
+                          <div class="pdf-transcript-row">
+                            <span class="pdf-speaker">[{{ seg.time }}] {{ seg.speaker }}:</span>
+                            <span class="pdf-text">{{ seg.text }}</span>
+                          </div>
+                        }
                       </div>
+                    } @else {
+                      <p class="pdf-summary-text">No transcript content.</p>
                     }
-                  </div>
                 </div>
+                }
+              } @else {
+                <p class="pdf-summary-text">No transcript available.</p>
               }
             </div>
             
             <div class="pdf-footer">
-              <span>AI Meeting Content Management System • Generated on {{ today | date:'dd/MM/yyyy HH:mm':'Asia/Ho_Chi_Minh':'vi-VN' }}</span>
+              <span>AI Meeting Content Management System - Generated on {{ today | date:'dd/MM/yyyy HH:mm':'Asia/Ho_Chi_Minh':'vi-VN' }}</span>
               <span>Page 1 of 1</span>
             </div>
           </div>
@@ -464,20 +516,35 @@
         <div class="modal-body participants-modal-body">
           <div class="participants-grid-popup">
             @for (p of meeting.participant_details; track p.name) {
-              <div class="participant-item-popup" [class.unactive]="p.status === 'Unactive' || !p.is_active">
-                <div class="avatar-lg" [class.avatar-unactive]="p.status === 'Unactive' || !p.is_active">
+              <div
+                class="participant-item-popup"
+                [class.unactive]="p.status === 'Unactive' || p.status === 'Unavailable' || !p.is_active"
+                [class.disabled-profile]="p.status === 'Unavailable' || !p.id"
+                role="button"
+                [attr.tabindex]="p.status === 'Unavailable' || !p.id ? -1 : 0"
+                [attr.title]="p.status === 'Unavailable' || !p.id ? 'Participant no longer exists' : 'View participant profile'"
+                (click)="openParticipantProfile(p)"
+                (keydown.enter)="openParticipantProfile(p)"
+                (keydown.space)="openParticipantProfile(p); $event.preventDefault()"
+              >
+                <div class="avatar-lg" [class.avatar-unactive]="p.status === 'Unactive' || p.status === 'Unavailable' || !p.is_active">
                   {{ p.name.trim().charAt(0) }}
                 </div>
                 <div class="participant-info-popup">
                   <span class="participant-name-popup">{{ p.name.trim() }}</span>
-                  <span class="participant-status-text" [class.status-unactive]="p.status === 'Unactive' || !p.is_active">
-                    {{ (p.status === 'Unactive' || !p.is_active) ? 'Unactive / Disabled' : 'Active Account' }}
+                  <span class="participant-status-text" [class.status-unactive]="p.status === 'Unactive' || p.status === 'Unavailable' || !p.is_active">
+                    {{ p.status === 'Unavailable' ? 'Deleted or unavailable' : ((p.status === 'Unactive' || !p.is_active) ? 'Unactive / Disabled' : 'Active Account') }}
                   </span>
                 </div>
-                @if (p.status === 'Unactive' || !p.is_active) {
+                @if (p.status === 'Unavailable') {
+                  <span class="participant-badge-unactive">Unavailable</span>
+                } @else if (p.status === 'Unactive' || !p.is_active) {
                   <span class="participant-badge-unactive">Unactive</span>
                 } @else {
                   <span class="participant-badge-active">Active</span>
+                }
+                @if (p.status !== 'Unavailable' && p.id) {
+                  <span class="material-icons-round participant-profile-icon">chevron_right</span>
                 }
               </div>
             }
