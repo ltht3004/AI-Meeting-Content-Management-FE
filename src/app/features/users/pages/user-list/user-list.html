@@ -1,12 +1,14 @@
 <div class="page-container animate-fade-in">
-  <!-- Top Page Header (If layout doesn't provide it) -->
-  <div class="page-header-local">
-    <h1 class="page-title-local">Users</h1>
+  <!-- Top Page Header using shared component -->
+  <app-page-header
+    title="Users"
+    subtitle="Manage all users in the organization."
+  >
     <div class="local-search">
       <span class="material-icons-round search-icon">search</span>
       <input type="text" placeholder="Search user..." [(ngModel)]="searchQuery" (keyup.enter)="onSearch()" class="search-input">
     </div>
-  </div>
+  </app-page-header>
 
   <div class="table-card glass-panel">
     <!-- Toolbar -->
@@ -80,7 +82,7 @@
               <tr class="table-row">
                 <td>
                   <div class="user-cell">
-                    <img [src]="user.avatar_url || 'assets/images/default-avatar.png'" alt="Avatar" class="avatar-sm">
+                    <img [src]="getAvatarUrl(user.avatar_url)" alt="Avatar" class="avatar-sm">
                     <div class="user-meta">
                       <a [routerLink]="['/users', user.id]" class="user-name-link">{{ user.full_name }}</a>
                     </div>

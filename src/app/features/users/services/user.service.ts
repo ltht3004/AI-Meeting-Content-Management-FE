@@ -83,8 +83,12 @@ export class UserService {
     return this.http.post<User>(`${this.apiUrl}/`, user);
   }
 
-  updateUser(id: string, updates: Partial<User>): Observable<User> {
-    return this.http.put<User>(`${this.apiUrl}/${id}`, updates);
+  updateUser(id: string, userData: any): Observable<any> {
+    return this.http.put<any>(`${this.apiService.baseUrl}/users/${id}`, userData);
+  }
+
+  verifyUserEmailChange(id: string, code: string): Observable<any> {
+    return this.http.post<any>(`${this.apiService.baseUrl}/users/${id}/verify-email`, { code });
   }
 
   deleteUser(id: string): Observable<void> {

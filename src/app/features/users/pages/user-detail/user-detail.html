@@ -30,7 +30,7 @@
       <div class="profile-card glass-panel">
         <div class="profile-header">
           <div class="avatar-wrapper">
-            <img [src]="user.avatar_url || 'assets/images/default-avatar.png'" alt="Avatar" class="avatar-lg">
+            <img [src]="getAvatarUrl(user.avatar_url)" alt="Avatar" class="avatar-lg">
           </div>
           <div class="profile-meta">
             <div class="name-row">

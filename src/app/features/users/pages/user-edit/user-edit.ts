@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { UserService, User } from '../../services/user.service';
 import { switchMap } from 'rxjs/operators';
 import { ToastService } from '../../../../shared/services/toast.service';
+import { ApiService } from '../../../../core/services/api.service';
 
 import { ConfirmDialog } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 
@@ -20,6 +21,7 @@ export class UserEdit implements OnInit {
   route = inject(ActivatedRoute);
   router = inject(Router);
   toastService = inject(ToastService);
+  apiService = inject(ApiService);
   cdr = inject(ChangeDetectorRef);
 
   user: User | null = null;
@@ -34,6 +36,19 @@ export class UserEdit implements OnInit {
   editPhone = '';
   editRole: 'admin' | 'user' = 'user';
   editStatus: 'Active' | 'Inactive' = 'Active';
+
+  getAvatarUrl(avatarUrl: string | undefined): string {
+    const defaultAvatar = 'assets/images/default-avatar.png';
+    if (avatarUrl) {
+      if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')) {
+        return avatarUrl;
+      }
+      const rootUrl = this.apiService.baseUrl.replace('/api/v1', '');
+      const path = avatarUrl.startsWith('/') ? avatarUrl : `/${avatarUrl}`;
+      return `${rootUrl}${path}`;
+    }
+    return defaultAvatar;
+  }
 
   ngOnInit() {
     this.route.paramMap.pipe(
@@ -87,7 +102,6 @@ export class UserEdit implements OnInit {
     this.saveError = '';
     this.userService.updateUser(this.user.id, {
       full_name: this.editFullName,
-      email: this.editEmail,
       phone: this.editPhone,
       role: this.editRole,
       status: this.editStatus

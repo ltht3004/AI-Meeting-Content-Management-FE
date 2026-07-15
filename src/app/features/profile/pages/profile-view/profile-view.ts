@@ -66,8 +66,12 @@ export class ProfileView implements OnInit {
   get avatarUrl(): string {
     const defaultAvatar = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80';
     if (this.user?.avatar_url) {
+      if (this.user.avatar_url.startsWith('http://') || this.user.avatar_url.startsWith('https://')) {
+        return this.user.avatar_url;
+      }
       const rootUrl = this.apiService.baseUrl.replace('/api/v1', '');
-      return `${rootUrl}${this.user.avatar_url}`;
+      const path = this.user.avatar_url.startsWith('/') ? this.user.avatar_url : `/${this.user.avatar_url}`;
+      return `${rootUrl}${path}`;
     }
     return defaultAvatar;
   }

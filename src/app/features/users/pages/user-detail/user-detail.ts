@@ -5,6 +5,7 @@ import { UserService, User } from '../../services/user.service';
 import { switchMap } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ApiService } from '../../../../core/services/api.service';
 
 @Component({
   selector: 'app-user-detail',
@@ -18,6 +19,7 @@ export class UserDetail implements OnInit {
   route = inject(ActivatedRoute);
   cdr = inject(ChangeDetectorRef);
   private authService = inject(AuthService);
+  private apiService = inject(ApiService);
 
   user: User | null = null;
   isLoading = true;
@@ -25,6 +27,19 @@ export class UserDetail implements OnInit {
 
   get isAdmin(): boolean {
     return this.authService.currentUser()?.role === 'admin';
+  }
+
+  getAvatarUrl(avatarUrl: string | undefined): string {
+    const defaultAvatar = 'assets/images/default-avatar.png';
+    if (avatarUrl) {
+      if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')) {
+        return avatarUrl;
+      }
+      const rootUrl = this.apiService.baseUrl.replace('/api/v1', '');
+      const path = avatarUrl.startsWith('/') ? avatarUrl : `/${avatarUrl}`;
+      return `${rootUrl}${path}`;
+    }
+    return defaultAvatar;
   }
 
   ngOnInit() {
