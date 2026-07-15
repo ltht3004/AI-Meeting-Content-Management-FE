@@ -10,4 +10,5 @@ export class ApiService {
   readonly meetings = `${this.baseUrl}/meetings`;
   readonly users = `${this.baseUrl}/users`;
   readonly dashboard = `${this.baseUrl}/dashboard`;
+  readonly recordings = `${this.baseUrl}/recordings`;
 }

@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { HttpClient, HttpEventType } from '@angular/common/http';
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -9,6 +10,7 @@ import { ToastService } from '../../../../shared/services/toast.service';
 import { ConfirmDialog } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 import { MeetingService, Meeting } from '../../../../core/services/meeting.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ApiService } from '../../../../core/services/api.service';
 
 interface ParticipantDetail {
   name: string;
@@ -43,6 +45,8 @@ interface MeetingDetailData extends Meeting {
 export class MeetingDetail implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private http = inject(HttpClient);
+  private api = inject(ApiService);
   private toastService = inject(ToastService);
   private meetingService = inject(MeetingService);
   private authService = inject(AuthService);
@@ -109,13 +113,13 @@ export class MeetingDetail implements OnInit {
           ...data,
           creator_id: data.user_id,
           status: this.normalizeStatus(data.status),
-          recordings: [],
+          recordings: (data as any).recordings || [],
           transcripts: {},
           summary: undefined,
           participant_details: (data as any).participant_details || []
         };
 
-        this.selectedRecordingId = '';
+        this.selectedRecordingId = this.meeting.recordings[0]?.id || '';
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -152,6 +156,22 @@ export class MeetingDetail implements OnInit {
     return this.meeting?.recordings.find(r => r.id === this.selectedRecordingId);
   }
 
+  getRecordingUrl(recording: any): string {
+    if (!recording?.file_url) return '';
+    if (recording.file_url.startsWith('http')) return recording.file_url;
+
+    return this.api.baseUrl.replace('/api/v1', '') + recording.file_url;
+  }
+
+  formatRecordingSize(size: number): string {
+    if (!size) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB'];
+    const unitIndex = Math.min(Math.floor(Math.log(size) / Math.log(1024)), units.length - 1);
+    const value = size / Math.pow(1024, unitIndex);
+
+    return `${value.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+  }
+
   deleteRecording(recId: string, event: Event) {
     event.stopPropagation();
     this.recToDelete = recId;
@@ -184,11 +204,72 @@ export class MeetingDetail implements OnInit {
   onDrop(event: DragEvent) {
     event.preventDefault();
     this.isDragOver = false;
-    this.toastService.info('Info', 'Upload recording API is not implemented yet.');
+
+    const file = event.dataTransfer?.files?.[0];
+    if (file) {
+      this.uploadRecording(file);
+    }
   }
 
   onFileSelected(event: Event) {
-    this.toastService.info('Info', 'Upload recording API is not implemented yet.');
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (file) {
+      this.uploadRecording(file);
+    }
+
+    input.value = '';
+  }
+
+  uploadRecording(file: File) {
+    const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/x-wav', 'audio/mp4', 'audio/aac', 'audio/ogg', 'audio/flac'];
+    const allowedExtensions = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.opus', '.flac'];
+    const lowerName = file.name.toLowerCase();
+    const hasAllowedExtension = allowedExtensions.some(ext => lowerName.endsWith(ext));
+
+    if (!allowedTypes.includes(file.type) && !hasAllowedExtension) {
+      this.toastService.error('Invalid file', 'Please upload an audio file (.mp3, .wav, .m4a, .ogg, .opus, .aac, .flac).');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    this.isUploading = true;
+    this.uploadProgress = 0;
+    this.isProcessing = false;
+
+    this.http.post<any>(
+      `${this.api.recordings}/upload/${this.meetingId}`,
+      formData,
+      {
+        reportProgress: true,
+        observe: 'events'
+      }
+    ).subscribe({
+      next: (event) => {
+        if (event.type === HttpEventType.UploadProgress) {
+          const total = event.total || file.size;
+          this.uploadProgress = Math.round((event.loaded / total) * 100);
+          this.cdr.detectChanges();
+        }
+
+        if (event.type === HttpEventType.Response) {
+          this.isUploading = false;
+          this.uploadProgress = 100;
+          this.toastService.success('Uploaded', 'Recording uploaded successfully.');
+          this.loadMeetingDetail();
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        this.isUploading = false;
+        this.uploadProgress = 0;
+        this.toastService.error('Upload failed', err?.error?.detail || 'Cannot upload recording.');
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   getFilteredTranscript(): any[] {

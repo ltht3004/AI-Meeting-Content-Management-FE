@@ -57,7 +57,7 @@
       <div class="meta-strip">
         <div class="meta-item">
           <span class="material-icons-round text-primary">calendar_today</span>
-          <span>{{ meeting.meeting_date | date:'MMMM d, y • h:mm a' }}</span>
+          <span>{{ meeting.meeting_date | date:'dd/MM/yyyy • HH:mm':'Asia/Ho_Chi_Minh':'vi-VN' }}</span>
         </div>
         <div class="meta-item">
           <span class="material-icons-round text-success">schedule</span>
@@ -204,7 +204,7 @@
                     </span>
                     <div class="rec-text">
                       <span class="rec-name" [title]="rec.file_name">{{ rec.file_name }}</span>
-                      <span class="rec-meta">{{ rec.size }} • {{ rec.created_at | date:'shortTime' }}</span>
+                      <span class="rec-meta">{{ formatRecordingSize(rec.size) }} • {{ rec.created_at | date:'HH:mm':'Asia/Ho_Chi_Minh':'vi-VN' }}</span>
                     </div>
                   </div>
                   <!-- Delete recording button -->
@@ -222,7 +222,7 @@
             <!-- Active Audio Player (If a recording is selected) -->
             @if (getSelectedRecording(); as activeRec) {
               <div class="active-player-section">
-                <audio controls class="html5-audio" [src]="activeRec.file_name || ''">
+                <audio controls class="html5-audio" [src]="getRecordingUrl(activeRec)">
                   Your browser does not support the audio element.
                 </audio>
               </div>
@@ -230,8 +230,11 @@
           </div>
 
           <!-- Participants Card -->
-          <div class="info-side-card glass-panel">
-            <h3>Participants</h3>
+          <div class="info-side-card participants-card glass-panel">
+            <div class="side-card-header">
+              <h3>Participants</h3>
+              <span class="participants-count">{{ meeting.participant_details.length }} people</span>
+            </div>
             <div class="participants-list">
               @for (p of meeting.participant_details; track p.name) {
                 <div class="participant-item" [class.unactive]="p.status === 'Unactive' || !p.is_active">
@@ -253,11 +256,11 @@
             <div class="timestamp-list">
               <div class="timestamp-item-row">
                 <span class="ts-label">Created:</span>
-                <span class="ts-value">{{ meeting.created_at | date:'MMM d, y • h:mm a' }}</span>
+                <span class="ts-value">{{ meeting.created_at | date:'dd/MM/yyyy • HH:mm':'Asia/Ho_Chi_Minh':'vi-VN' }}</span>
               </div>
               <div class="timestamp-item-row">
                 <span class="ts-label">Updated:</span>
-                <span class="ts-value">{{ meeting.updated_at | date:'MMM d, y • h:mm a' }}</span>
+                <span class="ts-value">{{ meeting.updated_at | date:'dd/MM/yyyy • HH:mm':'Asia/Ho_Chi_Minh':'vi-VN' }}</span>
               </div>
             </div>
           </div>
@@ -385,7 +388,7 @@
                   <strong>Title:</strong> <span>{{ meeting.title }}</span>
                 </div>
                 <div class="pdf-meta-item">
-                  <strong>Date:</strong> <span>{{ meeting.meeting_date | date:'MMMM d, y • h:mm a' }}</span>
+                  <strong>Date:</strong> <span>{{ meeting.meeting_date | date:'dd/MM/yyyy • HH:mm':'Asia/Ho_Chi_Minh':'vi-VN' }}</span>
                 </div>
                 <div class="pdf-meta-item">
                   <strong>Location:</strong> <span>{{ meeting.location }}</span>
@@ -422,7 +425,7 @@
             </div>
             
             <div class="pdf-footer">
-              <span>AI Meeting Content Management System • Generated on {{ today | date:'medium' }}</span>
+              <span>AI Meeting Content Management System • Generated on {{ today | date:'dd/MM/yyyy HH:mm':'Asia/Ho_Chi_Minh':'vi-VN' }}</span>
               <span>Page 1 of 1</span>
             </div>
           </div>
