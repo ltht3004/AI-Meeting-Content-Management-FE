@@ -3,22 +3,25 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { UserService, User } from '../../services/user.service';
+import { ApiService } from '../../../../core/services/api.service';
 
 import { DropdownComponent } from '../../../../shared/components/dropdown/dropdown';
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination';
 import { ConfirmDialog } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 import { ToastService } from '../../../../shared/services/toast.service';
+import { PageHeader } from '../../../../shared/components/page-header/page-header';
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, DropdownComponent, PaginationComponent, ConfirmDialog],
+  imports: [CommonModule, RouterLink, FormsModule, DropdownComponent, PaginationComponent, ConfirmDialog, PageHeader],
   templateUrl: './user-list.html',
   styleUrl: './user-list.css'
 })
 export class UserList implements OnInit {
   userService = inject(UserService);
   toastService = inject(ToastService);
+  apiService = inject(ApiService);
   cdr = inject(ChangeDetectorRef);
 
   users: User[] = [];
@@ -32,6 +35,19 @@ export class UserList implements OnInit {
   currentPage = 1;
   pageSize = 10;
   totalCount = 0;
+
+  getAvatarUrl(avatarUrl: string | undefined): string {
+    const defaultAvatar = 'assets/images/default-avatar.png';
+    if (avatarUrl) {
+      if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')) {
+        return avatarUrl;
+      }
+      const rootUrl = this.apiService.baseUrl.replace('/api/v1', '');
+      const path = avatarUrl.startsWith('/') ? avatarUrl : `/${avatarUrl}`;
+      return `${rootUrl}${path}`;
+    }
+    return defaultAvatar;
+  }
 
   ngOnInit() {
     this.loadData();
