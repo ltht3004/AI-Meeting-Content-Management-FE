@@ -51,6 +51,10 @@ export class AuthService {
     );
   }
 
+  resendVerification(email: string): Observable<any> {
+    return this.http.post<any>(`${this.apiService.baseUrl}/auth/resend-verification`, { email });
+  }
+
   forgotPassword(email: string): Observable<any> {
     return this.http.post<any>(`${this.apiService.baseUrl}/auth/forgot-password`, { email });
   }

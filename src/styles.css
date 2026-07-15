@@ -167,6 +167,12 @@ a {
   display: block;
 }
 
+/* Hide native Edge password reveal icon */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
 /* Button Styles */
 .btn {
   display: inline-flex;

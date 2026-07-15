@@ -25,8 +25,10 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
       if (error.status === 403) {
         const errorDetail = error.error?.detail;
         if (errorDetail === 'Account has been disabled') {
-          toastService.error('Forbidden', 'Your account has been disabled. Please contact the administrator.');
-          authService.logout();
+          if (!req.url.includes('/auth/login')) {
+            toastService.error('Forbidden', 'Your account has been disabled. Please contact the administrator.');
+            authService.logout();
+          }
           return throwError(() => error);
         }
       }

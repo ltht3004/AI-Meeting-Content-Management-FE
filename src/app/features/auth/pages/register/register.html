@@ -240,6 +240,19 @@
           }
         </button>
       </form>
+
+      <div class="auth-footer" style="margin-top: 16px;">
+        <p>Didn't receive the email? <a href="javascript:void(0)" class="login-link" (click)="onResend()">Resend</a></p>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="auth-footer">
+        <a routerLink="/auth/login" class="back-link">
+          <span class="material-icons-round back-icon">arrow_back</span>
+          <span>Back to <strong class="login-link">Login</strong></span>
+        </a>
+      </div>
       }
     </div>
   </div>

@@ -226,6 +226,32 @@
 
 .login-link:hover { text-decoration: underline; }
 
+.divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 24px 0;
+  width: 100%;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--text-main);
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.back-link:hover {
+  opacity: 0.8;
+}
+
+.back-icon {
+  font-size: 18px;
+}
+
 .spinner {
   display: inline-block;
   width: 18px;

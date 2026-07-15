@@ -2,6 +2,7 @@ import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ToastService } from '../../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-register',
@@ -14,6 +15,7 @@ export class Register {
   private authService = inject(AuthService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private toastService = inject(ToastService);
 
   fullName = '';
   email = '';
@@ -129,6 +131,34 @@ export class Register {
           detail = detail[0].msg;
         }
         this.errorMessage = detail || 'Verification failed. Please try again.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+  onResend() {
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    this.authService.resendVerification(this.registeredEmail).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        this.errorMessage = '';
+        this.toastService.success('Success', res.message || 'A new verification code has been sent.');
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        let detail = err.error?.detail;
+        if (Array.isArray(detail)) {
+          detail = detail[0].msg;
+        }
+        
+        if (detail === 'Session expired. Please register again.') {
+          this.isVerifying = false; // Go back to register
+          this.errorMessage = detail;
+        } else {
+          this.errorMessage = detail || 'Failed to resend code.';
+        }
         this.cdr.detectChanges();
       }
     });
