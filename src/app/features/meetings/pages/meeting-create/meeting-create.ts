@@ -241,7 +241,7 @@ export class MeetingCreate implements OnInit {
     const skip = (this.usersPage - 1) * this.usersPageSize;
     const queryParams = `?skip=${skip}&limit=${this.usersPageSize}&search=${encodeURIComponent(this.userSearchQuery.trim())}`;
     
-    this.http.get<any>(`${this.api.users}/${queryParams}`).subscribe({
+    this.http.get<any>(`${this.api.users}/participants${queryParams}`).subscribe({
       next: (res) => {
         this.isLoadingUsers = false;
         const users = res.items || res.users || [];

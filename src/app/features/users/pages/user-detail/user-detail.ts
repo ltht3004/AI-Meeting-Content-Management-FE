@@ -24,6 +24,7 @@ export class UserDetail implements OnInit {
   user: User | null = null;
   isLoading = true;
   error = '';
+  returnTo = '';
 
   get isAdmin(): boolean {
     return this.authService.currentUser()?.role === 'admin';
@@ -43,6 +44,8 @@ export class UserDetail implements OnInit {
   }
 
   ngOnInit() {
+    this.returnTo = this.route.snapshot.queryParamMap.get('returnTo') || '';
+
     this.route.paramMap.pipe(
       switchMap(params => {
         this.isLoading = true;

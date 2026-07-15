@@ -1,7 +1,7 @@
 <div class="page-container animate-fade-in">
   <!-- Top Navigation Bar -->
   <div class="page-nav">
-    <a [routerLink]="isAdmin ? '/users' : '/meetings'" class="btn btn-text back-btn">
+    <a [routerLink]="returnTo || (isAdmin ? '/users' : '/meetings')" class="btn btn-text back-btn">
       <span class="material-icons-round icon-left">arrow_back</span> Back
     </a>
     
