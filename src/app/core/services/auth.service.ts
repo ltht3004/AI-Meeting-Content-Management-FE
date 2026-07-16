@@ -18,8 +18,8 @@ export class AuthService {
   }
 
   private loadSession() {
-    const token = localStorage.getItem('token');
-    const userJson = localStorage.getItem('user');
+    const token = sessionStorage.getItem('token');
+    const userJson = sessionStorage.getItem('user');
     if (token && userJson) {
       try {
         const user = JSON.parse(userJson);
@@ -67,7 +67,7 @@ export class AuthService {
     return this.http.get<any>(`${this.apiService.baseUrl}/profile/me`).pipe(
       tap(user => {
         this.currentUser.set(user);
-        localStorage.setItem('user', JSON.stringify(user));
+        sessionStorage.setItem('user', JSON.stringify(user));
       })
     );
   }
@@ -82,7 +82,7 @@ export class AuthService {
         // Only update local storage if email was NOT changed (no verification needed yet)
         if (!user.requires_email_verification) {
           this.currentUser.set(user);
-          localStorage.setItem('user', JSON.stringify(user));
+          sessionStorage.setItem('user', JSON.stringify(user));
         }
       })
     );
@@ -92,7 +92,7 @@ export class AuthService {
     return this.http.post<any>(`${this.apiService.baseUrl}/profile/me/verify-email`, { code }).pipe(
       tap(user => {
         this.currentUser.set(user);
-        localStorage.setItem('user', JSON.stringify(user));
+        sessionStorage.setItem('user', JSON.stringify(user));
       })
     );
   }
@@ -106,7 +106,7 @@ export class AuthService {
         if (user) {
           user.avatar_url = res.avatar_url;
           this.currentUser.set({ ...user });
-          localStorage.setItem('user', JSON.stringify(user));
+          sessionStorage.setItem('user', JSON.stringify(user));
         }
       })
     );
@@ -119,7 +119,7 @@ export class AuthService {
         if (user) {
           user.avatar_url = null;
           this.currentUser.set({ ...user });
-          localStorage.setItem('user', JSON.stringify(user));
+          sessionStorage.setItem('user', JSON.stringify(user));
         }
       })
     );
@@ -131,17 +131,17 @@ export class AuthService {
   }
 
   private setSession(res: any) {
-    localStorage.setItem('token', res.access_token);
-    localStorage.setItem('role', res.user.role);
-    localStorage.setItem('user', JSON.stringify(res.user));
+    sessionStorage.setItem('token', res.access_token);
+    sessionStorage.setItem('role', res.user.role);
+    sessionStorage.setItem('user', JSON.stringify(res.user));
     this.currentUser.set(res.user);
     this.isAuthenticated.set(true);
   }
 
   private clearSession() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('role');
+    sessionStorage.removeItem('user');
     this.currentUser.set(null);
     this.isAuthenticated.set(false);
   }
