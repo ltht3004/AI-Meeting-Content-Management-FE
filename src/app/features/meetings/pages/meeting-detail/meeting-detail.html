@@ -71,7 +71,7 @@
           <span class="material-icons-round text-warning">people</span>
           <span class="meta-participants-inline">
             @for (p of meeting.participant_details.slice(0, 3); track p.name; let last = $last) {
-              <span [class.unactive-meta]="p.status === 'Unactive' || !p.is_active" [title]="(p.status === 'Unactive' || !p.is_active) ? 'Account has been disabled' : ''">
+              <span [class.unactive-meta]="isParticipantInactive(p)" [title]="isParticipantInactive(p) ? 'Account has been disabled' : ''">
                 {{ p.name.trim() }}
               </span>
               @if (!last || meeting.participant_details.length > 3) {
@@ -89,7 +89,7 @@
     </div>
 
     <!-- STATE 1: No Recording Uploaded yet -->
-    @if (meeting.recordings.length === 0 && !isUploading && !isProcessing) {
+    @if (meeting.recordings.length === 0 && !isUploading && !isProcessing && canManageRecordings) {
       <div 
         class="upload-dropzone glass-panel"
         [class.drag-over]="isDragOver"
@@ -115,6 +115,16 @@
             (change)="onFileSelected($event)" 
             style="display: none;"
           >
+        </div>
+      </div>
+    }
+
+    @if (meeting.recordings.length === 0 && !isUploading && !isProcessing && !canManageRecordings) {
+      <div class="loader-card glass-panel">
+        <div class="loader-content">
+          <span class="material-icons-round upload-icon">music_off</span>
+          <h3>No recordings available</h3>
+          <p>Only the meeting creator or an admin can upload recordings.</p>
         </div>
       </div>
     }
@@ -178,16 +188,18 @@
                   <span class="file-size">{{ meeting.recordings.length }} file(s)</span>
                 </div>
               </div>
-              <label for="audio-upload-more" class="upload-more-btn" title="Upload more recordings">
-                <span class="material-icons-round">add_circle</span>
-              </label>
-              <input 
-                type="file" 
-                id="audio-upload-more" 
-                accept="audio/*" 
-                (change)="onFileSelected($event)" 
-                style="display: none;"
-              >
+              @if (canManageRecordings) {
+                <label for="audio-upload-more" class="upload-more-btn" title="Upload more recordings">
+                  <span class="material-icons-round">add_circle</span>
+                </label>
+                <input 
+                  type="file" 
+                  id="audio-upload-more" 
+                  accept="audio/*" 
+                  (change)="onFileSelected($event)" 
+                  style="display: none;"
+                >
+              }
             </div>
             
             <!-- Recordings List -->
@@ -207,14 +219,15 @@
                       <span class="rec-meta">{{ formatRecordingSize(rec.size) }} • {{ rec.created_at | date:'HH:mm':'Asia/Ho_Chi_Minh':'vi-VN' }}</span>
                     </div>
                   </div>
-                  <!-- Delete recording button -->
-                  <button 
-                    class="btn-delete-rec" 
-                    title="Delete this recording" 
-                    (click)="deleteRecording(rec.id, $event)"
-                  >
-                    <span class="material-icons-round">delete</span>
-                  </button>
+                  @if (canManageRecordings) {
+                    <button 
+                      class="btn-delete-rec" 
+                      title="Delete this recording" 
+                      (click)="deleteRecording(rec.id, $event)"
+                    >
+                      <span class="material-icons-round">delete</span>
+                    </button>
+                  }
                 </div>
               }
             </div>
@@ -239,7 +252,7 @@
               @for (p of meeting.participant_details; track p.name) {
                 <div
                   class="participant-item"
-                  [class.unactive]="p.status === 'Unactive' || p.status === 'Unavailable' || !p.is_active"
+                  [class.unactive]="isParticipantInactive(p) || p.status === 'Unavailable'"
                   [class.clickable]="p.id && p.status !== 'Unavailable'"
                   [class.disabled-profile]="p.status === 'Unavailable' || !p.id"
                   role="button"
@@ -249,14 +262,14 @@
                   (keydown.enter)="openParticipantProfile(p)"
                   (keydown.space)="openParticipantProfile(p); $event.preventDefault()"
                 >
-                  <div class="avatar-sm" [class.avatar-unactive]="p.status === 'Unactive' || p.status === 'Unavailable' || !p.is_active">
+                  <div class="avatar-sm" [class.avatar-unactive]="isParticipantInactive(p) || p.status === 'Unavailable'">
                     {{ p.name.trim().charAt(0) }}
                   </div>
                   <span class="participant-name">{{ p.name.trim() }}</span>
                   @if (p.status === 'Unavailable') {
                     <span class="participant-badge-unactive">Unavailable</span>
-                  } @else if (p.status === 'Unactive' || !p.is_active) {
-                    <span class="participant-badge-unactive">Unactive</span>
+                  } @else if (isParticipantInactive(p)) {
+                    <span class="participant-badge-unactive">Inactive</span>
                   }
                 </div>
               }
@@ -518,7 +531,7 @@
             @for (p of meeting.participant_details; track p.name) {
               <div
                 class="participant-item-popup"
-                [class.unactive]="p.status === 'Unactive' || p.status === 'Unavailable' || !p.is_active"
+                [class.unactive]="isParticipantInactive(p) || p.status === 'Unavailable'"
                 [class.disabled-profile]="p.status === 'Unavailable' || !p.id"
                 role="button"
                 [attr.tabindex]="p.status === 'Unavailable' || !p.id ? -1 : 0"
@@ -527,19 +540,19 @@
                 (keydown.enter)="openParticipantProfile(p)"
                 (keydown.space)="openParticipantProfile(p); $event.preventDefault()"
               >
-                <div class="avatar-lg" [class.avatar-unactive]="p.status === 'Unactive' || p.status === 'Unavailable' || !p.is_active">
+                <div class="avatar-lg" [class.avatar-unactive]="isParticipantInactive(p) || p.status === 'Unavailable'">
                   {{ p.name.trim().charAt(0) }}
                 </div>
                 <div class="participant-info-popup">
                   <span class="participant-name-popup">{{ p.name.trim() }}</span>
-                  <span class="participant-status-text" [class.status-unactive]="p.status === 'Unactive' || p.status === 'Unavailable' || !p.is_active">
-                    {{ p.status === 'Unavailable' ? 'Deleted or unavailable' : ((p.status === 'Unactive' || !p.is_active) ? 'Unactive / Disabled' : 'Active Account') }}
+                  <span class="participant-status-text" [class.status-unactive]="isParticipantInactive(p) || p.status === 'Unavailable'">
+                    {{ p.status === 'Unavailable' ? 'Deleted or unavailable' : (isParticipantInactive(p) ? 'Inactive / Disabled' : 'Active Account') }}
                   </span>
                 </div>
                 @if (p.status === 'Unavailable') {
                   <span class="participant-badge-unactive">Unavailable</span>
-                } @else if (p.status === 'Unactive' || !p.is_active) {
-                  <span class="participant-badge-unactive">Unactive</span>
+                } @else if (isParticipantInactive(p)) {
+                  <span class="participant-badge-unactive">Inactive</span>
                 } @else {
                   <span class="participant-badge-active">Active</span>
                 }
