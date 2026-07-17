@@ -83,6 +83,10 @@ export class MeetingDetail implements OnInit {
     return this.authService.currentUser()?.role === 'admin';
   }
 
+  get canManageRecordings(): boolean {
+    return this.isAdmin || this.meeting?.creator_id === this.currentUserId;
+  }
+
   isDragOver = false;
   isUploading = false;
   uploadProgress = 0;
@@ -150,8 +154,12 @@ export class MeetingDetail implements OnInit {
     if (!others) return '';
     return others.map(o => {
       if (o.status === 'Unavailable') return `${o.name.trim()} (Unavailable)`;
-      return o.name.trim() + (o.status === 'Unactive' || !o.is_active ? ' (Unactive)' : '');
+      return o.name.trim() + (this.isParticipantInactive(o) ? ' (Inactive)' : '');
     }).join(', ');
+  }
+
+  isParticipantInactive(participant: ParticipantDetail): boolean {
+    return ['inactive', 'unactive'].includes(String(participant.status).toLowerCase()) || !participant.is_active;
   }
 
   selectRecording(recId: string) {
@@ -194,7 +202,9 @@ export class MeetingDetail implements OnInit {
 
     if (!recordingId) return;
 
-    this.http.delete<{ message: string }>(`${this.api.recordings}/${recordingId}`).subscribe({
+    this.http.delete<{ message: string }>(
+      `${this.api.recordings}/${recordingId}?current_user_id=${this.currentUserId}`
+    ).subscribe({
       next: () => {
         this.toastService.success('Deleted', `"${recordingName}" has been deleted.`);
         this.recToDelete = '';
@@ -218,6 +228,8 @@ export class MeetingDetail implements OnInit {
   }
 
   onDragOver(event: DragEvent) {
+    if (!this.canManageRecordings) return;
+
     event.preventDefault();
     this.isDragOver = true;
   }
@@ -229,6 +241,8 @@ export class MeetingDetail implements OnInit {
   onDrop(event: DragEvent) {
     event.preventDefault();
     this.isDragOver = false;
+
+    if (!this.canManageRecordings) return;
 
     const file = event.dataTransfer?.files?.[0];
     if (file) {
@@ -248,6 +262,11 @@ export class MeetingDetail implements OnInit {
   }
 
   uploadRecording(file: File) {
+    if (!this.canManageRecordings) {
+      this.toastService.error('Permission denied', 'Only the meeting creator or an admin can upload recordings.');
+      return;
+    }
+
     const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/x-wav', 'audio/mp4', 'audio/aac', 'audio/ogg', 'audio/flac'];
     const allowedExtensions = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.opus', '.flac'];
     const lowerName = file.name.toLowerCase();
@@ -271,7 +290,7 @@ export class MeetingDetail implements OnInit {
     this.isProcessing = false;
 
     this.http.post<any>(
-      `${this.api.recordings}/upload/${this.meetingId}`,
+      `${this.api.recordings}/upload/${this.meetingId}?current_user_id=${this.currentUserId}`,
       formData,
       {
         reportProgress: true,
