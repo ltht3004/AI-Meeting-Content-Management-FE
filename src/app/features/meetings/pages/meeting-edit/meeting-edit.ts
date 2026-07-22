@@ -86,6 +86,7 @@ export class MeetingEdit implements OnInit {
   }
 
   toggleUserSelection(id: string) {
+    // Keep participant values as UUIDs so edits do not depend on display names.
     const control = this.meetingForm.get('participants');
     let currentVal = control?.value || '';
     let selectedList = currentVal ? currentVal.split(',').map((n: string) => n.trim()) : [];
@@ -114,6 +115,7 @@ export class MeetingEdit implements OnInit {
   }
 
   getSelectedNamesDisplay(): string {
+    // Display participant names even though the form value stores IDs.
     const val = this.meetingForm.get('participants')?.value || '';
     if (!val) return '';
     const ids = val.split(',').map((id: string) => id.trim());
@@ -145,7 +147,7 @@ export class MeetingEdit implements OnInit {
         
         this.hasMoreUsers = this.availableUsers.length < total;
         
-        // If we just loaded the first page, we need to load meeting details
+        // Load meeting details after participants so selected UUIDs can resolve to names.
         if (!append) {
           this.loadMeetingData();
         }
@@ -328,6 +330,7 @@ export class MeetingEdit implements OnInit {
   loadMeetingData() {
     this.meetingService.getMeetingById(this.meetingId, this.currentUserId).subscribe({
       next: (meeting: any) => {
+        // datetime-local inputs expect a local "YYYY-MM-DDTHH:mm" value without timezone suffix.
         let formattedDate = meeting.meeting_date;
         if (formattedDate && formattedDate.includes('Z')) {
           formattedDate = formattedDate.replace('Z', '').substring(0, 16);
@@ -335,6 +338,7 @@ export class MeetingEdit implements OnInit {
           formattedDate = formattedDate.substring(0, 16);
         }
         
+        // Cache participant metadata before patching the UUID list into the form.
         let participantIds = '';
         if (meeting.participant_details) {
           meeting.participant_details.forEach((participant: any) => {
@@ -377,6 +381,7 @@ export class MeetingEdit implements OnInit {
 
     this.isSubmitting = true;
     const formValue = this.meetingForm.getRawValue();
+    // getRawValue keeps disabled fields, which matters for completed/processing meetings.
     const meetingPayload = {
       title: formValue.title,
       description: formValue.description,

@@ -84,6 +84,7 @@ export class MeetingDetail implements OnInit {
   }
 
   get canManageRecordings(): boolean {
+    // Only admins and the meeting creator can upload or delete recordings.
     return this.isAdmin || this.meeting?.creator_id === this.currentUserId;
   }
 
@@ -115,6 +116,7 @@ export class MeetingDetail implements OnInit {
 
   loadMeetingDetail() {
     this.isLoading = true;
+    // Meeting detail is permission-aware; currentUserId lets the backend validate access.
     this.meetingService.getMeetingById(this.meetingId, this.currentUserId).subscribe({
       next: (data) => {
         this.meeting = {
@@ -175,6 +177,7 @@ export class MeetingDetail implements OnInit {
     if (!recording?.file_url) return '';
     if (recording.file_url.startsWith('http')) return recording.file_url;
 
+    // Support legacy relative URLs while Supabase Storage returns absolute URLs.
     return this.api.baseUrl.replace('/api/v1', '') + recording.file_url;
   }
 
@@ -202,6 +205,7 @@ export class MeetingDetail implements OnInit {
 
     if (!recordingId) return;
 
+    // current_user_id is required because only the creator/admin may delete recordings.
     this.http.delete<{ message: string }>(
       `${this.api.recordings}/${recordingId}?current_user_id=${this.currentUserId}`
     ).subscribe({
@@ -262,11 +266,13 @@ export class MeetingDetail implements OnInit {
   }
 
   uploadRecording(file: File) {
+    // Stop unauthorized users before opening any upload request.
     if (!this.canManageRecordings) {
       this.toastService.error('Permission denied', 'Only the meeting creator or an admin can upload recordings.');
       return;
     }
 
+    // Validate by MIME type and extension because browsers report audio types differently.
     const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/x-wav', 'audio/mp4', 'audio/aac', 'audio/ogg', 'audio/flac'];
     const allowedExtensions = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.opus', '.flac'];
     const lowerName = file.name.toLowerCase();
@@ -282,13 +288,16 @@ export class MeetingDetail implements OnInit {
       return;
     }
 
+    // Package the selected audio file for the FastAPI multipart upload endpoint.
     const formData = new FormData();
     formData.append('file', file);
 
+    // Reset upload UI state before streaming progress events.
     this.isUploading = true;
     this.uploadProgress = 0;
     this.isProcessing = false;
 
+    // Upload progress is streamed from HttpClient events so the UI can show progress.
     this.http.post<any>(
       `${this.api.recordings}/upload/${this.meetingId}?current_user_id=${this.currentUserId}`,
       formData,
@@ -336,13 +345,16 @@ export class MeetingDetail implements OnInit {
   }
 
   downloadReport() {
+    // Map the UI label to the backend export format.
     const format = this.exportType === 'word' ? 'docx' : 'pdf';
     const fileName = `${this.slugify(this.meeting?.title || 'meeting')}-report.${format}`;
     const url = `${this.api.meetings}/${this.meetingId}/export?format=${format}&current_user_id=${this.currentUserId}`;
 
+    // Close the preview before downloading so the user sees one clear action state.
     this.isExporting = true;
     this.showPreviewModal = false;
 
+    // Report export returns a binary blob that the browser downloads as PDF or DOCX.
     this.http.get(url, { responseType: 'blob' }).subscribe({
       next: (blob) => {
         const downloadUrl = URL.createObjectURL(blob);
@@ -387,6 +399,7 @@ export class MeetingDetail implements OnInit {
   openParticipantProfile(participant: ParticipantDetail) {
     if (!participant.id || participant.status === 'Unavailable') return;
 
+    // Preserve the meeting detail URL so the browser Back flow returns to this meeting.
     this.showParticipantsModal = false;
     this.router.navigate(['/users', participant.id], {
       queryParams: { returnTo: `/meetings/${this.meetingId}` }
