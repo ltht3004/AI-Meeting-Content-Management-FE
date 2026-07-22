@@ -79,6 +79,7 @@ export class MeetingList implements OnInit {
 
   constructor() {
     effect(() => {
+      // Shared top-bar search drives the meeting list and is debounced before calling the API.
       const query = this.searchService.searchQuery();
       this.currentPage = 1;
       this.loadMeetingsDebounced();
@@ -92,6 +93,7 @@ export class MeetingList implements OnInit {
   loadMeetings() {
     this.isLoading = true;
     const query = this.searchService.searchQuery();
+    // The backend filters by status, search text, page, and current user's meeting visibility.
     this.meetingService.getMeetings(this.selectedStatus, query, this.currentPage, this.pageSize, this.currentUserId).subscribe({
       next: (data: any) => {
         this.meetings = data.meetings.map((m: any) => ({
@@ -241,6 +243,7 @@ export class MeetingList implements OnInit {
   }
 
   getParticipantsList(meeting: Meeting): Participant[] {
+    // Prefer backend participant details because they include real user IDs for profile links.
     if (meeting.participant_details?.length) {
       return meeting.participant_details;
     }

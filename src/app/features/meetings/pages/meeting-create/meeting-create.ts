@@ -197,6 +197,7 @@ export class MeetingCreate implements OnInit {
   }
 
   toggleUserSelection(id: string) {
+    // The form stores participant IDs, while the dropdown displays friendly names.
     const control = this.meetingForm.get('participants');
     let currentVal = control?.value || '';
     let selectedList = currentVal ? currentVal.split(',').map((n: string) => n.trim()) : [];
@@ -225,6 +226,7 @@ export class MeetingCreate implements OnInit {
   }
 
   getSelectedNamesDisplay(): string {
+    // Resolve selected IDs back to names for display inside the collapsed participant field.
     const val = this.meetingForm.get('participants')?.value || '';
     if (!val) return '';
     const ids = val.split(',').map((id: string) => id.trim());
@@ -239,6 +241,7 @@ export class MeetingCreate implements OnInit {
     
     this.isLoadingUsers = true;
     const skip = (this.usersPage - 1) * this.usersPageSize;
+    // Participant search uses the dedicated participants API instead of the admin users API.
     const queryParams = `?skip=${skip}&limit=${this.usersPageSize}&search=${encodeURIComponent(this.userSearchQuery.trim())}`;
     
     this.http.get<any>(`${this.api.users}/participants${queryParams}`).subscribe({
@@ -279,6 +282,7 @@ export class MeetingCreate implements OnInit {
     const element = event.target as HTMLElement;
     const atBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 10;
     
+    // Lazy-load more participants so large user lists do not render all at once.
     if (atBottom && this.hasMoreUsers && !this.isLoadingUsers) {
       this.usersPage++;
       this.loadAvailableUsers(true);
@@ -302,6 +306,7 @@ export class MeetingCreate implements OnInit {
 
     this.isSubmitting = true;
     const formValue = this.meetingForm.value;
+    // The creator is the logged-in user; participants remain a comma-separated UUID list.
     const meetingPayload = {
       user_id: this.authService.currentUser()?.id || '',
       title: formValue.title,

@@ -65,6 +65,7 @@ export class Dashboard implements OnInit {
   }
 
   loadDashboard() {
+    // Send the current user ID so the backend can return role/participant-aware metrics.
     const currentUserId = this.authService.currentUser()?.id;
     const url = currentUserId
       ? `${this.api.dashboard}/summary?current_user_id=${currentUserId}`
@@ -73,6 +74,7 @@ export class Dashboard implements OnInit {
     this.isLoading = true;
     this.http.get<any>(url).subscribe({
       next: (data) => {
+        // Convert backend snake_case fields into the camelCase shape used by the template.
         this.stats = {
           totalMeetings: data.stats?.total_meetings ?? 0,
           totalRecordings: data.stats?.total_recordings ?? 0,
@@ -84,6 +86,7 @@ export class Dashboard implements OnInit {
           summarizedDurationMinutes: data.stats?.summarized_duration_minutes ?? 0
         };
 
+        // Normalize recent meeting statuses before binding badge classes in the UI.
         this.recentMeetings = (data.recent_meetings || []).map((meeting: any) => ({
           id: meeting.id,
           title: meeting.title,
@@ -91,6 +94,7 @@ export class Dashboard implements OnInit {
           status: this.normalizeStatus(meeting.status)
         }));
 
+        // Convert raw timestamps into human-readable labels for the activity timeline.
         this.recentActivities = (data.recent_activities || []).map((activity: any) => ({
           title: activity.title,
           desc: activity.desc,
@@ -117,6 +121,7 @@ export class Dashboard implements OnInit {
   }
 
   getMeetingGrowthLabel(): string {
+    // Show the real month-over-month value calculated by the backend.
     const value = this.stats.meetingGrowthPercent;
     if (value > 0) return `+${value}% vs last month`;
     if (value < 0) return `${value}% vs last month`;
@@ -124,6 +129,7 @@ export class Dashboard implements OnInit {
   }
 
   getStorageUsedLabel(): string {
+    // Present storage usage in MB/GB while keeping the raw value in bytes from the API.
     const bytes = this.stats.totalStorageBytes;
     if (bytes <= 0) return '0 MB used';
 
@@ -135,6 +141,7 @@ export class Dashboard implements OnInit {
   }
 
   getTranscriptAccuracyLabel(): string {
+    // Accuracy is optional until the AI pipeline stores confidence/quality metrics.
     const accuracy = this.stats.transcriptAccuracyAvg;
     if (accuracy === null || accuracy === undefined) return 'No accuracy data';
 
@@ -142,6 +149,7 @@ export class Dashboard implements OnInit {
   }
 
   getSummarizedDurationLabel(): string {
+    // Convert summarized meeting duration from minutes into a compact dashboard label.
     const minutes = this.stats.summarizedDurationMinutes;
     if (minutes <= 0) return '0 minutes summarized';
     if (minutes < 60) return `${minutes} minutes summarized`;
@@ -151,6 +159,7 @@ export class Dashboard implements OnInit {
   }
 
   getRelativeTime(dateValue: string): string {
+    // Recent activity uses relative time so newly created meetings feel live on the dashboard.
     if (!dateValue) return '';
 
     const date = new Date(dateValue);
