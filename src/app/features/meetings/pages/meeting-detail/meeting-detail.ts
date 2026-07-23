@@ -11,6 +11,7 @@ import { ConfirmDialog } from '../../../../shared/components/confirm-dialog/conf
 import { MeetingService, Meeting } from '../../../../core/services/meeting.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ApiService } from '../../../../core/services/api.service';
+import { HighlightPipe } from '../../../../shared/pipes/highlight.pipe';
 
 interface ParticipantDetail {
   id?: string | null;
@@ -32,6 +33,13 @@ interface MeetingDetailData extends Meeting {
 const MAX_RECORDING_SIZE_BYTES = 50 * 1024 * 1024;
 const MAX_RECORDING_SIZE_LABEL = '50MB';
 
+interface TranscriptSegment {
+  id: string;
+  speaker: string;
+  time: string;
+  text: string;
+}
+
 @Component({
   selector: 'app-meeting-detail',
   standalone: true,
@@ -41,7 +49,8 @@ const MAX_RECORDING_SIZE_LABEL = '50MB';
     FormsModule,
     ButtonComponent,
     DropdownComponent,
-    ConfirmDialog
+    ConfirmDialog,
+    HighlightPipe
   ],
   templateUrl: './meeting-detail.html',
   styleUrl: './meeting-detail.css'
@@ -93,6 +102,7 @@ export class MeetingDetail implements OnInit {
   uploadProgress = 0;
   isProcessing = false;
   processingStep = 0;
+  isLoadingTranscript = false;
 
   processingStepsText = [
     'Transcribing audio to text...',
@@ -125,12 +135,15 @@ export class MeetingDetail implements OnInit {
           status: this.normalizeStatus(data.status),
           recordings: (data as any).recordings || [],
           transcripts: {},
-          summary: undefined,
+          summary: (data as any).summary || undefined,
           participant_details: (data as any).participant_details || []
         };
 
         this.selectedRecordingId = this.meeting.recordings[0]?.id || '';
         this.isLoading = false;
+        if (this.selectedRecordingId) {
+          this.loadTranscriptForRecording(this.selectedRecordingId);
+        }
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -167,6 +180,7 @@ export class MeetingDetail implements OnInit {
   selectRecording(recId: string) {
     this.selectedRecordingId = recId;
     this.transcriptSearch = '';
+    this.loadTranscriptForRecording(recId);
   }
 
   getSelectedRecording() {
@@ -317,6 +331,7 @@ export class MeetingDetail implements OnInit {
           this.isUploading = false;
           this.uploadProgress = 100;
           this.toastService.success('Uploaded', 'Recording uploaded successfully.');
+          this.activeTab = 'transcript';
           this.loadMeetingDetail();
         }
       },
@@ -331,7 +346,88 @@ export class MeetingDetail implements OnInit {
   }
 
   getFilteredTranscript(): any[] {
-    return [];
+    const segments = this.meeting?.transcripts?.[this.selectedRecordingId] || [];
+    const search = this.transcriptSearch.trim().toLowerCase();
+
+    if (!search) {
+      return segments;
+    }
+
+    return segments.filter(segment =>
+      segment.text?.toLowerCase().includes(search) ||
+      segment.speaker?.toLowerCase().includes(search) ||
+      segment.time?.toLowerCase().includes(search)
+    );
+  }
+
+  loadTranscriptForRecording(recordingId: string, forceReload = false) {
+    if (!recordingId || !this.meeting) return;
+
+    // Transcript is loaded per recording to keep meeting detail API small and REST-focused.
+    if (!forceReload && this.meeting.transcripts[recordingId]) {
+      return;
+    }
+
+    this.isLoadingTranscript = true;
+
+    this.http.get<any>(`${this.api.recordings}/${recordingId}/transcript`).subscribe({
+      next: (transcript) => {
+        this.meeting.transcripts = {
+          ...this.meeting.transcripts,
+          [recordingId]: this.normalizeTranscriptValue(transcript)
+        };
+        this.isLoadingTranscript = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        if (err?.status !== 404) {
+          console.error(err);
+          this.toastService.error('Error', 'Cannot load transcript.');
+        }
+
+        this.meeting.transcripts = {
+          ...this.meeting.transcripts,
+          [recordingId]: []
+        };
+        this.isLoadingTranscript = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private normalizeTranscriptValue(value: any, indexSeed = 0): TranscriptSegment[] {
+    if (!value) return [];
+
+    if (typeof value === 'string') {
+      return this.contentToSegments(value, indexSeed);
+    }
+
+    if (Array.isArray(value)) {
+      return value.flatMap((item, index) => this.normalizeTranscriptValue(item, index));
+    }
+
+    const content = value.content || value.text || value.transcript || '';
+    if (!content) return [];
+
+    return [{
+      id: String(value.id || `transcript-${indexSeed}`),
+      speaker: value.speaker || 'Transcript',
+      time: value.time || value.timestamp || '00:00',
+      text: content
+    }];
+  }
+
+  private contentToSegments(content: string, indexSeed = 0): TranscriptSegment[] {
+    return content
+      .split(/\n+/)
+      .map(text => text.trim())
+      .filter(Boolean)
+      .map((text, index) => ({
+        id: `transcript-${indexSeed}-${index}`,
+        speaker: 'Transcript',
+        time: index === 0 ? '00:00' : '',
+        text
+      }));
   }
 
   triggerExport(type: 'pdf' | 'word') {

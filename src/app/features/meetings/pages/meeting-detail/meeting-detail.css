@@ -905,6 +905,14 @@
   margin: 0;
 }
 
+:host ::ng-deep .segment-text .highlight {
+  background-color: #fef08a;
+  color: #0f172a;
+  border-radius: 3px;
+  padding: 0 2px;
+  font-weight: 700;
+}
+
 .no-matches {
   display: flex;
   flex-direction: column;
@@ -1191,18 +1199,23 @@
 .pdf-transcript-row {
   font-size: 12px;
   line-height: 1.5;
-  display: flex;
-  gap: 6px;
+  display: block;
+  padding-bottom: 8px;
 }
 
 .pdf-speaker {
+  display: block;
   font-weight: 700;
   color: #475569;
-  flex-shrink: 0;
+  margin-bottom: 3px;
 }
 
 .pdf-text {
+  display: block;
   color: #334155;
+  text-align: justify;
+  text-justify: inter-word;
+  overflow-wrap: anywhere;
 }
 
 .pdf-footer {
