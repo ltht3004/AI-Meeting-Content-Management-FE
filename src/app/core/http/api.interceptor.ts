@@ -6,7 +6,7 @@ import { AuthService } from '../services/auth.service';
 import { ToastService } from '../../shared/services/toast.service';
 
 export const apiInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   const authService = inject(AuthService);
   const toastService = inject(ToastService);
   const router = inject(Router);

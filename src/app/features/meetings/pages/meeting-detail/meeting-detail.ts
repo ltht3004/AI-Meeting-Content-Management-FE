@@ -111,6 +111,7 @@ export class MeetingDetail implements OnInit {
   ];
 
   transcriptSearch = '';
+  transcriptFailed: Record<string, boolean> = {};
 
   ngOnInit() {
     this.meetingId = this.route.snapshot.paramMap.get('id') || '';
@@ -372,6 +373,7 @@ export class MeetingDetail implements OnInit {
 
     this.http.get<any>(`${this.api.recordings}/${recordingId}/transcript`).subscribe({
       next: (transcript) => {
+        this.transcriptFailed[recordingId] = false;
         this.meeting.transcripts = {
           ...this.meeting.transcripts,
           [recordingId]: this.normalizeTranscriptValue(transcript)
@@ -383,6 +385,8 @@ export class MeetingDetail implements OnInit {
         if (err?.status !== 404) {
           console.error(err);
           this.toastService.error('Error', 'Cannot load transcript.');
+        } else {
+          this.transcriptFailed[recordingId] = true;
         }
 
         this.meeting.transcripts = {
@@ -390,6 +394,43 @@ export class MeetingDetail implements OnInit {
           [recordingId]: []
         };
         this.isLoadingTranscript = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  retryTranscription(recordingId: string) {
+    if (!recordingId) return;
+
+    this.isProcessing = true;
+    this.processingStep = 0;
+    
+    // Simulate steps progress for UI since retry takes a while
+    const stepInterval = setInterval(() => {
+      if (this.processingStep < 2) {
+        this.processingStep++;
+        this.cdr.detectChanges();
+      }
+    }, 15000); // Progress steps blindly since it's a long running HTTP call
+
+    this.http.post<any>(
+      `${this.api.recordings}/${recordingId}/retry?current_user_id=${this.currentUserId}`,
+      {}
+    ).subscribe({
+      next: () => {
+        clearInterval(stepInterval);
+        this.isProcessing = false;
+        this.toastService.success('Success', 'Transcription retried successfully.');
+        this.transcriptFailed[recordingId] = false;
+        
+        // Reload meeting details to fetch the updated summary and transcript
+        this.loadMeetingDetail();
+      },
+      error: (err) => {
+        clearInterval(stepInterval);
+        console.error(err);
+        this.isProcessing = false;
+        this.toastService.error('Retry failed', err?.error?.detail || 'Cannot retry transcription.');
         this.cdr.detectChanges();
       }
     });

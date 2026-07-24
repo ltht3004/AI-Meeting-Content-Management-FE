@@ -235,9 +235,20 @@
             <!-- Active Audio Player (If a recording is selected) -->
             @if (getSelectedRecording(); as activeRec) {
               <div class="active-player-section">
-                <audio controls class="html5-audio" [src]="getRecordingUrl(activeRec)">
-                  Your browser does not support the audio element.
-                </audio>
+                @if (transcriptFailed[activeRec.id]) {
+                  <div class="retry-transcription-box">
+                    <span class="material-icons-round text-danger" style="font-size: 2rem;">error_outline</span>
+                    <p class="text-danger" style="margin: 8px 0; font-weight: 500;">Transcription Failed</p>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px; text-align: center;">AI failed to transcribe this recording. You can retry without re-uploading.</p>
+                    @if (canManageRecordings) {
+                      <app-button type="primary" icon="refresh" (click)="retryTranscription(activeRec.id)">Retry Transcription</app-button>
+                    }
+                  </div>
+                } @else {
+                  <audio controls class="html5-audio" [src]="getRecordingUrl(activeRec)">
+                    Your browser does not support the audio element.
+                  </audio>
+                }
               </div>
             }
           </div>
@@ -433,10 +444,12 @@
               </div>
             </div>
 
-            <div class="pdf-section">
-              <h4 class="pdf-sec-title" [class.border-word]="exportType === 'word'">Description</h4>
-              <p class="pdf-summary-text">{{ meeting.description || 'No description.' }}</p>
-            </div>
+            @if (meeting.description) {
+              <div class="pdf-section">
+                <h4 class="pdf-sec-title" [class.border-word]="exportType === 'word'">Description</h4>
+                <p class="pdf-summary-text">{{ meeting.description }}</p>
+              </div>
+            }
 
             <div class="pdf-section">
               <h4 class="pdf-sec-title" [class.border-word]="exportType === 'word'">Participants</h4>
@@ -452,11 +465,6 @@
             </div>
 
             <div class="pdf-section">
-              <h4 class="pdf-sec-title" [class.border-word]="exportType === 'word'">AI Summary</h4>
-              <p class="pdf-summary-text">{{ meeting.summary?.content || 'No summary generated yet.' }}</p>
-            </div>
-
-            <div class="pdf-section">
               <h4 class="pdf-sec-title" [class.border-word]="exportType === 'word'">Recordings</h4>
               @if (meeting.recordings.length) {
                 <div class="pdf-list">
@@ -466,6 +474,21 @@
                 </div>
               } @else {
                 <p class="pdf-summary-text">No recordings uploaded.</p>
+              }
+            </div>
+
+            <div class="pdf-section">
+              <h4 class="pdf-sec-title" [class.border-word]="exportType === 'word'">AI Summary</h4>
+              @if (meeting.summary?.content; as summaryContent) {
+                @for (line of summaryContent.split('\n'); track $index) {
+                  @if (line.trim().length > 0) {
+                    <p class="pdf-ai-summary-text">{{ line }}</p>
+                  } @else {
+                    <div class="pdf-spacer"></div>
+                  }
+                }
+              } @else {
+                <p class="pdf-ai-summary-text">No summary generated yet.</p>
               }
             </div>
             
