@@ -710,6 +710,7 @@
   font-size: 14px;
   color: var(--text-main);
   line-height: 1.7;
+  white-space: pre-wrap;
 }
 
 /* Takeaways List */
@@ -1149,7 +1150,8 @@
 }
 
 .pdf-info-value {
-  color: #1f2937;
+  color: #334155;
+  font-size: 13px;
 }
 
 .pdf-list {
@@ -1158,6 +1160,7 @@
   gap: 6px;
   font-size: 13px;
   color: #334155;
+  line-height: 1.5;
 }
 
 .pdf-list.pdf-list-columns {
@@ -1176,7 +1179,11 @@
 .pdf-summary-text {
   font-size: 13px;
   color: #334155;
-  line-height: 1.6;
+  line-height: 1.5;
+}
+
+.pdf-spacer {
+  height: 12px;
 }
 
 .pdf-recording-block {
@@ -1197,7 +1204,7 @@
 }
 
 .pdf-transcript-row {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
   display: block;
   padding-bottom: 8px;
@@ -1518,4 +1525,13 @@
 .participant-item-popup .participant-badge-unactive {
   justify-self: center;
   margin-left: 0;
+}
+
+.retry-transcription-box { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; background: rgba(239, 68, 68, 0.05); border: 1px dashed rgba(239, 68, 68, 0.3); border-radius: 12px; margin-top: 16px; }
+
+.pdf-ai-summary-text {
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.5;
+  text-align: justify;
 }
